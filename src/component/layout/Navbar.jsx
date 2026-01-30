@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState } from "react";
 import Button from "../common/Button.jsx";
 // eslint-disable-next-line no-unused-vars
@@ -11,36 +10,16 @@ import { Menu, X } from "lucide-react";
 const navLinks = [
 	{ href: "#", lable: "Home" },
 	{ href: "#", lable: "Benefits" },
-=======
-import React from "react";
-import Button from "../common/Button.jsx";
-// eslint-disable-next-line no-unused-vars
-import { motion } from "framer-motion";
-import '../../index.css'
-import ThemeToggle from "../common/ThemeToggle.jsx";
-import Logo from "../common/Logo.jsx";
-
-
-const navLinks = [
-	{ href: "#", lable: "Home" },
-	{ href: "#", lable: "Banefits" },
->>>>>>> 73e530e (make navbar)
 	{ href: "#", lable: "About Us" },
 	{ href: "#", lable: "Contact" },
 ];
 
 const Navbar = () => {
-<<<<<<< HEAD
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 	return (
 		<header className="fixed top-0 left-0 right-0 bg-transparent py-5">
 			<nav className="flex sm:block container mx-auto px-6 justify-between items-center">
-=======
-	return (
-		<header className="fixed top-0 left-0 right-0 bg-transparent py-5">
-			<nav className="container mx-auto px-6 items-center">
->>>>>>> 73e530e (make navbar)
 				<motion.div
 					initial={{ opacity: 0, y: -10 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -52,19 +31,11 @@ const Navbar = () => {
 								href="#"
 								className="text-xl font-bold tracking-tight text-center py-3 "
 							>
-<<<<<<< HEAD
 								<Logo />
 							</a>
 						</div>
 
 						<div className="hidden sm:flex gap-2.5 justify-items-center ">
-=======
-								<Logo/>
-							</a>
-						</div>
-
-						<div className="flex gap-2.5 justify-items-center ">
->>>>>>> 73e530e (make navbar)
 							<div className="flex gap-10 p-2.5 justify-items-center">
 								{navLinks.map((link, index) => (
 									<motion.a
@@ -84,17 +55,12 @@ const Navbar = () => {
 								))}
 							</div>
 							<div className="flex gap-6.25">
-<<<<<<< HEAD
 								<ThemeToggle />
-=======
-								<ThemeToggle/>
->>>>>>> 73e530e (make navbar)
 								<Button size="sm">Get Started</Button>
 							</div>
 						</div>
 					</div>
 				</motion.div>
-<<<<<<< HEAD
 				<motion.button
 					initial={{ opacity: 0, y: -10 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -132,9 +98,6 @@ const Navbar = () => {
 					</div>
 				</div>
 			)}
-=======
-			</nav>
->>>>>>> 73e530e (make navbar)
 		</header>
 	);
 };
