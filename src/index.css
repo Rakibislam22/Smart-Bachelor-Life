@@ -1,2 +1,77 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+@theme {
+	--color-background: var(--color-bg-base);
+	--color-foreground: var(--color-text-base);
+
+	/* NEW: Register the new text color here to use it as "text-subtle" */
+	--color-subtle: var(--color-text-sub);
+
+	--color-card: var(--color-card-base);
+	--color-primary: var(--color-prim);
+	--color-primary-foreground: var(--color-prim-fg);
+	--color-secondary: var(--color-sec);
+	--color-secondary-foreground: var(--color-sec-fg);
+	--color-muted: var(--color-mut);
+	--color-muted-foreground: var(--color-mut-fg);
+	--color-border: var(--color-bord);
+	--radius: 0.75rem;
+	--color-highlight: var(--color-high);
+	--color-surface: var(--color-surf);
+}
+
+@layer base {
+	:root {
+		/* --- DEFAULT BASE: DARK MODE (Cyber Blue) --- */
+		--color-bg-base: #020617;
+		--color-text-base: #ffffff;
+
+		/* NEW: Slightly softer white for paragraphs in Dark Mode */
+		--color-text-sub: #cbd5e1; /* Slate 300 */
+
+		--color-card-base: #0f172a;
+		--color-prim: #0ea5e9;
+		--color-prim-fg: #ffffff;
+		--color-sec: #1e293b;
+		--color-sec-fg: #ffffff;
+		--color-mut: #0f172a;
+		--color-mut-fg: #94a3b8;
+		--color-bord: #1e293b;
+		--color-high: #0ea5e9;
+		--color-surf: #0f172a;
+	}
+
+	/* --- TOGGLE: LIGHT MODE (Lime) --- */
+	:root.light {
+		--color-bg-base: #ffffff;
+		--color-text-base: #0f172a;
+
+		/* NEW: Slightly softer black for paragraphs in Light Mode */
+		--color-text-sub: #334155; /* Slate 700 */
+
+		--color-card-base: #d9f99d;
+		--color-prim: #000000;
+		--color-prim-fg: #ffffff;
+		--color-sec: #bef264;
+		--color-sec-fg: #0f172a;
+		--color-mut: #f1f5f9;
+		--color-mut-fg: #64748b;
+		--color-bord: #e2e8f0;
+		--color-high: #bef264;
+		--color-surf: #f7fee7;
+	}
+
+	html {
+		scroll-behavior: smooth;
+	}
+
+	body {
+		background-color: var(--color-background);
+		color: var(--color-foreground);
+		font-family: "Inter", sans-serif;
+		transition:
+			background-color 0.3s ease,
+			color 0.3s ease;
+	}
+}
