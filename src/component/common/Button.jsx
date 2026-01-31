@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 const Button = ({ className = "", size = "default", children, ...props }) => {
 	const baseClasses =
-		"w-[144px] h-[50px] relative overflow-hidden rounded-lg font-medium bg-primary text-primary-foreground hover:bg-highlight hover:text-secondary-foreground   hover:border-primary hover:border-1  shadow-lg shadow-highlight/25";
+		"w-[144px] h-[50px] relative overflow-hidden rounded-lg font-medium bg-primary text-primary-foreground hover:bg-highlight hover:text-secondary-foreground   hover:border-primary hover:border  shadow-lg shadow-highlight/25";
 
 	const sizeClasses = {
 		sm: "px-4 py-2 text-sm",
