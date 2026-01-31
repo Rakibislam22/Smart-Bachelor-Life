@@ -18,8 +18,8 @@ const Navbar = () => {
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 	return (
-		<header className="fixed top-0 left-0 right-0 bg-transparent py-5">
-			<nav className="flex sm:block container mx-auto px-6 justify-between items-center">
+		<header className="fixed top-0 left-0 right-0 py-5 bg-transparent">
+			<nav className="container flex items-center justify-between px-6 mx-auto sm:block">
 				<motion.div
 					initial={{ opacity: 0, y: -10 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -29,7 +29,7 @@ const Navbar = () => {
 						<div className="flex justify-items-center">
 							<a
 								href="#"
-								className="text-xl font-bold tracking-tight text-center py-3 "
+								className="py-3 text-xl font-bold tracking-tight text-center "
 							>
 								<Logo />
 							</a>
@@ -65,7 +65,7 @@ const Navbar = () => {
 					initial={{ opacity: 0, y: -10 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 1, ease: "easeIn" }}
-					className="md:hidden p-2 text-foreground cursor-pointer"
+					className="p-2 cursor-pointer md:hidden text-foreground"
 					onClick={() => setIsMobileMenuOpen((prev) => !prev)}
 				>
 					{isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -73,7 +73,24 @@ const Navbar = () => {
 			</nav>
 
 			{isMobileMenuOpen && (
-				<div className="flex flex-col sm:hidden px-9 pb-5 w-full bg-background gap-2.5 justify-items-center rounded-2xl ">
+				<motion.div
+					initial={{
+						opacity: 0,
+						y: 20,
+						filter: "blur(10px)",
+					}}
+					animate={{
+						opacity: 1,
+						y: 0,
+						filter: "blur(0px)",
+					}}
+					transition={{
+						duration: 0.8,
+						ease: "easeOut",
+					}}
+					
+					className="flex flex-col sm:hidden px-9 pb-5 w-full bg-background gap-2.5 justify-items-center rounded-2xl "
+				>
 					<div className="flex flex-col gap-10 p-2.5 justify-items-center">
 						{navLinks.map((link, index) => (
 							<motion.a
@@ -96,7 +113,7 @@ const Navbar = () => {
 						<ThemeToggle />
 						<Button className="w-full">Get Started</Button>
 					</div>
-				</div>
+				</motion.div>
 			)}
 		</header>
 	);
