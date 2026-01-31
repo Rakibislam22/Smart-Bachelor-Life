@@ -1,9 +1,5 @@
 @import "tailwindcss";
-<<<<<<< HEAD
 /* @plugin "daisyui"; */
-=======
-@plugin "daisyui";
->>>>>>> 73e530e (make navbar)
 
 @theme {
 	--color-background: var(--color-bg-base);
@@ -25,11 +21,9 @@
 	--color-surface: var(--color-surf);
 }
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 73e530e (make navbar)
+
 @layer base {
 	:root {
 		/* --- DEFAULT BASE: DARK MODE (Cyber Blue) --- */
@@ -40,11 +34,7 @@
 		--color-text-sub: #cbd5e1; /* Slate 300 */
 
 		--color-card-base: #0f172a;
-<<<<<<< HEAD
 		--color-prim: #8956fc;
-=======
-		--color-prim: #0ea5e9;
->>>>>>> 73e530e (make navbar)
 		--color-prim-fg: #ffffff;
 		--color-sec: #1e293b;
 		--color-sec-fg: #ffffff;
