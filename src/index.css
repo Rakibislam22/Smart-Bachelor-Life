@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@plugin "daisyui";
+/* @plugin "daisyui"; */
 
 @theme {
 	--color-background: var(--color-bg-base);
@@ -31,7 +31,7 @@
 		--color-text-sub: #cbd5e1; /* Slate 300 */
 
 		--color-card-base: #0f172a;
-		--color-prim: #0ea5e9;
+		--color-prim: #8956fc;
 		--color-prim-fg: #ffffff;
 		--color-sec: #1e293b;
 		--color-sec-fg: #ffffff;
