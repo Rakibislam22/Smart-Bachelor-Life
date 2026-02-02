@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Button from "../common/Button.jsx";
+import Button from "../common/ButtonPrimary.jsx";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import "../../index.css";
@@ -25,14 +25,9 @@ const Navbar = () => {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 1, ease: "easeIn" }}
 				>
-					<div className="flex justify-between p-5 text-center ">
+					<div className="flex justify-between pt-5 text-center px-15 ">
 						<div className="flex justify-items-center">
-							<a
-								href="#"
-								className="py-3 text-xl font-bold tracking-tight text-center "
-							>
-								<Logo />
-							</a>
+							<Logo />
 						</div>
 
 						<div className="hidden sm:flex gap-2.5 justify-items-center ">
@@ -56,7 +51,7 @@ const Navbar = () => {
 							</div>
 							<div className="flex gap-6.25">
 								<ThemeToggle />
-								<Button size="sm">Get Started</Button>
+								<Button>Get Started</Button>
 							</div>
 						</div>
 					</div>
@@ -88,7 +83,6 @@ const Navbar = () => {
 						duration: 0.8,
 						ease: "easeOut",
 					}}
-					
 					className="flex flex-col sm:hidden px-9 pb-5 w-full bg-background gap-2.5 justify-items-center rounded-2xl "
 				>
 					<div className="flex flex-col gap-10 p-2.5 justify-items-center">
