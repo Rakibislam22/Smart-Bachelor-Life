@@ -32,25 +32,25 @@ const Logo = () => {
 			whileHover="visible"
 			// StaggerChildren makes "mart", "achelor", "ife" open one after another slightly
 			// Remove 'viewport' if you want it to reset every time
-			className="flex items-center text-2xl font-bold tracking-tight text-foreground cursor-pointer overflow-hidden whitespace-nowrap"
+			className="flex items-center overflow-hidden text-2xl font-bold tracking-tight cursor-pointer text-foreground whitespace-nowrap"
 		>
 			{/* Block 1: S -> Smart */}
 			<div className="flex">
 				<span>S</span>
 				<motion.span
 					variants={expand}
-					className="overflow-hidden inline-block origin-left"
+					className="inline-block overflow-hidden origin-left"
 				>
 					mart
 				</motion.span>
 			</div>
 
 			{/* Block 2: B -> Bachelor (Highlighted) */}
-			<div className="flex text-highlight hover:text-primary transition-colors duration-300">
+			<div className="flex transition-colors duration-300 text-primary hover:text-highlight">
 				<span>B</span>
 				<motion.span
 					variants={expand}
-					className="overflow-hidden inline-block origin-left"
+					className="inline-block overflow-hidden origin-left"
 				>
 					achelor
 				</motion.span>
@@ -61,7 +61,7 @@ const Logo = () => {
 				<span>L</span>
 				<motion.span
 					variants={expand}
-					className="overflow-hidden inline-block origin-left"
+					className="inline-block overflow-hidden origin-left"
 				>
 					ife
 				</motion.span>
