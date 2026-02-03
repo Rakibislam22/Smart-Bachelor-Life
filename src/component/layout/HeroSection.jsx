@@ -5,7 +5,7 @@ import ButtonSecondary from "../common/ButtonSecondary.jsx";
 const HeroSection = () => {
 	return (
 		<section className="flex items-center justify-center text-center border-2 border-black min-h-dvh">
-			<div className="max-w-3xl pt-15">
+			<div className="max-w-3xl pt-15 px-8">
 				<h1 className="text-4xl font-bold leading-tight md:text-6xl">
 					Manage your mess
 					<br />
@@ -17,7 +17,7 @@ const HeroSection = () => {
 					clarity to your daily life.
 				</p>
 
-				<div className="flex justify-center gap-4 mt-8">
+				<div className="flex sm:flex-row flex-col justify-center gap-4 mt-8">
 					<ButtonPrimary>Get Started</ButtonPrimary>
 
 					<ButtonSecondary>Watch Demo</ButtonSecondary>
