@@ -24,7 +24,7 @@ const Navbar = () => {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 1, ease: "easeIn" }}
 				>
-					<div className="flex justify-between text-center px-10 sm:px-0">
+					<div className="flex pt-3 justify-between text-center px-10 sm:px-0">
 						<div className="flex justify-items-center">
 							<Logo />
 						</div>
@@ -59,7 +59,7 @@ const Navbar = () => {
 					initial={{ opacity: 0, y: -10 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 1, ease: "easeIn" }}
-					className="pt-5 px-10 cursor-pointer md:hidden text-foreground"
+					className="pt-3 px-10 cursor-pointer md:hidden text-foreground"
 					onClick={() => setIsMobileMenuOpen((prev) => !prev)}
 				>
 					{isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
