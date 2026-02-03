@@ -5,9 +5,9 @@ import React from "react";
 const FeatureSection = () => {
 	return (
 		<section className="border-2 border-black min-h-dvh">
-			<div className="grid items-center max-w-6xl pl-10 mx-auto pt-35 gap-25 md:grid-cols-2">
+			<div className="grid grid-cols-1 md:grid-cols-2 justify-center items-center max-w-6xl p-10 mx-auto pt-35 gap-25 ">
 				{/* Left Text */}
-				<div className="pl-15">
+				<div className="">
 					{/* <p className="mb-3 text-sm tracking-wide uppercase text-highlight/90">
 						Eliminate distractions
 					</p> */}
