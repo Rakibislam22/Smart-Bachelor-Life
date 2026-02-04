@@ -8,7 +8,6 @@ import HowItWorks from '../component/layout/HowItWorks.jsx';
 const LandingPage = () => {
     return (
         <div>
-            <Navbar/>
             <HeroSection/>
             <FeatureSection />
             <BenefitsSection/>
