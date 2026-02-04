@@ -5,7 +5,10 @@ import { Outlet } from 'react-router';
 const MainLayout = () => {
     return (
         <div>
-            <Navbar/>
+            <div>
+               <Navbar/> 
+            </div>
+            
             <Outlet/>
             {/* footer here... */}
         </div>

@@ -4,6 +4,9 @@ import MainLayout from "../layouts/MainLayout";
 import AuthLayout from "../layouts/AuthLayout";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
+import Benefits from "../pages/Benefits";
+import About from "../pages/About";
+import Contact from "../pages/Contact";
 
 const router = createBrowserRouter([
     {
@@ -14,6 +17,18 @@ const router = createBrowserRouter([
                 path: "/",
                 element: <LandingPage />,
             },
+            {
+                path: "/benefits",
+                element: <Benefits />,
+            },
+            {
+                path: "/about",
+                element: <About />,
+            },
+            {
+                path: "/contact",
+                element: <Contact />,
+            }
         ],
     },
     {
