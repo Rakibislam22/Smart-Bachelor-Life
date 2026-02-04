@@ -35,21 +35,21 @@ const Navbar = () => {
 							<div className="hidden sm:flex gap-2.5 justify-items-center ">
 								<div className="flex gap-10 p-2.5 justify-items-center">
 									{navLinks.map((link, index) => (
-										<NavLink to={link.href}>
-											<motion.span
-												whileHover={{ scale: 1.05, y: -2 }}
-												whileTap={{ scale: 0.9, y: 1 }}
-												transition={{
-													type: "spring",
-													stiffness: 300,
-													damping: 15,
-												}}
-												className="p-1 text-[15px] text-subtle items-center hover:text-highlight "
-												key={index}
-											>
-												{link.lable}
-											</motion.span>
-										</NavLink>
+
+										<motion.span
+											whileHover={{ scale: 1.05, y: -2 }}
+											whileTap={{ scale: 0.9, y: 1 }}
+											transition={{
+												type: "spring",
+												stiffness: 300,
+												damping: 15,
+											}}
+											className="p-1 text-[15px] text-subtle items-center hover:text-highlight "
+											key={index}
+										>
+											<NavLink to={link.href}>{link.lable}</NavLink>
+										</motion.span>
+
 									))}
 								</div>
 								<div className="flex gap-6.25">
@@ -90,21 +90,21 @@ const Navbar = () => {
 					>
 						<div className="flex flex-col gap-10 p-2.5 justify-items-center">
 							{navLinks.map((link, index) => (
-								<NavLink to={link.href}>
-									<motion.span
-										whileHover={{ scale: 1.05, y: -2 }}
-										whileTap={{ scale: 0.9, y: 1 }}
-										transition={{
-											type: "spring",
-											stiffness: 200,
-											damping: 15,
-										}}
-										className="p-1 text-[15px] text-subtle items-center hover:text-highlight "
-										key={index}
-									>
-										{link.lable}
-									</motion.span>
-								</NavLink>
+
+								<motion.span
+									whileHover={{ scale: 1.05, y: -2 }}
+									whileTap={{ scale: 0.9, y: 1 }}
+									transition={{
+										type: "spring",
+										stiffness: 200,
+										damping: 15,
+									}}
+									className="p-1 text-[15px] text-subtle items-center hover:text-highlight "
+									key={index}
+								>
+									<NavLink to={link.href}>{link.lable} </NavLink>
+								</motion.span>
+
 							))}
 						</div>
 						<div className="flex flex-col gap-6.25">
