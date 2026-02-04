@@ -1,6 +1,7 @@
 import React from "react";
 import ButtonPrimary from "../common/ButtonPrimary.jsx";
 import ButtonSecondary from "../common/ButtonSecondary.jsx";
+import { Link } from "react-router";
 
 const HeroSection = () => {
 	return (
@@ -18,7 +19,7 @@ const HeroSection = () => {
 				</p>
 
 				<div className="flex sm:flex-row flex-col justify-center gap-4 mt-8">
-					<ButtonPrimary>Get Started</ButtonPrimary>
+					<Link to="/auth/login"><ButtonPrimary>Get Started</ButtonPrimary></Link>
 
 					<ButtonSecondary>Watch Demo</ButtonSecondary>
 				</div>
