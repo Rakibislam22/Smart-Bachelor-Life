@@ -1,6 +1,7 @@
 import React from "react";
 import ButtonPrimary from "../common/ButtonPrimary.jsx";
 import ButtonSecondary from "../common/ButtonSecondary.jsx";
+import { Link } from "react-router";
 
 const HeroSection = () => {
 	return (
@@ -17,8 +18,13 @@ const HeroSection = () => {
 					clarity to your daily life.
 				</p>
 
+<<<<<<< HEAD:src/component/layout/HeroSection.jsx
 				<div className="flex pt-15 sm:pt-7.5 sm:flex-row flex-col justify-center gap-4 mt-8">
 					<ButtonPrimary>Get Started</ButtonPrimary>
+=======
+				<div className="flex sm:flex-row flex-col justify-center gap-4 mt-8">
+					<Link to="/auth/login"><ButtonPrimary>Get Started</ButtonPrimary></Link>
+>>>>>>> team/main:src/component/landingLayout/HeroSection.jsx
 
 					<ButtonSecondary>Watch Demo</ButtonSecondary>
 				</div>
