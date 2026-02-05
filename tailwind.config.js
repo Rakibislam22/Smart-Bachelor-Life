@@ -11,6 +11,11 @@ export default {
 	},
 
 	theme: {
+		fontFamily: {
+			unbounded: ["Unbounded"],
+			urbanist: ["Urbanist"],
+			testfont: ["serif"],
+		},
 		extend: {
 			colors: {
 				/* base */

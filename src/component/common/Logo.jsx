@@ -32,7 +32,7 @@ const Logo = () => {
 			whileHover="visible"
 			// StaggerChildren makes "mart", "achelor", "ife" open one after another slightly
 			// Remove 'viewport' if you want it to reset every time
-			className="flex items-center overflow-hidden text-2xl font-bold tracking-tight cursor-pointer text-foreground whitespace-nowrap"
+			className="flex items-center overflow-hidden text-2xl font-unbounded font-medium tracking-tight cursor-pointer text-foreground whitespace-nowrap"
 		>
 			{/* Block 1: S -> Smart */}
 			<div className="flex">

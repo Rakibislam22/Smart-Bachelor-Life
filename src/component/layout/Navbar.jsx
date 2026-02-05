@@ -30,7 +30,7 @@ const Navbar = () => {
 						</div>
 
 						<div className="hidden sm:flex gap-2.5 justify-items-center ">
-							<div className="flex gap-10 p-2.5 justify-items-center">
+							<div className="flex gap-10 p-2.5 justify-items-center font-urbanist font-medium">
 								{navLinks.map((link, index) => (
 									<motion.a
 										whileHover={{ scale: 1.05, y: -2 }}
@@ -59,7 +59,7 @@ const Navbar = () => {
 					initial={{ opacity: 0, y: -10 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 1, ease: "easeIn" }}
-					className="pt-3 px-10 cursor-pointer md:hidden text-foreground"
+					className="pt-3 px-10 cursor-pointer sm:hidden text-foreground"
 					onClick={() => setIsMobileMenuOpen((prev) => !prev)}
 				>
 					{isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -94,7 +94,7 @@ const Navbar = () => {
 									stiffness: 200,
 									damping: 15,
 								}}
-								className="p-1 text-[15px] text-subtle items-center hover:text-highlight "
+								className="p-1 text-[15px] text-subtle items-center hover:text-highlight font-urbanist font-medium "
 								href={link.href}
 								key={index}
 							>
