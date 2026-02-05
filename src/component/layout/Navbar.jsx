@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Button from "../common/ButtonPrimary.jsx";
+import ButtonPrimary from "../common/ButtonPrimary.jsx";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import ThemeToggle from "../common/ThemeToggle.jsx";
@@ -50,7 +50,7 @@ const Navbar = () => {
 							</div>
 							<div className="flex gap-6.25">
 								<ThemeToggle />
-								<Button>Get Started</Button>
+								<ButtonPrimary>Get Started</ButtonPrimary>
 							</div>
 						</div>
 					</div>
@@ -104,7 +104,7 @@ const Navbar = () => {
 					</div>
 					<div className="flex flex-col gap-6.25">
 						<ThemeToggle />
-						<Button className="w-full">Get Started</Button>
+						<ButtonPrimary className="w-full">Get Started</ButtonPrimary>
 					</div>
 				</motion.div>
 			)}
