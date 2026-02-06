@@ -2,6 +2,9 @@
 /* @plugin "daisyui"; */
 
 @theme {
+	--font-urbanist: "Urbanist", sans-serif;
+	--font-unbounded: "Unbounded", sans-serif;
+
 	--color-background: var(--color-bg-base);
 	--color-foreground: var(--color-text-base);
 
@@ -20,9 +23,6 @@
 	--color-highlight: var(--color-high);
 	--color-surface: var(--color-surf);
 }
-
-
-
 
 @layer base {
 	:root {
@@ -72,7 +72,6 @@
 	body {
 		background-color: var(--color-background);
 		color: var(--color-foreground);
-		font-family: "Inter", sans-serif;
 		transition:
 			background-color 0.3s ease,
 			color 0.3s ease;

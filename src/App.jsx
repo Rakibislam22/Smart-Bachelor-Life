@@ -6,7 +6,7 @@ const App = () => {
   return (
     <div>
       <LandingPage></LandingPage>
-      <Sample/>
+      {/* <Sample/> */}
     </div>
   );
 };
