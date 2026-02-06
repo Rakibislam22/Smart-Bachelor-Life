@@ -9,7 +9,7 @@ const About = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-4xl md:text-5xl font-bold text-foreground"
+          className="text-4xl md:text-5xl font-bold text-foreground font-urbanist"
         >
           About <span className="text-primary">Smart Bachelor Life</span>
         </motion.h1>
@@ -18,7 +18,7 @@ const About = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="mt-6 max-w-3xl text-subtle text-lg"
+          className="mt-6 max-w-3xl text-subtle text-lg font-unbounded"
         >
           Smart Bachelor Life (SBL) is a modern lifestyle and expense management
           platform designed especially for students and bachelors who want
@@ -28,7 +28,7 @@ const About = () => {
 
       {/* INFO GRID */}
       <section className="max-w-7xl mx-auto px-6 pb-24">
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-10">
           {[
             {
               title: "Why We Built SBL",
@@ -49,12 +49,23 @@ const About = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="bg-card border border-border rounded-xl p-6"
+              whileHover={{ y: -6 }}
+              className="
+                bg-card border border-border rounded-xl
+                p-8 md:p-10
+                transition-all duration-300 ease-out
+                hover:border-primary
+                hover:shadow-[0_0_40px_-10px_rgba(137,86,252,0.6)]
+                cursor-pointer
+              "
             >
-              <h3 className="text-xl font-semibold text-foreground mb-3">
+              <h3 className="text-xl font-semibold text-foreground mb-4 font-unbounded">
                 {item.title}
               </h3>
-              <p className="text-subtle">{item.text}</p>
+
+              <p className="text-subtle font-unbounded leading-relaxed">
+                {item.text}
+              </p>
             </motion.div>
           ))}
         </div>

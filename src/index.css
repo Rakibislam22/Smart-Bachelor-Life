@@ -25,6 +25,7 @@
 }
 
 @layer base {
+	
 	:root {
 		/* --- DEFAULT BASE: DARK MODE (Cyber Blue) --- */
 		--color-bg-base: #020617;
@@ -76,4 +77,11 @@
 			background-color 0.3s ease,
 			color 0.3s ease;
 	}
+	.font-urbanist {
+    font-family: var(--font-urbanist);
+  }
+
+  .font-unbounded {
+    font-family: var(--font-unbounded);
+  }
 }
