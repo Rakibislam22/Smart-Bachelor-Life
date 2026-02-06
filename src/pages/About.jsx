@@ -59,7 +59,7 @@ const About = () => {
                 cursor-pointer
               "
             >
-              <h3 className="text-xl font-semibold text-foreground mb-4 font-unbounded">
+              <h3 className="text-2xl font-bold text-foreground mb-4 font-urbanist">
                 {item.title}
               </h3>
 
