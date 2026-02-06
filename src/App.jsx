@@ -5,8 +5,13 @@ import Sample from './component/Sample.jsx';
 const App = () => {
   return (
     <div>
+<<<<<<< HEAD
    
       <Sample/>
+=======
+      <LandingPage></LandingPage>
+      {/* <Sample/> */}
+>>>>>>> origin/main
     </div>
   );
 };
