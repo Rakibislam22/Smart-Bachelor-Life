@@ -18,9 +18,9 @@ const Navbar = () => {
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 	return (
-		<div className="h-25">
+		<div className="h-16">
 
-			<header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md py-5">
+			<header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md pt-3 font-urbanist">
 				<nav className=" flex items-center justify-between mx-auto sm:block sm:px-10 lg:p-0 max-w-7xl ">
 					<motion.div
 						initial={{ opacity: 0, y: -10 }}
