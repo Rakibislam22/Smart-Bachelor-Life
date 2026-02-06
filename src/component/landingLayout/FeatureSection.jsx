@@ -12,11 +12,11 @@ const FeatureSection = () => {
 						Eliminate distractions
 					</p> */}
 
-					<h2 className="mb-4 text-3xl font-bold md:text-4xl">
+					<h2 className="mb-4 text-3xl font-medium md:text-4xl font-urbanist">
 						Productivity without the chaos
 					</h2>
 
-					<p className="leading-relaxed text-subtle">
+					<p className="leading-relaxed text-subtle font-unbounded font-normal">
 						Smart Bachelor Life brings you a place to keep track of
 						your necessary living expenses in your chaotic bachelor
 						life.

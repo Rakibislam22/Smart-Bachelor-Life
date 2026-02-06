@@ -1,4 +1,5 @@
 import { Link, NavLink } from "react-router";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import Logo from "../common/Logo.jsx";
 
@@ -15,7 +16,7 @@ export default function Footer() {
             <div className="mx-auto max-w-7xl px-6 py-10">
 
                 {/* Top Row */}
-                <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between font-urbanist font-medium">
 
                     {/* Logo (same as Navbar) */}
                     <div className="flex items-center">
@@ -66,7 +67,7 @@ export default function Footer() {
                 </div>
 
                 {/* Bottom Row */}
-                <div className="mt-10 flex flex-col gap-4 border-t border-border pt-6 text-sm text-subtle md:flex-row md:items-center md:justify-between">
+                <div className="mt-10 flex flex-col gap-4 border-t border-border pt-6 text-sm text-subtle md:flex-row md:items-center md:justify-between font-unbounded font-normal">
                     <p>© {new Date().getFullYear()} SBL. All rights reserved</p>
 
                     <div className="flex gap-6">
