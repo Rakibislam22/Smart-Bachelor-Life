@@ -8,7 +8,7 @@ const ButtonPrimary = ({
 	children,
 	...props
 }) => {
-	const baseClasses ="relative overflow-hidden rounded-lg font-urbanist font-medium bg-primary text-primary-foreground border border-transparent hover:border-primary hover:bg-highlight hover:text-secondary-foreground shadow-lg shadow-highlight/25";
+	const baseClasses ="relative overflow-hidden rounded-lg font-urbanist font-medium bg-primary text-primary-foreground border border-transparent hover:border-primary hover:bg-highlight hover:text-secondary-foreground shadow-lg shadow-highlight/25 cursor-pointer";
 
 	const sizeClasses = {
 		sm: "px-4 py-2 text-sm",
