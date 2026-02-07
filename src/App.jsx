@@ -5,10 +5,12 @@ import Sample from './component/Sample.jsx';
 const App = () => {
   return (
     <div>
-      <LandingPage></LandingPage>
-      {/* <Sample/> */}
+   
+      <Sample/>
     </div>
   );
 };
 
 export default App;
+
+
