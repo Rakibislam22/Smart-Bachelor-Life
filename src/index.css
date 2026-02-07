@@ -77,11 +77,5 @@
 			background-color 0.3s ease,
 			color 0.3s ease;
 	}
-	.font-urbanist {
-    font-family: var(--font-urbanist);
-  }
-
-  .font-unbounded {
-    font-family: var(--font-unbounded);
-  }
+	
 }
