@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { useState } from "react";
+import ButtonPrimary from "../component/common/ButtonPrimary";
 
 const Contact = () => {
   const [name, setName] = useState("");
@@ -121,13 +122,12 @@ const Contact = () => {
               placeholder="Your message"
             />
 
-            <button
+            <ButtonPrimary
               type="submit"
               disabled={sending}
-              className="bg-primary text-primary-foreground px-8 py-3 rounded-lg disabled:opacity-60"
             >
               {sending ? "Sending..." : "Send Message"}
-            </button>
+            </ButtonPrimary>
           </motion.form>
         </div>
       </section>
