@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import dark from "../../assets/icons/switch_mode_dark.png";
+import light from "../../assets/icons/switch_mode_light.png";
 
 
 
@@ -38,11 +40,11 @@ export default function ThemeToggle() {
 		>
 			{isLight ? (
 				<>
-					<img className="w-9 h-9 p-1.5 border-2 backdrop-blur-[10px] border-primary/15 bg-highlight/90 rounded-md " src="src\assets\icons\switch_mode_light.png" alt="" />
+					<img className="w-9 h-9 p-1.5 border-2 backdrop-blur-[10px] border-primary/15 bg-highlight/90 rounded-md " src={light} alt="" />
 				</>
 			) : (
 				<>
-					<img className="w-9 h-9 p-1.5 border-2 backdrop-blur-[10px] border-primary/15 bg-highlight/10 rounded-md " src="src\assets\icons\switch_mode_dark.png" alt="" />
+					<img className="w-9 h-9 p-1.5 border-2 backdrop-blur-[10px] border-primary/15 bg-highlight/10 rounded-md " src={dark} alt="" />
 				</>
 			)}
 		</motion.button>

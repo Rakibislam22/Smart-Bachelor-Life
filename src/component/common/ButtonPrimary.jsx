@@ -2,13 +2,17 @@ import React from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 
-const Button = ({ className = "", size = "default", children, ...props }) => {
-	const baseClasses =
-		"w-[144px] h-[50px] relative overflow-hidden rounded-lg font-medium bg-primary text-primary-foreground hover:bg-highlight hover:text-secondary-foreground   hover:border-primary hover:border  shadow-lg shadow-highlight/25";
+const ButtonPrimary = ({
+	className = "",
+	size = "default",
+	children,
+	...props
+}) => {
+	const baseClasses ="relative overflow-hidden rounded-lg font-medium bg-primary text-primary-foreground border border-transparent hover:border-primary hover:bg-highlight hover:text-secondary-foreground shadow-lg shadow-highlight/25";
 
 	const sizeClasses = {
 		sm: "px-4 py-2 text-sm",
-		default: "px-6 py-3 text-base",
+		default: "px-8 py-3 text-base",
 		lg: "px-8 py-4 text-lg",
 	};
 
@@ -29,4 +33,4 @@ const Button = ({ className = "", size = "default", children, ...props }) => {
 	);
 };
 
-export default Button;
+export default ButtonPrimary;

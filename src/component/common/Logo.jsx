@@ -1,6 +1,7 @@
 import React from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import { Link } from "react-router";
 
 
 
@@ -26,47 +27,54 @@ const Logo = () => {
 	};
 
 	return (
-		<motion.a
-			href="#"
-			initial="hidden"
-			whileHover="visible"
-			// StaggerChildren makes "mart", "achelor", "ife" open one after another slightly
-			// Remove 'viewport' if you want it to reset every time
-			className="flex items-center text-2xl font-bold tracking-tight text-foreground cursor-pointer overflow-hidden whitespace-nowrap"
-		>
-			{/* Block 1: S -> Smart */}
-			<div className="flex">
-				<span>S</span>
-				<motion.span
-					variants={expand}
-					className="overflow-hidden inline-block origin-left"
-				>
-					mart
-				</motion.span>
-			</div>
+		<>
+			<Link to="/">
 
-			{/* Block 2: B -> Bachelor (Highlighted) */}
-			<div className="flex text-highlight hover:text-primary transition-colors duration-300">
-				<span>B</span>
-				<motion.span
-					variants={expand}
-					className="overflow-hidden inline-block origin-left"
+				<motion.a
+					href="#"
+					initial="hidden"
+					whileHover="visible"
+					// StaggerChildren makes "mart", "achelor", "ife" open one after another slightly
+					// Remove 'viewport' if you want it to reset every time
+					className="flex items-center overflow-hidden text-2xl font-bold tracking-tight cursor-pointer text-foreground whitespace-nowrap"
 				>
-					achelor
-				</motion.span>
-			</div>
+					{/* Block 1: S -> Smart */}
+					<div className="flex">
+						<span>S</span>
+						<motion.span
+							variants={expand}
+							className="inline-block overflow-hidden origin-left"
+						>
+							mart
+						</motion.span>
+					</div>
 
-			{/* Block 3: L -> Life */}
-			<div className="flex">
-				<span>L</span>
-				<motion.span
-					variants={expand}
-					className="overflow-hidden inline-block origin-left"
-				>
-					ife
-				</motion.span>
-			</div>
-		</motion.a>
+					{/* Block 2: B -> Bachelor (Highlighted) */}
+					<div className="flex transition-colors duration-300 text-primary hover:text-highlight">
+						<span>B</span>
+						<motion.span
+							variants={expand}
+							className="inline-block overflow-hidden origin-left"
+						>
+							achelor
+						</motion.span>
+					</div>
+
+					{/* Block 3: L -> Life */}
+					<div className="flex">
+						<span>L</span>
+						<motion.span
+							variants={expand}
+							className="inline-block overflow-hidden origin-left"
+						>
+							ife
+						</motion.span>
+					</div>
+				</motion.a>
+
+			</Link>
+
+		</>
 	);
 };
 
