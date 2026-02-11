@@ -11,7 +11,7 @@ const Card = ({ title, description }) => {
 						{" "}
 						{title}{" "}
 					</h2>
-					<p className="font-unbounded font-normal text-subtle text-[15px] leading-4.75 text-center flex-none self-stretch">
+					<p className="font-unbounded font-light text-subtle text-[15px] leading-4.75 text-center flex-none self-stretch px-4">
 						{" "}
 						{description}{" "}
 					</p>

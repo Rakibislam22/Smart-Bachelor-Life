@@ -5,24 +5,24 @@ import { Link } from "react-router";
 
 const HeroSection = () => {
 	return (
-		<section className="flex items-center justify-center text-center border-2 border-black min-h-screen">
+		<section className="flex items-center justify-center text-center min-h-screen">
 			<div className="max-w-3xl  px-8">
 				<div className="-translate-y-30 sm:-translate-y-10 md:-translate-y-16">
 					<h1 className="text-4xl font-urbanist font-semibold leading-tight md:text-6xl">
 						Manage Your Mess
 						<br />
-						<span className="text-highlight">
+						<span className="text-primary">
 							Track. Live Better
 						</span>
 					</h1>
 
-					<p className="mt-6 font-unbounded font-normal text-lg text-subtle">
+					<p className="mt-6 font-unbounded font-light text-md sm:text-lg text-subtle">
 						Smart Bachelor Life helps you organize expenses and
 						bring clarity to your daily life.
 					</p>
 				</div>
 
-				<div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+				<div className="flex flex-col sm:flex-row items-center justify-center gap-6">
 					<Link to="/auth/login" className="w-full sm:w-auto cour">
 						<ButtonPrimary className="w-full sm:w-auto px-8 py-3">
 							Get Started
