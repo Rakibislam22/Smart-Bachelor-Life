@@ -15,7 +15,7 @@ const BenefitsSection = () => {
 
 				{/* HEADING */}
 				<h1 className=" font-urbanist font-medium text-3xl sm:text-4xl lg:text-[48px] leading-tight sm:leading-[1.2] text-foreground ">
-					Why choose SmartBachelorLife
+					Why choose <span className="text-primary">SmartBachelorLife</span>
 				</h1>
 
 				{/* CARDS */}
