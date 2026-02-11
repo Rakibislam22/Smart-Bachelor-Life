@@ -3,9 +3,9 @@ import Step from "../common/Step";
 
 const HowItWorks = () => {
 	return (
-		<section className="flex justify-center px-4 sm:px-6 lg:px-12 py-16 min-h-dvh border-black border-2 items-center ">
+		<section className="flex justify-center px-4 sm:px-6 lg:px-12 py-16 min-h-dvh items-center ">
 			<div className="w-full max-w-7xl ">
-				<div className="flex flex-col gap-14 rounded-3xl bg-[linear-gradient(101deg,rgba(13,77,56,0.2)_18.53%,rgba(8,136,88,0.2)_81.47%)] backdrop-blur-md px-6 sm:px-10 lg:px-16 py-12">
+				<div className="flex flex-col gap-14 rounded-3xl bg-[linear-gradient(210deg,rgba(132,204,22,0.25),rgba(14,165,233,0.2))] backdrop-blur-md px-6 sm:px-10 lg:px-16 py-12">
 					{/* 🔹 HEADER */}
 					<div className="flex flex-col gap-6">
 						{/* TAG */}
@@ -18,7 +18,7 @@ const HowItWorks = () => {
 
 						{/* TITLE */}
 						<h1 className="font-urbanist font-medium text-3xl sm:text-4xl lg:text-5xl leading-tight text-foreground max-w-2xl">
-							Get started in 3 easy steps
+							Get started in <span className="text-primary">3 easy steps</span>
 						</h1>
 					</div>
 
