@@ -34,7 +34,7 @@ export default function ProductCTA() {
 	}, []);
 
 	return (
-		<section className="relative w-full flex flex-col items-center justify-center min-h-svh py-24 md:py-32 px-5 md:px-8 overflow-hidden bg-background">
+		<section className="relative w-full flex flex-col items-center justify-center min-h-svh py-24 md:py-32 px-5 md:px-8 overflow-hidden">
 			{/* ================= PHONE MOCKUP ================= */}
 			<div className="relative flex justify-center items-center top-10 sm:top-20">
 				{/* soft floor shadow */}
