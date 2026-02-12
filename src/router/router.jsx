@@ -7,6 +7,7 @@ import Signup from "../pages/Signup";
 import Benefits from "../pages/Benefits";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
+import DashboardLayout from "../layouts/DashboardLayout";
 
 const router = createBrowserRouter([
     {
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
                 element: <Signup />,
             }
         ]
+    },
+    {
+        path: "/dashboard",
+        element: <DashboardLayout />,
     }
 ]);
 
