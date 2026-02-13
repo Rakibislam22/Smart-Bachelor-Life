@@ -1,5 +1,7 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+	themes: false;
+}
 
 @theme {
 	--font-urbanist: "Urbanist", sans-serif;
@@ -25,7 +27,6 @@
 }
 
 @layer base {
-	
 	:root {
 		/* --- DEFAULT BASE: DARK MODE (Cyber Blue) --- */
 		--color-bg-base: #020617;
@@ -66,9 +67,6 @@
 		--color-surf: #f7fee7;
 	}
 
-
-
-	
 	html {
 		scroll-behavior: smooth;
 	}
