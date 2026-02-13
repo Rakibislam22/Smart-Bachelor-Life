@@ -5,7 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const ThreeGlow = () => {
+const HaloBackground = () => {
 	const mountRef = useRef(null);
 
 	useEffect(() => {
@@ -129,4 +129,4 @@ const ThreeGlow = () => {
 	);
 };
 
-export default ThreeGlow;
+export default HaloBackground;
