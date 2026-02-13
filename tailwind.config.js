@@ -6,9 +6,9 @@ export default {
 		require("daisyui"), // ✅ components only
 	],
 
-	daisyui: {
-		themes: false, // 🚫 disable DaisyUI themes
-	},
+	// daisyui: {
+	// 	themes: false, // 🚫 disable DaisyUI themes
+	// },
 
 	theme: {
 		extend: {
