@@ -34,7 +34,7 @@ export default function ProductCTA() {
 	}, []);
 
 	return (
-		<section className="relative w-full flex flex-col items-center justify-center min-h-svh py-24 md:py-32 px-5 md:px-8 overflow-hidden bg-background">
+		<section className="relative w-full flex flex-col items-center justify-center min-h-svh py-24 md:py-32 px-5 md:px-8 overflow-hidden">
 			{/* ================= PHONE MOCKUP ================= */}
 			<div className="relative flex justify-center items-center top-10 sm:top-20">
 				{/* soft floor shadow */}
@@ -59,7 +59,7 @@ export default function ProductCTA() {
 						animate={{ opacity: 1, x: 0 }}
 						exit={{ opacity: 0, x: -40 }}
 						transition={{ duration: 0.45, ease: "easeInOut" }}
-						className="w-67.5sm:w-[340px] md:w-95 lg:w-110 drop-shadow-[0_50px_70px_rgba(0,0,0,0.35)]"
+						className="w-67.5 sm:w-85 md:w-95 lg:w-110 drop-shadow-[0_50px_70px_rgba(0,0,0,0.35)]"
 					/>
 				</motion.div>
 			</div>

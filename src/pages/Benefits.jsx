@@ -31,11 +31,11 @@ const FeatureRow = ({ title, desc, icon, reverse }) => {
 					<IconComponent size={28} />
 				</div>
 
-				<h2 className="text-3xl md:text-4xl font-urbanist leading-tight">
+				<h2 className="text-3xl md:text-4xl font-urbanist leading-tight font-medium ">
 					{title}
 				</h2>
 
-				<p className="text-subtle text-lg font-unbounded leading-relaxed max-w-xl">
+				<p className="text-subtle text-lg font-unbounded leading-relaxed max-w-xl font-light">
 					{desc}
 				</p>
 			</motion.div>
@@ -83,10 +83,10 @@ const SmallCard = ({ icon, title, desc }) => {
 				<IconComponent size={24} />
 			</div>
 
-			<h3 className="font-urbanist text-lg font-semibold mb-2">
+			<h3 className="font-urbanist text-lg font-medium mb-2">
 				{title}
 			</h3>
-			<p className="text-subtle font-unbounded text-[15px]">{desc}</p>
+			<p className="text-subtle font-unbounded text-[15px] font-light">{desc}</p>
 		</motion.div>
 	);
 };
@@ -100,13 +100,13 @@ const Benefits = () => {
 					initial={{ opacity: 0, y: 40 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.6 }}
-					className="font-urbanist text-4xl md:text-6xl leading-tight"
+					className="font-urbanist text-4xl md:text-6xl leading-tight font-medium"
 				>
 					Manage Your Mess Life
 					<span className="text-primary"> Without Stress</span>
 				</motion.h1>
 
-				<p className="max-w-2xl text-subtle font-unbounded text-lg">
+				<p className="max-w-2xl text-subtle font-unbounded text-lg font-normal">
 					No more notebooks, manual calculations, or money arguments.
 					Smart Bachelor Life automates meals, expenses, and monthly
 					bills so roommates can live peacefully.
@@ -189,11 +189,11 @@ const Benefits = () => {
 			{/* ================= FINAL CTA ================= */}
 			<div className="w-full flex justify-center pb-32 px-6">
 				<div className="max-w-5xl w-full rounded-[30px] border border-border p-12 text-center bg-[linear-gradient(120deg,rgba(132,204,22,0.25),rgba(14,165,233,0.2))]">
-					<h2 className="text-3xl md:text-4xl font-urbanist mb-4">
+					<h2 className="text-3xl md:text-4xl font-urbanist mb-4 font-medium">
 						Stop Managing Mess Manually
 					</h2>
 
-					<p className="text-subtle font-unbounded max-w-xl mx-auto mb-8">
+					<p className="text-subtle font-unbounded max-w-xl mx-auto mb-8 font-light">
 						Let Smart Bachelor Life handle meals, expenses and
 						billing automatically so you can focus on study, work,
 						and real life.
