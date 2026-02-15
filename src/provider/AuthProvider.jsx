@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/firebase.init';
 
 const AuthProvider = ({ children }) => {
@@ -39,6 +39,14 @@ const AuthProvider = ({ children }) => {
         return signInWithPopup(auth, provider);
     }
 
+    const forUpdateProfile = (Dname, photo) => {
+        return updateProfile(auth.currentUser, {
+            displayName: Dname, photoURL: photo
+        }).then(() => {
+            setUser({ ...auth.currentUser });
+        });
+    }
+
 
     const authData = {
         isLight,
@@ -47,7 +55,8 @@ const AuthProvider = ({ children }) => {
         setUser,
         createUser,
         userLogin,
-        google
+        google,
+        forUpdateProfile
     }
 
     return (<AuthContext value={authData}>

@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import logoImg from '../assets/images/google.svg';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { AuthContext } from '../provider/AuthContext';
+import { toast } from 'react-toastify';
 
 const Signup = () => {
+
+    const { createUser, setUser, google, forUpdateProfile } = use(AuthContext);
+
     const {
         register,
         handleSubmit,
@@ -17,10 +22,32 @@ const Signup = () => {
     const [eye, setEye] = useState(false);
     const [cEye, setCeye] = useState(false);
     const [showTip, setShowTip] = useState(false);
+    const navigate = useNavigate();
 
     const onSubmit = (data) => {
-        console.log(data);
-        // handle signup logic here
+
+        const fullName = `${data.firstName} ${data.lastName}`;
+
+        createUser(data.email, data.password)
+            .then((result) => {
+                const newUser = result.user;
+                setUser(newUser);
+                toast.success('Register successful!');
+
+                // const userToDatabase = { name: data.name, email: data.email, photoURL: data?.photoUrl, role: "Student" };
+
+                // axiosIn.post('/users', userToDatabase).then();
+
+                forUpdateProfile(fullName, data?.photoUrl)
+                    .then(() => {
+                        navigate('/dashboard');
+                    })
+                    .catch((err) => toast.error(err.message));
+            })
+            .catch((error) => {
+                toast.error(error.message);
+            })
+            
     };
 
     return (
@@ -102,7 +129,7 @@ const Signup = () => {
 
 
 
-                    {errors?.password.type === "required" && (
+                    {errors.password?.type == "required" && (
                         <p className="text-sm text-red-500 mt-1">Password is required</p>
                     )}
                     {

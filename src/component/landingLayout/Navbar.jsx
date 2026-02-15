@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import ButtonPrimary from "../common/ButtonPrimary.jsx";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
@@ -6,16 +6,19 @@ import ThemeToggle from "../common/ThemeToggle.jsx";
 import Logo from "../common/Logo.jsx";
 import { Menu, X } from "lucide-react";
 import { Link, NavLink } from "react-router";
+import { AuthContext } from "../../provider/AuthContext.jsx";
 
 const navLinks = [
 	{ href: "/", lable: "Home" },
 	{ href: "/benefits", lable: "Benefits" },
 	{ href: "/about", lable: "About Us" },
 	{ href: "/contact", lable: "Contact" },
+
 ];
 
 const Navbar = () => {
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+	const { user } = use(AuthContext);
 
 	return (
 		<div className="h-16">
@@ -54,7 +57,11 @@ const Navbar = () => {
 								</div>
 								<div className="flex gap-6.25">
 									<ThemeToggle />
-									<Link to="/auth/login"><ButtonPrimary >Get Started</ButtonPrimary></Link>
+									{user ? (
+										<Link to="/dashboard"><ButtonPrimary >Dashboard</ButtonPrimary></Link>
+									) : (
+										<Link to="/auth/login"><ButtonPrimary >Get Started</ButtonPrimary></Link>
+									)}
 								</div>
 							</div>
 						</div>
