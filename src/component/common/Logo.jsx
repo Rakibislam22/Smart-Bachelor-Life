@@ -30,8 +30,7 @@ const Logo = () => {
 		<>
 			<Link to="/">
 
-				<motion.a
-					href="#"
+				<motion.span
 					initial="hidden"
 					whileHover="visible"
 					// StaggerChildren makes "mart", "achelor", "ife" open one after another slightly
@@ -70,7 +69,7 @@ const Logo = () => {
 							ife
 						</motion.span>
 					</div>
-				</motion.a>
+				</motion.span>
 
 			</Link>
 

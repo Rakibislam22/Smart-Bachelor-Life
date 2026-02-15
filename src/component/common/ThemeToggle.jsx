@@ -1,29 +1,15 @@
-import { useEffect, useState } from "react";
+import { use } from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import dark from "../../assets/icons/switch_mode_dark.png";
 import light from "../../assets/icons/switch_mode_light.png";
+import { AuthContext } from "../../provider/AuthContext";
 
 
 
 export default function ThemeToggle() {
-	const [isLight, setIsLight] = useState(() => {
-		if (typeof window !== "undefined") {
-			return localStorage.getItem("theme") === "light";
-		}
-		return false; // Default to dark
-	});
+	const { isLight, setIsLight } = use(AuthContext);
 
-	// 2. Sync DOM and Storage whenever state changes
-	useEffect(() => {
-		if (isLight) {
-			document.documentElement.classList.add("light");
-			localStorage.setItem("theme", "light");
-		} else {
-			document.documentElement.classList.remove("light");
-			localStorage.setItem("theme", "dark");
-		}
-	}, [isLight]); // <--- Dependency ensures this runs when isLight changes
 
 	const toggleTheme = () => {
 		setIsLight((prev) => !prev);
