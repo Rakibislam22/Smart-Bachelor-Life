@@ -21,7 +21,7 @@ const AuthLayout = () => {
                 </div> */}
             </div>
 
-            <div>
+            <div className='mt-15'>
                 <Footer />
             </div>
 

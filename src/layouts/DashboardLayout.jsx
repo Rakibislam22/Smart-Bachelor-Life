@@ -11,7 +11,7 @@ import ThemeToggle from '../component/common/ThemeToggle';
 import { AuthContext } from '../provider/AuthContext';
 
 const DashboardLayout = () => {
-    const { isLight, setIsLight } = use(AuthContext);
+    const { isLight } = use(AuthContext);
 
     return (
         <div>

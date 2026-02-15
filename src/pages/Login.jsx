@@ -1,41 +1,102 @@
-import React from 'react';
-import {Link} from 'react-router'
-import logoImg from '../assets/images/google.svg'
+import React, { useState } from 'react';
+import { Link } from 'react-router';
+import { useForm } from 'react-hook-form';
+import logoImg from '../assets/images/google.svg';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Login = () => {
+    const [eye, setEye] = useState(false);
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors }
+    } = useForm();
+
+    const onSubmit = (data) => {
+        console.log(data);
+        // handle login logic here
+    };
+
     return (
         <div className='text-subtle bg-card p-8 rounded-3xl border-gray-100 shadow-md '>
             <h1 className='text-4xl font-semibold'>Welcome</h1>
-            <p className='mt-1 text-sm md:text-base font-medium text-gray-500'>please enter your login credentials</p>
-            <div className='mt-3'>
+            <p className='mt-1 text-sm md:text-base font-medium text-gray-500'>
+                please enter your login credentials
+            </p>
+
+            <form onSubmit={handleSubmit(onSubmit)} className='mt-3'>
                 <div className='pb-3'>
                     <label className='font-medium'>Email</label>
-                    <input className="w-full border text-muted-foreground border-gray-100 rounded-xl p-2 mt-1 bg-transparent"type="Email" placeholder='Enter your email'required/>
+                    <input
+                        {...register("email", { required: true })}
+                        className="w-full border text-muted-foreground border-gray-100 rounded-xl p-2 mt-1 bg-transparent"
+                        type="email"
+                        placeholder='Enter your email'
+                    />
+                    {errors.email && (
+                        <p className="text-sm text-red-500 mt-1">Email is required</p>
+                    )}
                 </div>
-                <div>
+
+                <div className='relative'>
                     <label className='font-medium'>Password</label>
-                    <input className="w-full border text-muted-foreground border-gray-100 rounded-xl p-2 mt-1 bg-transparent"type="password" placeholder='Enter your password' required/>
+                    <input
+                        {...register("password", { required: true })}
+                        className="w-full border text-muted-foreground border-gray-100 rounded-xl p-2 mt-1 bg-transparent"
+                        type={eye ? "text" : "password"}
+                        placeholder='Enter your password'
+                    />
+                    {errors.password && (
+                        <p className="text-sm text-red-500 mt-1">Password is required</p>
+                    )}
+                    <span onClick={() => setEye(!eye)} className='absolute right-3 top-10 cursor-pointer z-10'>
+                        {
+                            eye ? <FaEye /> : <FaEyeSlash />
+                        }
+                    </span>
                 </div>
-                <div className='my-4 flex justify-between items-center gap-4'>
-                    <div className='mt-[-28px] ml-2'>
-                        <input type="checkbox" id='remember'/>
-                        <label className='ml-2 text-sm font-medium' for='remember'>Remember for 30 days</label>
+
+                <div className='my-4 flex justify-between items-center gap-15'>
+                    <div className='ml-2'>
+                        <input
+                            {...register("remember")}
+                            type="checkbox"
+                            id='remember'
+                        />
+                        <label className='ml-2 font-medium' htmlFor='remember'>
+                            Remember me
+                        </label>
                     </div>
-                    <button className='font-medium text-base text-violet-500'>Forgot password</button>
+                    <button type="button" className='font-medium text-base text-violet-500'>
+                        Forgot password
+                    </button>
                 </div>
+
                 <div className='mt-8 flex flex-col gap-y-4'>
-                    <button className='active:scale-[.98] active:duration-75 hover:scale-[1.01] transition-all ease-in-out py-3  rounded-xl bg-violet-500 text-white font-bold'>Sign in</button>
-                    <button className='flex items-center justify-center active:scale-[.98] active:duration-75 hover:scale-[1.01] transition-all ease-in-out'>
-                        <img className='mr-2' src={logoImg} alt="google" width='24'/>
-                        Sign in with google 
+                    <button
+                        type="submit"
+                        className='active:scale-[.98] active:duration-75 hover:scale-[1.01] transition-all ease-in-out py-3 rounded-xl bg-violet-500 text-white font-bold'
+                    >
+                        Sign in
                     </button>
-                    <Link to = {"/auth/signup"} className='flex items-center justify-center'>
-                    <button className=' active:scale-[.98] active:duration-75 hover:scale-[1.01] transition-all ease-in-out'>
+
+                    <button
+                        type="button"
+                        className='flex items-center justify-center active:scale-[.98] active:duration-75 hover:scale-[1.01] transition-all ease-in-out'
+                    >
+                        <img className='mr-2' src={logoImg} alt="google" width='24' />
+                        Sign in with google
+                    </button>
+
+                    <Link
+                        to="/auth/signup"
+                        className='flex items-center justify-center hover:underline text-primary'
+                    >
                         Create an account
-                    </button>
                     </Link>
                 </div>
-            </div>
+            </form>
         </div>
     );
 };
