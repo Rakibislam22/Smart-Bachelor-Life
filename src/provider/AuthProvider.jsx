@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/firebase.init';
 
 const AuthProvider = ({ children }) => {
 
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
     const provider = new GoogleAuthProvider();
 
     // for theme toggle
@@ -26,6 +27,18 @@ const AuthProvider = ({ children }) => {
             localStorage.setItem("theme", "dark");
         }
     }, [isLight]); // <--- Dependency ensures this runs when isLight changes
+
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            setLoading(false);
+        })
+
+        return () => {
+            unsubscribe();
+        }
+    }, [])
 
     const createUser = (email, password) => {
         return createUserWithEmailAndPassword(auth, email, password);
@@ -56,7 +69,9 @@ const AuthProvider = ({ children }) => {
         createUser,
         userLogin,
         google,
-        forUpdateProfile
+        forUpdateProfile,
+        loading,
+        setLoading
     }
 
     return (<AuthContext value={authData}>

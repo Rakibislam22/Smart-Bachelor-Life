@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router';
+import React, { use, useState } from 'react';
+import { Link, useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
 import logoImg from '../assets/images/google.svg';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { AuthContext } from '../provider/AuthContext';
+import { toast } from 'react-toastify';
 
 const Login = () => {
+    const { google, userLogin, setUser } = use(AuthContext);
     const [eye, setEye] = useState(false);
+    const navigate = useNavigate();
 
     const {
         register,
@@ -14,8 +18,15 @@ const Login = () => {
     } = useForm();
 
     const onSubmit = (data) => {
-        console.log(data);
-        // handle login logic here
+        userLogin(data.email, data.password).then(result => {
+            setUser(result.user);
+            toast.success('Login successful!');
+            navigate("/dashboard");
+        }).catch(error => {
+            const errorMessage = error.message;
+            toast.error(errorMessage);
+
+        })
     };
 
     return (
