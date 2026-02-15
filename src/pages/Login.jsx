@@ -29,6 +29,22 @@ const Login = () => {
         })
     };
 
+    const handleGoogle = () => {
+        google().then(result => {
+            toast.success('Login successful!');
+            setUser(result.user);
+            navigate("/dashboard");
+            // const newUser = result.user;
+
+            // const userToDatabase = { name: newUser.displayName, email: newUser.email, photoURL: newUser.photoUrl, role: "Student" };
+            // axiosIn.post('/users', userToDatabase).then();
+
+        }).catch(error => {
+            const errorMessage = error.message;
+            toast.error(errorMessage);
+        });
+    }
+
     return (
         <div className='text-subtle bg-card p-8 rounded-3xl border-gray-100 shadow-md '>
             <h1 className='text-4xl font-semibold'>Welcome</h1>
@@ -94,6 +110,7 @@ const Login = () => {
 
                     <button
                         type="button"
+                        onClick={handleGoogle}
                         className='flex items-center justify-center active:scale-[.98] active:duration-75 hover:scale-[1.01] transition-all ease-in-out'
                     >
                         <img className='mr-2' src={logoImg} alt="google" width='24' />
