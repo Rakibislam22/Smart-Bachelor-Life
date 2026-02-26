@@ -10,10 +10,10 @@ import { ToastContainer } from 'react-toastify'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <HaloBackground />
     <AuthProvider>
+      <HaloBackground />
       <RouterProvider router={router} />
     </AuthProvider>
-    <ToastContainer  theme="colorful" position="bottom-right"/>
+    <ToastContainer position="top-center" />
   </StrictMode>,
 )

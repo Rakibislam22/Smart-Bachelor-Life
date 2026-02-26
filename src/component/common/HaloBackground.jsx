@@ -1,53 +1,59 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, use } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { AuthContext } from "../../provider/AuthContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const HaloBackground = () => {
 	const mountRef = useRef(null);
+	const cleanupRef = useRef(null);
+	const { isLight } = use(AuthContext);
 
 	useEffect(() => {
 
-		/* -------------------- SAFE REF CAPTURE -------------------- */
-		const mount = mountRef.current;
-		if (!mount) return;
+		// Wait for DOM to be fully ready before initializing Three.js
+		const timeoutId = setTimeout(() => {
 
-		/* -------------------- COLORS FROM CSS -------------------- */
-		const style = getComputedStyle(document.documentElement);
+			/* -------------------- SAFE REF CAPTURE -------------------- */
+			const mount = mountRef.current;
+			if (!mount) return;
 
-		const primColor = new THREE.Color(
-			style.getPropertyValue("--color-prim").trim() || "#8956fc"
-		);
+			/* -------------------- COLORS FROM CSS -------------------- */
+			const style = getComputedStyle(document.documentElement);
 
-		const highColor = new THREE.Color(
-			style.getPropertyValue("--color-high").trim() || "#0ea5e9"
-		);
+			const primColor = new THREE.Color(
+				style.getPropertyValue("--color-prim").trim() || "#8956fc"
+			);
 
-		/* -------------------- SCENE -------------------- */
-		const scene = new THREE.Scene();
+			const highColor = new THREE.Color(
+				style.getPropertyValue("--color-high").trim() || "#0ea5e9"
+			);
 
-		const camera = new THREE.PerspectiveCamera(
-			75,
-			window.innerWidth / window.innerHeight,
-			0.1,
-			1000
-		);
+			/* -------------------- SCENE -------------------- */
+			const scene = new THREE.Scene();
 
-		const renderer = new THREE.WebGLRenderer({
-			antialias: true,
-			alpha: true,
-			powerPreference: "high-performance",
-		});
+			const camera = new THREE.PerspectiveCamera(
+				75,
+				window.innerWidth / window.innerHeight,
+				0.1,
+				1000
+			);
 
-		renderer.setSize(window.innerWidth, window.innerHeight);
-		renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+			const renderer = new THREE.WebGLRenderer({
+				antialias: true,
+				alpha: true,
+				powerPreference: "high-performance",
+			});
 
-		mount.appendChild(renderer.domElement);
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-		/* -------------------- SHADERS -------------------- */
-		const vertexShader = `
+			mount.appendChild(renderer.domElement);
+
+			/* -------------------- SHADERS -------------------- */
+			const vertexShader = `
 			varying vec2 vUv;
 			varying float vZ;
 			uniform float uTime;
@@ -65,7 +71,7 @@ const HaloBackground = () => {
 			}
 		`;
 
-		const fragmentShader = `
+			const fragmentShader = `
 			varying vec2 vUv;
 			varying float vZ;
 			uniform float uTime;
@@ -84,93 +90,107 @@ const HaloBackground = () => {
 			}
 		`;
 
-		/* -------------------- GEOMETRY -------------------- */
-		const geometry = new THREE.PlaneGeometry(20, 12, 128, 128);
+			/* -------------------- GEOMETRY -------------------- */
+			const geometry = new THREE.PlaneGeometry(20, 12, 128, 128);
 
-		const material = new THREE.ShaderMaterial({
-			vertexShader,
-			fragmentShader,
-			uniforms: {
-				uTime: { value: 0 },
-				uColorPrim: { value: primColor },
-				uColorHigh: { value: highColor },
-			},
-			transparent: true,
-			side: THREE.DoubleSide,
-		});
+			const material = new THREE.ShaderMaterial({
+				vertexShader,
+				fragmentShader,
+				uniforms: {
+					uTime: { value: 0 },
+					uColorPrim: { value: primColor },
+					uColorHigh: { value: highColor },
+				},
+				transparent: true,
+				side: THREE.DoubleSide,
+			});
 
-		const mesh = new THREE.Mesh(geometry, material);
-		mesh.rotation.x = -Math.PI / 4;
-		mesh.position.y = 2;
-		scene.add(mesh);
+			const mesh = new THREE.Mesh(geometry, material);
+			mesh.rotation.x = -Math.PI / 4;
+			mesh.position.y = 2;
+			scene.add(mesh);
 
-		camera.position.z = 10;
+			camera.position.z = 10;
 
-		/* -------------------- ANIMATION -------------------- */
-		const clock = new THREE.Clock();
-		let animationId;
+			/* -------------------- ANIMATION -------------------- */
+			const clock = new THREE.Clock();
+			let animationId;
 
-		const animate = () => {
-			material.uniforms.uTime.value = clock.getElapsedTime() * 0.4;
-			renderer.render(scene, camera);
-			animationId = requestAnimationFrame(animate);
-		};
+			const animate = () => {
+				material.uniforms.uTime.value = clock.getElapsedTime() * 0.4;
+				renderer.render(scene, camera);
+				animationId = requestAnimationFrame(animate);
+			};
 
-		animate();
+			animate();
 
-		/* -------------------- SCROLL ANIMATION -------------------- */
-		const scrollTween = gsap.to(mesh.rotation, {
-			z: Math.PI * 0.5,
-			x: -Math.PI / 8,
-			ease: "none",
-			scrollTrigger: {
-				trigger: document.documentElement,
-				start: "top top",
-				end: "bottom bottom",
-				scrub: 2,
-			},
-		});
+			/* -------------------- SCROLL ANIMATION -------------------- */
+			const scrollTween = gsap.to(mesh.rotation, {
+				z: Math.PI * 0.5,
+				x: -Math.PI / 8,
+				ease: "none",
+				scrollTrigger: {
+					trigger: document.documentElement,
+					start: "top top",
+					end: "bottom bottom",
+					scrub: 2,
+				},
+			});
 
-		// Fix SPA height calculation
-		setTimeout(() => ScrollTrigger.refresh(), 100);
+			// Fix SPA height calculation
+			setTimeout(() => ScrollTrigger.refresh(), 100);
 
-		/* -------------------- RESIZE -------------------- */
-		const handleResize = () => {
-			const width = window.innerWidth;
-			const height = window.innerHeight;
+			/* -------------------- RESIZE -------------------- */
+			const handleResize = () => {
+				const width = window.innerWidth;
+				const height = window.innerHeight;
 
-			camera.aspect = width / height;
-			camera.updateProjectionMatrix();
-			renderer.setSize(width, height);
-		};
+				camera.aspect = width / height;
+				camera.updateProjectionMatrix();
+				renderer.setSize(width, height);
+			};
 
-		window.addEventListener("resize", handleResize);
+			window.addEventListener("resize", handleResize);
 
-		/* -------------------- CLEANUP (VERY IMPORTANT) -------------------- */
+			/* -------------------- CLEANUP (VERY IMPORTANT) -------------------- */
+			const cleanup = () => {
+
+				window.removeEventListener("resize", handleResize);
+
+				// stop animation loop
+				cancelAnimationFrame(animationId);
+
+				// kill GSAP + ScrollTrigger
+				scrollTween.kill();
+				ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+
+				// remove canvas safely
+				if (mount.contains(renderer.domElement)) {
+					mount.removeChild(renderer.domElement);
+				}
+
+				// dispose GPU resources
+				geometry.dispose();
+				material.dispose();
+				renderer.dispose();
+
+			};
+
+			// Store cleanup for later
+			cleanupRef.current = cleanup;
+
+		}, 100); // Wait 100ms for DOM to be ready
+
+		// Return cleanup function for useEffect
 		return () => {
-
-			window.removeEventListener("resize", handleResize);
-
-			// stop animation loop
-			cancelAnimationFrame(animationId);
-
-			// kill GSAP + ScrollTrigger
-			scrollTween.kill();
-			ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-
-			// remove canvas safely
-			if (mount.contains(renderer.domElement)) {
-				mount.removeChild(renderer.domElement);
+			clearTimeout(timeoutId); // Clean up timeout if component unmounts
+			if (cleanupRef.current) {
+				cleanupRef.current();
+				cleanupRef.current = null;
 			}
-
-			// dispose GPU resources
-			geometry.dispose();
-			material.dispose();
-			renderer.dispose();
-
 		};
 
-	}, []);
+	}, [isLight]);
 
 	return (
 		<div
