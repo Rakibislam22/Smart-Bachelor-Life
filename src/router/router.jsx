@@ -8,6 +8,7 @@ import Benefits from "../pages/Benefits";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
 import DashboardLayout from "../layouts/DashboardLayout";
+import PrivateRoute from "./PrivateRoute";
 
 const router = createBrowserRouter([
     {
@@ -48,7 +49,7 @@ const router = createBrowserRouter([
     },
     {
         path: "/dashboard",
-        element: <DashboardLayout />,
+        element: <PrivateRoute><DashboardLayout /></PrivateRoute>,
     }
 ]);
 
