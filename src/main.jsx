@@ -14,6 +14,6 @@ createRoot(document.getElementById('root')).render(
       <HaloBackground />
       <RouterProvider router={router} />
     </AuthProvider>
-    <ToastContainer theme="colorful" position="top-center" />
+    <ToastContainer position="top-center" />
   </StrictMode>,
 )
