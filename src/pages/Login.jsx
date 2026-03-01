@@ -21,7 +21,7 @@ const Login = () => {
         userLogin(data.email, data.password).then(result => {
             setUser(result.user);
             toast.success('Login successful!');
-            navigate("/dashboard");
+            navigate("/group-selection");
         }).catch(error => {
             const errorMessage = error.message;
             toast.error(errorMessage);
@@ -33,7 +33,7 @@ const Login = () => {
         google().then(result => {
             toast.success('Login successful!');
             setUser(result.user);
-            navigate("/dashboard");
+            navigate("/group-selection");
             // const newUser = result.user;
 
             // const userToDatabase = { name: newUser.displayName, email: newUser.email, photoURL: newUser.photoUrl, role: "Student" };

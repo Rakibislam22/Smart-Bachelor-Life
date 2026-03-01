@@ -9,6 +9,7 @@ import About from "../pages/About";
 import Contact from "../pages/Contact";
 import DashboardLayout from "../layouts/DashboardLayout";
 import PrivateRoute from "./PrivateRoute";
+import GroupSelection from "../pages/GroupSelection";
 
 const router = createBrowserRouter([
     {
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
                 element: <Signup />,
             }
         ]
+    },
+    {
+        path: "/group-selection",
+        element: <GroupSelection />,
     },
     {
         path: "/dashboard",

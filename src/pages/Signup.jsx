@@ -40,7 +40,7 @@ const Signup = () => {
 
                 forUpdateProfile(fullName, data?.photoUrl)
                     .then(() => {
-                        navigate('/dashboard');
+                        navigate('/group-selection');
                     })
                     .catch((err) => toast.error(err.message));
             })
@@ -55,7 +55,7 @@ const Signup = () => {
         google().then(result => {
             toast.success('Login successful!');
             setUser(result.user);
-            navigate("/dashboard");
+            navigate("/group-selection");
             // const newUser = result.user;
 
             // const userToDatabase = { name: newUser.displayName, email: newUser.email, photoURL: newUser.photoUrl, role: "Student" };
