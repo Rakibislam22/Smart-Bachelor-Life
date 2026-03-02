@@ -1,7 +1,6 @@
 import React, { use, useState } from 'react';
 import Logo from '../component/common/Logo';
-import { Link } from 'react-router';
-import { FcBarChart, FcCalendar, FcDebt } from 'react-icons/fc';
+import { Link, Outlet, useLocation } from 'react-router';
 import { TbCoinTakaFilled } from 'react-icons/tb';
 import { MdOutlineRestaurantMenu } from 'react-icons/md';
 import { FaAmazonPay, FaCartPlus } from 'react-icons/fa';
@@ -17,6 +16,7 @@ const DashboardLayout = () => {
     const [showGroupModal, setShowGroupModal] = useState(false);
     const [showJoinForm, setShowJoinForm] = useState(false);
     const [groupCode, setGroupCode] = useState('');
+    const location = useLocation();
 
     const handleCreateGroup = () => {
         setUserRole('manager');
@@ -45,19 +45,13 @@ const DashboardLayout = () => {
             return (
                 <>
                     <li>
-                        <Link to="/" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Homepage">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
-                            <span className="is-drawer-close:hidden">Homepage</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Analytics">
-                            <FcBarChart className="my-1.5 inline-block size-6" />
+                        <Link to="/dashboard" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Analytics">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
                             <span className="is-drawer-close:hidden">Analytics</span>
                         </Link>
                     </li>
                     <li>
-                        <Link className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Manage Members">
+                        <Link to="/dashboard/members" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Manage Members">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
@@ -65,40 +59,46 @@ const DashboardLayout = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Meal Calendar">
-                            <FcCalendar className="my-1.5 inline-block size-6" />
+                        <Link to="/dashboard/meal" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Meal Calendar">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path><path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path></svg>
                             <span className="is-drawer-close:hidden">Meal Calendar</span>
                         </Link>
                     </li>
                     <li>
-                        <Link className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Meal Expense">
-                            <FcDebt className="my-1.5 inline-block size-6" />
+                        <Link to="/dashboard/meal-expense" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Meal Expense">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M16 8V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"></path><path d="M12 11v10"></path><path d="M8 11h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"></path></svg>
                             <span className="is-drawer-close:hidden">Meal Expense</span>
                         </Link>
                     </li>
                     <li>
-                        <Link className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Total Expense">
+                        <Link to="/dashboard/total-expense" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Total Expense">
                             <TbCoinTakaFilled className="my-1.5 inline-block size-6" />
                             <span className="is-drawer-close:hidden">Total Expense</span>
                         </Link>
                     </li>
                     <li>
-                        <Link className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Daily Menu">
+                        <Link to="/dashboard/menu" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Daily Menu">
                             <MdOutlineRestaurantMenu className="my-1.5 inline-block size-6" />
                             <span className="is-drawer-close:hidden">Daily Menu</span>
                         </Link>
                     </li>
                     <li>
-                        <Link className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Bazar">
+                        <Link to="/dashboard/bazar" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Bazar">
                             <FaCartPlus className="my-1.5 inline-block size-6" />
                             <span className="is-drawer-close:hidden">Bazar</span>
                         </Link>
                     </li>
                     <li>
-                        <Link className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Payment & Receipt">
+                        <Link to="/dashboard/payment" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Payment & Receipt">
                             <FaAmazonPay className="my-1.5 inline-block size-6" />
                             <span className="is-drawer-close:hidden">Payment & Receipt</span>
                         </Link>
+                    </li>
+                    <li>
+                        <button onClick={handleOpenGroupModal} className={` is-drawer-close:tooltip is-drawer-close:tooltip-right min-w-18 h-full px-2 ${isLight ? 'text-gray-600' : 'text-gray-400'}`} data-tip="Settings">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-6"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <span className="is-drawer-close:hidden">Settings</span>
+                        </button>
                     </li>
                 </>
             );
@@ -107,40 +107,40 @@ const DashboardLayout = () => {
             return (
                 <>
                     <li>
-                        <Link to="/" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Homepage">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
-                            <span className="is-drawer-close:hidden">Homepage</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Dashboard">
-                            <FcBarChart className="my-1.5 inline-block size-6" />
+                        <Link to="/dashboard" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Dashboard">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
                             <span className="is-drawer-close:hidden">My Dashboard</span>
                         </Link>
                     </li>
                     <li>
-                        <Link className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Meal Calendar">
-                            <FcCalendar className="my-1.5 inline-block size-6" />
+                        <Link to="/dashboard/meal" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Meal Calendar">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path><path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path></svg>
                             <span className="is-drawer-close:hidden">Meal Calendar</span>
                         </Link>
                     </li>
                     <li>
-                        <Link className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Expenses">
-                            <FcDebt className="my-1.5 inline-block size-6" />
+                        <Link to="/dashboard/meal-expense" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Expenses">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M16 8V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"></path><path d="M12 11v10"></path><path d="M8 11h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"></path></svg>
                             <span className="is-drawer-close:hidden">My Expenses</span>
                         </Link>
                     </li>
                     <li>
-                        <Link className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Daily Menu">
+                        <Link to="/dashboard/menu" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Daily Menu">
                             <MdOutlineRestaurantMenu className="my-1.5 inline-block size-6" />
                             <span className="is-drawer-close:hidden">Daily Menu</span>
                         </Link>
                     </li>
                     <li>
-                        <Link className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Make Payment">
+                        <Link to="/dashboard/payment" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Make Payment">
                             <FaAmazonPay className="my-1.5 inline-block size-6" />
                             <span className="is-drawer-close:hidden">Make Payment</span>
                         </Link>
+                    </li>
+                    <li>
+                        <button onClick={handleOpenGroupModal} className={` is-drawer-close:tooltip is-drawer-close:tooltip-right min-w-18 h-full px-2 ${isLight ? 'text-gray-600' : 'text-gray-400'}`} data-tip="Settings">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-6"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <span className="is-drawer-close:hidden">Settings</span>
+                        </button>
                     </li>
                 </>
             );
@@ -151,15 +151,15 @@ const DashboardLayout = () => {
         <div>
             <div className="drawer lg:drawer-open">
                 <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
-                <div className="drawer-content">
+                <div className="drawer-content relative">
                     {/* Navbar */}
                     <nav className={`navbar w-full  ${isLight ? 'bg-[#eeeeee]' : 'bg-[#15191e]'}`}>
-                        <label htmlFor="my-drawer-4" aria-label="open sidebar" className="btn btn-square btn-ghost">
+                        <label htmlFor="my-drawer-4" aria-label="open sidebar" className="hidden lg:inline-flex btn btn-square btn-ghost">
                             {/* Sidebar toggle icon */}
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path><path d="M9 4v16"></path><path d="M14 10l2 2l-2 2"></path></svg>
                         </label>
                         <div className='flex justify-between items-center w-full px-2'>
-                            <div className="px-4 "> <Logo></Logo></div>
+                            <div className=" "> <Logo></Logo></div>
 
                             <div className='flex justify-center items-center gap-5'>
                                 <ThemeToggle />
@@ -170,46 +170,16 @@ const DashboardLayout = () => {
                         </div>
                     </nav>
                     {/* Page content here */}
-                    <div className="p-2 sm:p-4">
-                        {userRole === 'manager' ? (
-                            <div>
-                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4">
-                                    <h2 className={`text-xl sm:text-2xl font-bold ${isLight ? 'text-gray-800' : 'text-white'}`}>
-                                        Manager Dashboard
-                                    </h2>
-                                    <button
-                                        onClick={handleOpenGroupModal}
-                                        className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg ${isLight ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' : 'bg-gray-700 hover:bg-gray-600 text-white'} transition-colors`}
-                                    >
-                                        Change Group
-                                    </button>
-                                </div>
-                                <div className={`p-3 sm:p-4 rounded-lg ${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-900 border-blue-700'} border`}>
-                                    <p className={`text-sm sm:text-base ${isLight ? 'text-gray-700' : 'text-gray-200'}`}>
-                                        Welcome, Manager! You have full control over group management, expenses, and all other features.
-                                    </p>
-                                </div>
-                            </div>
-                        ) : (
-                            <div>
-                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4">
-                                    <h2 className={`text-xl sm:text-2xl font-bold ${isLight ? 'text-gray-800' : 'text-white'}`}>
-                                        User Dashboard
-                                    </h2>
-                                    <button
-                                        onClick={handleOpenGroupModal}
-                                        className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg ${isLight ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' : 'bg-gray-700 hover:bg-gray-600 text-white'} transition-colors`}
-                                    >
-                                        Change Group
-                                    </button>
-                                </div>
-                                <div className={`p-3 sm:p-4 rounded-lg ${isLight ? 'bg-green-50 border-green-200' : 'bg-green-900 border-green-700'} border`}>
-                                    <p className={`text-sm sm:text-base ${isLight ? 'text-gray-700' : 'text-gray-200'}`}>
-                                        Welcome! You can view your expenses, meals, and make payments here.
-                                    </p>
-                                </div>
-                            </div>
-                        )}
+                    <div className="p-2 sm:p-4 pb-20 lg:pb-4">{/* Extra bottom padding for mobile nav */}
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4">
+
+                        </div>
+
+                        {/* Meal Sections - Stacked on Mobile, Side by Side on PC */}
+
+                        <div>
+                            <Outlet></Outlet>
+                        </div>
 
                         {/* Group Management Modal */}
                         {showGroupModal && (
@@ -349,9 +319,101 @@ const DashboardLayout = () => {
                             </div>
                         )}
                     </div>
+
+                    {/* Bottom Navigation Bar - Mobile Only */}
+                    <nav className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t ${isLight ? 'bg-white border-gray-200' : 'bg-gray-900 border-gray-700'} shadow-lg`}>
+                        <div className="relative h-16">
+                            {/* Left Scroll Indicator */}
+                            <div className={`absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center pointer-events-none z-10 ${isLight ? 'bg-linear-to-r from-white to-transparent' : 'bg-linear-to-r from-gray-900 to-transparent'}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className={`size-4 ${isLight ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </div>
+
+                            {/* Scrollable Navigation Items */}
+                            <div className="flex items-center h-full overflow-x-auto scrollbar-hide px-2 gap-1">
+                                {userRole === 'manager' ? (
+                                    <>
+                                        <Link to="/dashboard" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-5"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Analytics</span>
+                                        </Link>
+                                        <Link to="/dashboard/members" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/members' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                            </svg>
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Members</span>
+                                        </Link>
+                                        <Link to="/dashboard/meal" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/meal' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-5"><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path><path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path></svg>
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Meals</span>
+                                        </Link>
+                                        <Link to="/dashboard/meal-expense" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/meal-expense' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-5"><path d="M16 8V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"></path><path d="M12 11v10"></path><path d="M8 11h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"></path></svg>
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">M.Expense</span>
+                                        </Link>
+                                        <Link to="/dashboard/total-expense" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/total-expense' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <TbCoinTakaFilled className="size-5" />
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">T.Expense</span>
+                                        </Link>
+                                        <Link to="/dashboard/menu" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/menu' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <MdOutlineRestaurantMenu className="size-5" />
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Menu</span>
+                                        </Link>
+                                        <Link to="/dashboard/bazar" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/bazar' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <FaCartPlus className="size-5" />
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Bazar</span>
+                                        </Link>
+                                        <Link to="/dashboard/payment" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/payment' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <FaAmazonPay className="size-5" />
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Payment</span>
+                                        </Link>
+                                        <button onClick={handleOpenGroupModal} className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-5"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Settings</span>
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link to="/dashboard" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-5"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Dashboard</span>
+                                        </Link>
+                                        <Link to="/dashboard/meal" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/meal' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-5"><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path><path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path></svg>
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Calendar</span>
+                                        </Link>
+                                        <Link to="/dashboard/meal-expense" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/meal-expense' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-5"><path d="M16 8V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"></path><path d="M12 11v10"></path><path d="M8 11h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"></path></svg>
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Expenses</span>
+                                        </Link>
+                                        <Link to="/dashboard/menu" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/menu' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <MdOutlineRestaurantMenu className="size-5" />
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Menu</span>
+                                        </Link>
+                                        <Link to="/dashboard/payment" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/payment' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <FaAmazonPay className="size-5" />
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Payment</span>
+                                        </Link>
+                                        <button onClick={handleOpenGroupModal} className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-5"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Settings</span>
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Right Scroll Indicator */}
+                            <div className={`absolute right-0 top-0 bottom-0 w-8 flex items-center justify-center pointer-events-none z-10 ${isLight ? 'bg-linear-to-l from-white to-transparent' : 'bg-linear-to-l from-gray-900 to-transparent'}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className={`size-4 ${isLight ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </nav>
                 </div>
 
-                <div className="drawer-side is-drawer-close:overflow-visible">
+                <div className="drawer-side is-drawer-close:overflow-visible hidden lg:block">
                     <label htmlFor="my-drawer-4" aria-label="close sidebar" className="drawer-overlay"></label>
                     <div className={`${isLight ? 'bg-[#e5e7eb]' : 'bg-[#191e24]'} flex min-h-full flex-col items-start is-drawer-close:w-16 is-drawer-open:w-64`}>
                         {/* Sidebar content here */}

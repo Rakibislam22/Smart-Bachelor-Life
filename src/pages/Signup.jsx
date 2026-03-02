@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { AuthContext } from '../provider/AuthContext';
 import { toast } from 'react-toastify';
+import ButtonPrimary from '../component/common/ButtonPrimary';
 
 const Signup = () => {
 
@@ -68,57 +69,57 @@ const Signup = () => {
     }
 
     return (
-        <div className='bg-card p-8 rounded-3xl shadow-md'>
-            <h1 className='text-3xl font-semibold'>Sign up</h1>
-            <p className='font-medium text-gray-500'>Please enter the required details</p>
+        <div className='bg-card p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-md w-full max-w-md'>
+            <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold'>Sign up</h1>
+            <p className='font-medium text-xs sm:text-sm text-gray-500'>Please enter the required details</p>
 
-            <form onSubmit={handleSubmit(onSubmit)} className='mt-6 space-y-2 relative'>
-                <div className='flex justify-between items-center'>
-                    <div className='mr-4'>
-                        <label className='text-lg font-medium'>First Name</label>
+            <form onSubmit={handleSubmit(onSubmit)} className='mt-4 sm:mt-6 space-y-3 sm:space-y-4 relative'>
+                <div className='flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4'>
+                    <div className='w-full sm:flex-1'>
+                        <label className='text-sm sm:text-base font-medium'>First Name</label>
                         <input
                             {...register("firstName", { required: true })}
-                            className="w-full border text-muted-foreground border-gray-100 rounded-xl p-3 mt-1 bg-transparent"
+                            className="w-full border text-muted-foreground border-gray-100 rounded-lg sm:rounded-xl p-2.5 sm:p-3 mt-1 bg-transparent text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                             type="text"
                             placeholder='Enter your first name'
                         />
                         {errors.firstName && (
-                            <p className="text-sm text-red-500 mt-1">First name is required</p>
+                            <p className="text-xs sm:text-sm text-red-500 mt-1">First name is required</p>
                         )}
                     </div>
 
-                    <div>
-                        <label className='text-lg font-medium'>Last Name</label>
+                    <div className='w-full sm:flex-1'>
+                        <label className='text-sm sm:text-base font-medium'>Last Name</label>
                         <input
                             {...register("lastName", { required: true })}
-                            className="w-full border text-muted-foreground border-gray-100 rounded-xl p-3 mt-1 bg-transparent"
+                            className="w-full border text-muted-foreground border-gray-100 rounded-lg sm:rounded-xl p-2.5 sm:p-3 mt-1 bg-transparent text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                             type="text"
                             placeholder='Enter your last name'
                         />
                         {errors.lastName && (
-                            <p className="text-sm text-red-500 mt-1">Last name is required</p>
+                            <p className="text-xs sm:text-sm text-red-500 mt-1">Last name is required</p>
                         )}
                     </div>
                 </div>
 
                 <div>
-                    <label className='text-lg font-medium'>Email</label>
+                    <label className='text-sm sm:text-base font-medium'>Email</label>
                     <input
                         {...register("email", { required: true })}
-                        className="w-full border text-muted-foreground border-gray-100 rounded-xl p-3 mt-1 bg-transparent"
+                        className="w-full border text-muted-foreground border-gray-100 rounded-lg sm:rounded-xl p-2.5 sm:p-3 mt-1 bg-transparent text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                         type="email"
                         placeholder='Enter your email'
                     />
                     {errors.email && (
-                        <p className="text-sm text-red-500 mt-1">Email is required</p>
+                        <p className="text-xs sm:text-sm text-red-500 mt-1">Email is required</p>
                     )}
 
                 </div>
 
                 {showTip && (
-                    <div className="absolute top-4 z-20 mt-2 w-full bg-gray-900 text-white text-sm rounded-xl p-3 shadow-lg">
-                        <p className="font-semibold mb-1">Password must contain:</p>
-                        <ul className="list-disc list-inside space-y-1 text-gray-300">
+                    <div className="absolute left-0 right-0 top-4 z-20 mt-2 mx-2 sm:mx-0 bg-gray-900 text-white text-xs sm:text-sm rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-xl">
+                        <p className="font-semibold mb-1.5 sm:mb-2">Password must contain:</p>
+                        <ul className="list-disc list-inside space-y-0.5 sm:space-y-1 text-gray-300">
                             <li>At least 6 characters</li>
                             <li>One uppercase letter (A-Z)</li>
                             <li>One lowercase letter (a-z)</li>
@@ -129,74 +130,74 @@ const Signup = () => {
                 )}
 
                 <div className='relative'>
-                    <label className='text-lg font-medium'>Password</label>
+                    <label className='text-sm sm:text-base font-medium'>Password</label>
                     <input
                         {...register("password", { required: true, pattern: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{6,}$/ })}
-                        className="w-full border text-muted-foreground border-gray-100 rounded-xl p-3 mt-1 bg-transparent"
+                        className="w-full border text-muted-foreground border-gray-100 rounded-lg sm:rounded-xl p-2.5 sm:p-3 mt-1 bg-transparent text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                         type={eye ? "text" : "password"}
                         placeholder='Enter your password'
                         onFocus={() => setShowTip(true)}
                         onBlur={() => setShowTip(false)}
                     />
-                    <span onClick={() => setEye(!eye)} className='absolute right-3 top-12 cursor-pointer z-10'>
+                    <span onClick={() => setEye(!eye)} className='absolute right-3 top-9 sm:top-10 cursor-pointer z-10 text-gray-500 hover:text-gray-700 p-1'>
                         {
-                            eye ? <FaEye /> : <FaEyeSlash />
+                            eye ? <FaEye className='w-4 h-4 sm:w-5 sm:h-5' /> : <FaEyeSlash className='w-4 h-4 sm:w-5 sm:h-5' />
                         }
                     </span>
 
 
 
                     {errors.password?.type == "required" && (
-                        <p className="text-sm text-red-500 mt-1">Password is required</p>
+                        <p className="text-xs sm:text-sm text-red-500 mt-1">Password is required</p>
                     )}
                     {
-                        errors.password?.type === "pattern" && <p className=" text-red-500 text-sm mt-1">Password must be at least 6 characters and include uppercase, lowercase, number, and special character.</p>
+                        errors.password?.type === "pattern" && <p className="text-red-500 text-xs sm:text-sm mt-1">Password must be at least 6 characters and include uppercase, lowercase, number, and special character.</p>
                     }
                 </div>
 
                 <div className='relative'>
-                    <label className='text-lg font-medium'>Confirm Password</label>
+                    <label className='text-sm sm:text-base font-medium'>Confirm Password</label>
                     <input
                         {...register("confirmPassword", {
                             required: true,
                             validate: value => value === password
                         })}
-                        className="w-full border text-muted-foreground border-gray-100 rounded-xl p-3 mt-1 bg-transparent"
+                        className="w-full border text-muted-foreground border-gray-100 rounded-lg sm:rounded-xl p-2.5 sm:p-3 mt-1 bg-transparent text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                         type={cEye ? "text" : "password"}
                         placeholder='Confirm password'
                     />
-                    <span onClick={() => setCeye(!cEye)} className='absolute right-3 top-12 cursor-pointer z-10'>
+                    <span onClick={() => setCeye(!cEye)} className='absolute right-3 top-9 sm:top-10 cursor-pointer z-10 text-gray-500 hover:text-gray-700 p-1'>
                         {
-                            cEye ? <FaEye /> : <FaEyeSlash />
+                            cEye ? <FaEye className='w-4 h-4 sm:w-5 sm:h-5' /> : <FaEyeSlash className='w-4 h-4 sm:w-5 sm:h-5' />
                         }
                     </span>
                     {errors.confirmPassword?.type === "required" && (
-                        <p className="text-sm text-red-500 mt-1">Confirm password is required</p>
+                        <p className="text-xs sm:text-sm text-red-500 mt-1">Confirm password is required</p>
                     )}
                     {errors.confirmPassword?.type === "validate" && (
-                        <p className="text-sm text-red-500 mt-1">Confirm passwords and Password did not match</p>
+                        <p className="text-xs sm:text-sm text-red-500 mt-1">Passwords do not match</p>
                     )}
                 </div>
 
-                <div className='mt-8 flex flex-col gap-y-4'>
-                    <button
+                <div className='mt-6 sm:mt-8 flex flex-col gap-y-3 sm:gap-y-4'>
+                    <ButtonPrimary
                         type="submit"
-                        className='active:scale-[.98] active:duration-75 hover:scale-[1.01] transition-all ease-in-out py-3 rounded-xl bg-primary text-white text-lg font-bold'
+                        className="w-full"
                     >
                         Sign Up
-                    </button>
+                    </ButtonPrimary>
 
                     <button
                         type="button"
                         onClick={handleGoogle}
-                        className='flex items-center justify-center active:scale-[.98] active:duration-75 hover:scale-[1.01] transition-all ease-in-out'
+                        className='flex items-center justify-center active:scale-[.98] active:duration-75 hover:scale-[1.01] transition-all ease-in-out py-2.5 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-lg sm:rounded-xl bg-white dark:bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm sm:text-base font-medium'
                     >
-                        <img className='mr-2' src={logoImg} alt="google" width='24' />
-                        Sign in with google
+                        <img className='mr-2 w-5 h-5 sm:w-6 sm:h-6' src={logoImg} alt="google" />
+                        Sign in with Google
                     </button>
 
-                    <Link to={"/auth/login"} className='flex items-center justify-center'>
-                        Already have an account? <span className='hover:underline pl-2 text-primary'> Login</span>
+                    <Link to={"/auth/login"} className='flex items-center justify-center text-xs sm:text-sm font-medium mt-2'>
+                        Already have an account? <span className='hover:underline pl-1 sm:pl-2 text-primary'> Login</span>
                     </Link>
                 </div>
             </form>
