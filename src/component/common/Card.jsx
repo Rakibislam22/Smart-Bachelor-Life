@@ -2,7 +2,17 @@ import React from "react";
 import "../../index.css";
 import Logo from "./Logo.jsx";
 
-const Card = ({ title, description }) => {
+const Card = ({ title, description, children }) => {
+	// If children are provided, render them directly
+	if (children) {
+		return (
+			<div className="border-border hover:border hover:border-primary rounded-[25px] bg-card backdrop-blur-[5px] shadow-[0_10px_30px_-12px_rgba(7,117,80,0.35)] hover:-translate-y-1 hover:shadow-[0_18px_40px_-10px_rgba(7,117,80,0.45)] transition-all duration-300">
+				{children}
+			</div>
+		);
+	}
+
+	// Otherwise, use the title and description props (original behavior)
 	return (
 		<div>
 			<div className="flex gap-20 left-5 top-4.25 w-83.5 h-101 flex-col justify-between border-border hover:border hover:border-primary rounded-[25px] bg-card backdrop-blur-[5px]  shadow-[0_10px_30px_-12px_rgba(7,117,80,0.35)] hover:-translate-y-1 hover:shadow-[0_18px_40px_-10px_rgba(7,117,80,0.45)] transition-all duration-300 ">

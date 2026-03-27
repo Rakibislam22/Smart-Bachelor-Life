@@ -7,6 +7,10 @@ const AuthProvider = ({ children }) => {
 
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [userRole, setUserRole] = useState(() => {
+        // Check if role exists in localStorage
+        return localStorage.getItem('userRole') || null;
+    });
     const provider = new GoogleAuthProvider();
 
     // for theme toggle
@@ -28,6 +32,14 @@ const AuthProvider = ({ children }) => {
         }
     }, [isLight]); // <--- Dependency ensures this runs when isLight changes
 
+    // Sync userRole with localStorage
+    useEffect(() => {
+        if (userRole) {
+            localStorage.setItem('userRole', userRole);
+        } else {
+            localStorage.removeItem('userRole');
+        }
+    }, [userRole]);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -71,7 +83,9 @@ const AuthProvider = ({ children }) => {
         google,
         forUpdateProfile,
         loading,
-        setLoading
+        setLoading,
+        userRole,
+        setUserRole
     }
 
     return (<AuthContext value={authData}>

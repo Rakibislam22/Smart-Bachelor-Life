@@ -9,7 +9,7 @@ const AuthLayout = () => {
             <div>
                 <Navbar />
             </div>
-            <div className='flex justify-center max-w-7xl mx-auto bg-background-100 w-full h-screen gap-4'>
+            <div className='flex justify-center max-w-7xl mx-auto bg-background-100 w-full min-h-[calc(100vh-4rem)] gap-4 py-0 sm:py-4 md:py-12 px-3'>
 
                 <div className="w-full flex items-center justify-center">
                     <Outlet></Outlet> {/*  its delivered login page when you go to /auth/login and signup page when go to /auth/signup */}
@@ -21,7 +21,7 @@ const AuthLayout = () => {
                 </div> */}
             </div>
 
-            <div className='mt-15'>
+            <div>
                 <Footer />
             </div>
 

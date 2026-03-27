@@ -9,6 +9,15 @@ import About from "../pages/About";
 import Contact from "../pages/Contact";
 import DashboardLayout from "../layouts/DashboardLayout";
 import PrivateRoute from "./PrivateRoute";
+import GroupSelection from "../pages/GroupSelection";
+import MealLayout from "../layouts/MealLayout";
+import DashboardHome from "../pages/dashboard/DashboardHome";
+import ManageMembersPage from "../pages/dashboard/ManageMembersPage";
+import MealExpensePage from "../pages/dashboard/MealExpensePage";
+import TotalExpensePage from "../pages/dashboard/TotalExpensePage";
+import DailyMenuPage from "../pages/dashboard/DailyMenuPage";
+import BazarPage from "../pages/dashboard/BazarPage";
+import PaymentPage from "../pages/dashboard/PaymentPage";
 
 const router = createBrowserRouter([
     {
@@ -48,8 +57,46 @@ const router = createBrowserRouter([
         ]
     },
     {
+        path: "/group-selection",
+        element: <GroupSelection />,
+    },
+    {
         path: "/dashboard",
         element: <PrivateRoute><DashboardLayout /></PrivateRoute>,
+        children: [
+            {
+                index: true,
+                element: <DashboardHome />,
+            },
+            {
+                path: "meal",
+                element: <MealLayout />,
+            },
+            {
+                path: "members",
+                element: <ManageMembersPage />,
+            },
+            {
+                path: "meal-expense",
+                element: <MealExpensePage />,
+            },
+            {
+                path: "total-expense",
+                element: <TotalExpensePage />,
+            },
+            {
+                path: "menu",
+                element: <DailyMenuPage />,
+            },
+            {
+                path: "bazar",
+                element: <BazarPage />,
+            },
+            {
+                path: "payment",
+                element: <PaymentPage />,
+            }
+        ]
     }
 ]);
 
