@@ -43,4 +43,24 @@ async function rejectPayment(paymentID, transactionID, token) {
     });
 }
 
-export { getManagerPayments, getUserPayments, createPayment, confirmPayment, rejectPayment };
+async function createStripeCheckoutSession(amount, token) {
+    return authorizedRequest("/api/payment/stripe/checkout-session", "POST", token, {
+        amount,
+    });
+}
+
+async function confirmStripeSession(sessionId, token) {
+    return authorizedRequest("/api/payment/stripe/confirm-session", "POST", token, {
+        sessionId,
+    });
+}
+
+export {
+    getManagerPayments,
+    getUserPayments,
+    createPayment,
+    confirmPayment,
+    rejectPayment,
+    createStripeCheckoutSession,
+    confirmStripeSession,
+};
