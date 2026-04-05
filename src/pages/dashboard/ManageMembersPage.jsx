@@ -5,6 +5,7 @@ import {
     changeGroupUserRole,
     getManagerGroupDetails,
     removeGroupUser,
+    revokeGroupInvite,
     sendJoinCodeInvites,
 } from '../../utils/groupApi';
 
@@ -13,11 +14,13 @@ const ManageMembersPage = () => {
     const normalizedRole = userRole ? userRole.toLowerCase() : null;
 
     const [members, setMembers] = useState([]);
+    const [pendingInvites, setPendingInvites] = useState([]);
     const [inviteEmail, setInviteEmail] = useState('');
     const [inviteCode, setInviteCode] = useState('');
     const [lastInviteResult, setLastInviteResult] = useState({ sent: [], failed: [] });
     const [isLoading, setIsLoading] = useState(false);
     const [isInviting, setIsInviting] = useState(false);
+    const [isRevoking, setIsRevoking] = useState('');
 
     const loadGroupDetails = useCallback(async () => {
         if (!user || normalizedRole !== 'manager') {
@@ -40,7 +43,18 @@ const ManageMembersPage = () => {
                 status: 'Active',
             }));
 
+            const memberEmails = new Set(
+                mappedMembers
+                    .map((member) => (typeof member.email === 'string' ? member.email.toLowerCase() : ''))
+                    .filter(Boolean)
+            );
+
+            const pendingEmails = (group?.invitedEmails || [])
+                .map((email) => (typeof email === 'string' ? email.trim() : ''))
+                .filter((email) => email && !memberEmails.has(email.toLowerCase()));
+
             setMembers(mappedMembers);
+            setPendingInvites(pendingEmails);
         } catch (error) {
             toast.error(error.message || 'Failed to load group members');
         } finally {
@@ -102,6 +116,24 @@ const ManageMembersPage = () => {
             await loadGroupDetails();
         } catch (error) {
             toast.error(error.message || 'Failed to remove member');
+        }
+    };
+
+    const handleRevokeInvite = async (email) => {
+        if (!user || !email) {
+            return;
+        }
+
+        try {
+            setIsRevoking(email);
+            const token = await user.getIdToken();
+            await revokeGroupInvite(email, token);
+            toast.success('Invite revoked successfully');
+            await loadGroupDetails();
+        } catch (error) {
+            toast.error(error.message || 'Failed to revoke invite');
+        } finally {
+            setIsRevoking('');
         }
     };
 
@@ -176,7 +208,7 @@ const ManageMembersPage = () => {
                                 </tr>
                             )}
 
-                            {!isLoading && members.length === 0 && (
+                            {!isLoading && members.length === 0 && pendingInvites.length === 0 && (
                                 <tr>
                                     <td colSpan={normalizedRole === 'manager' ? 5 : 4} className="px-4 py-4 text-sm">
                                         No members found.
@@ -208,6 +240,27 @@ const ManageMembersPage = () => {
                                                     Remove
                                                 </button>
                                             </div>
+                                        </td>
+                                    )}
+                                </tr>
+                            ))}
+
+                            {pendingInvites.map((email) => (
+                                <tr key={`pending-${email}`} className={`border-t ${isLight ? 'border-gray-200' : 'border-gray-700'}`}>
+                                    <td className="px-4 py-3 text-sm">Pending Invite</td>
+                                    <td className="px-4 py-3 text-sm">{email}</td>
+                                    <td className="px-4 py-3 text-sm">Invited</td>
+                                    <td className="px-4 py-3 text-sm">Pending</td>
+                                    {normalizedRole === 'manager' && (
+                                        <td className="px-4 py-3 text-sm">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRevokeInvite(email)}
+                                                disabled={isRevoking === email}
+                                                className="rounded-md bg-amber-600 px-2 py-1 text-xs text-white hover:bg-amber-700 disabled:opacity-60"
+                                            >
+                                                {isRevoking === email ? 'Revoking...' : 'Revoke Invite'}
+                                            </button>
                                         </td>
                                     )}
                                 </tr>

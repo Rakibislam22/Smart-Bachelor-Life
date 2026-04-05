@@ -1,6 +1,6 @@
 import React, { use, useEffect, useRef, useState } from 'react';
 import Logo from '../component/common/Logo';
-import { Link, Outlet, useLocation } from 'react-router';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { TbCoinTakaFilled } from 'react-icons/tb';
 import { MdOutlineRestaurantMenu } from 'react-icons/md';
 import { FaAmazonPay, FaCartPlus } from 'react-icons/fa';
@@ -11,7 +11,7 @@ import ButtonPrimary from '../component/common/ButtonPrimary';
 import ButtonSecondary from '../component/common/ButtonSecondary';
 import { AuthContext } from '../provider/AuthContext';
 import { toast } from 'react-toastify';
-import { ensureManagerGroupExists, joinAsMember, registerAsManager } from '../utils/groupApi';
+import { ensureManagerGroupExists, joinAsMember, leaveGroup, registerAsManager, updateGroupTitle } from '../utils/groupApi';
 import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 
 const DashboardLayout = () => {
@@ -19,8 +19,11 @@ const DashboardLayout = () => {
     const [showGroupModal, setShowGroupModal] = useState(false);
     const [showJoinForm, setShowJoinForm] = useState(false);
     const [groupCode, setGroupCode] = useState('');
+    const [groupTitleInput, setGroupTitleInput] = useState('');
     const [isManagerSubmitting, setIsManagerSubmitting] = useState(false);
     const [isJoinSubmitting, setIsJoinSubmitting] = useState(false);
+    const [isSavingGroupTitle, setIsSavingGroupTitle] = useState(false);
+    const [isLeavingGroup, setIsLeavingGroup] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSidebarHovered, setIsSidebarHovered] = useState(false);
     const [isNavbarVisible, setIsNavbarVisible] = useState(true);
@@ -28,7 +31,12 @@ const DashboardLayout = () => {
     const sidebarHoverCloseTimer = useRef(null);
     const lastScrollY = useRef(0);
     const location = useLocation();
+    const navigate = useNavigate();
     const normalizedRole = userRole ? userRole.toLowerCase() : null;
+
+    useEffect(() => {
+        setGroupTitleInput(currentGroup?.title || '');
+    }, [currentGroup?.title]);
 
     const isLargeScreen = () => {
         return typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches;
@@ -204,6 +212,51 @@ const DashboardLayout = () => {
     const handleOpenGroupModal = () => {
         setShowGroupModal(true);
         setShowJoinForm(false);
+    };
+
+    const handleSaveGroupTitle = async () => {
+        if (!user || normalizedRole !== 'manager') {
+            return;
+        }
+
+        if (!groupTitleInput.trim()) {
+            toast.error('Please enter a group name');
+            return;
+        }
+
+        try {
+            setIsSavingGroupTitle(true);
+            const token = await user.getIdToken();
+            const data = await updateGroupTitle(groupTitleInput.trim(), token);
+            setCurrentGroup(data?.group || currentGroup);
+            toast.success('Group name updated successfully');
+        } catch (error) {
+            toast.error(error.message || 'Failed to update group name');
+        } finally {
+            setIsSavingGroupTitle(false);
+        }
+    };
+
+    const handleLeaveGroup = async () => {
+        if (!user || !currentGroup) {
+            return;
+        }
+
+        try {
+            setIsLeavingGroup(true);
+            const token = await user.getIdToken();
+            await leaveGroup(token);
+            setCurrentGroup(null);
+            setUserRole(null);
+            setIsRoleSelectionCompleted(false);
+            setShowGroupModal(false);
+            toast.success('You left the group successfully');
+            navigate('/group-selection');
+        } catch (error) {
+            toast.error(error.message || 'Failed to leave the group');
+        } finally {
+            setIsLeavingGroup(false);
+        }
     };
 
     // Render different sidebar items based on role
@@ -405,7 +458,46 @@ const DashboardLayout = () => {
                                             </div>
                                         )}
 
-                                        {!showJoinForm ? (
+                                        {currentGroup && normalizedRole === 'manager' && (
+                                            <div className={`mb-6 rounded-xl border p-4 ${isLight ? 'bg-white border-gray-200' : 'bg-gray-900/40 border-gray-700'}`}>
+                                                <h3 className={`text-base font-semibold mb-3 ${isLight ? 'text-gray-900' : 'text-white'}`}>Edit Group Name</h3>
+                                                <div className="flex flex-col sm:flex-row gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={groupTitleInput}
+                                                        onChange={(e) => setGroupTitleInput(e.target.value)}
+                                                        className={`w-full rounded-lg border px-3 py-2 text-sm ${isLight ? 'bg-white border-gray-300 text-gray-900' : 'bg-gray-800 border-gray-600 text-white'}`}
+                                                        placeholder="Enter group name"
+                                                    />
+                                                    <ButtonPrimary onClick={handleSaveGroupTitle} disabled={isSavingGroupTitle}>
+                                                        {isSavingGroupTitle ? 'Saving...' : 'Save'}
+                                                    </ButtonPrimary>
+                                                </div>
+                                                <p className={`mt-2 text-xs ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
+                                                    Manager can edit the group name from here.
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {currentGroup && (
+                                            <div className={`mb-6 rounded-xl border p-4 ${isLight ? 'bg-white border-gray-200' : 'bg-gray-900/40 border-gray-700'}`}>
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                                    <div>
+                                                        <h3 className={`text-base font-semibold ${isLight ? 'text-gray-900' : 'text-white'}`}>Leave Group</h3>
+                                                        <p className={`text-xs sm:text-sm ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
+                                                            {normalizedRole === 'manager'
+                                                                ? 'Manager can leave only after transferring the manager role.'
+                                                                : 'Leave the group from your account settings.'}
+                                                        </p>
+                                                    </div>
+                                                    <ButtonSecondary onClick={handleLeaveGroup} disabled={isLeavingGroup}>
+                                                        {isLeavingGroup ? 'Leaving...' : 'Leave Group'}
+                                                    </ButtonSecondary>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {!currentGroup && (!showJoinForm ? (
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                                 {/* Create Group Option */}
                                                 <div className={`p-4 sm:p-8 rounded-xl border-2 ${isLight ? 'border-blue-200 bg-blue-50 hover:border-blue-400' : 'border-blue-700 bg-blue-900 hover:border-blue-500'} transition-all text-center`}>
@@ -517,7 +609,7 @@ const DashboardLayout = () => {
                                                     </ButtonPrimary>
                                                 </form>
                                             </div>
-                                        )}
+                                        ))}
                                     </div>
                                 </div>
                             </div>

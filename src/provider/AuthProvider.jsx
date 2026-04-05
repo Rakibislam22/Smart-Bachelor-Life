@@ -76,7 +76,8 @@ const AuthProvider = ({ children }) => {
                 const session = await syncUserSession(token);
 
                 const backendRole = session?.user?.role ? session.user.role.toLowerCase() : null;
-                setUserRole(backendRole);
+                const hasCurrentGroup = Boolean(session?.currentGroup);
+                setUserRole(hasCurrentGroup ? backendRole : null);
                 setIsRoleSelectionCompleted(Boolean(session?.user?.roleSelectionCompleted));
                 setCurrentGroup(session?.currentGroup || null);
             } catch {
