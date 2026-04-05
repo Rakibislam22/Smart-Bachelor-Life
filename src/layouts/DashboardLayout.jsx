@@ -18,8 +18,10 @@ const DashboardLayout = () => {
     const [groupCode, setGroupCode] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+    const [isNavbarVisible, setIsNavbarVisible] = useState(true);
     const sidebarHoverOpenTimer = useRef(null);
     const sidebarHoverCloseTimer = useRef(null);
+    const lastScrollY = useRef(0);
     const location = useLocation();
 
     const isLargeScreen = () => {
@@ -29,6 +31,32 @@ const DashboardLayout = () => {
     useEffect(() => {
         return () => {
             clearSidebarHoverTimers();
+        };
+    }, []);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+
+            if (currentScrollY <= 16) {
+                setIsNavbarVisible(true);
+                lastScrollY.current = currentScrollY;
+                return;
+            }
+
+            if (currentScrollY > lastScrollY.current + 4) {
+                setIsNavbarVisible(false);
+            } else if (currentScrollY < lastScrollY.current - 4) {
+                setIsNavbarVisible(true);
+            }
+
+            lastScrollY.current = currentScrollY;
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
         };
     }, []);
 
@@ -221,7 +249,7 @@ const DashboardLayout = () => {
                 />
                 <div className="drawer-content relative">
                     {/* Navbar */}
-                    <nav className={`navbar w-full  ${isLight ? 'bg-[#eeeeee]' : 'bg-[#15191e]'}`}>
+                    <nav className={`sticky top-0 z-40 navbar w-full transition-transform duration-300 ${isNavbarVisible ? 'translate-y-0' : '-translate-y-full'} ${isLight ? 'bg-[#eeeeee]' : 'bg-[#15191e]'}`}>
                         <label htmlFor="my-drawer-4" aria-label="open sidebar" className="hidden md:inline-flex lg:hidden btn btn-square btn-ghost">
                             {/* Sidebar toggle icon */}
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path><path d="M9 4v16"></path><path d="M14 10l2 2l-2 2"></path></svg>
