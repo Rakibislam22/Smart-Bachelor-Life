@@ -6,6 +6,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { AuthContext } from '../provider/AuthContext';
 import { toast } from 'react-toastify';
 import ButtonPrimary from '../component/common/ButtonPrimary';
+import { registerUserInBackend } from '../utils/authApi';
 
 const Login = () => {
     const { google, userLogin, setUser, isLight } = use(AuthContext);
@@ -31,14 +32,11 @@ const Login = () => {
     };
 
     const handleGoogle = () => {
-        google().then(result => {
+        google().then(async result => {
             toast.success('Login successful!');
             setUser(result.user);
+            await registerUserInBackend(result.user);
             navigate("/group-selection");
-            // const newUser = result.user;
-
-            // const userToDatabase = { name: newUser.displayName, email: newUser.email, photoURL: newUser.photoUrl, role: "Student" };
-            // axiosIn.post('/users', userToDatabase).then();
 
         }).catch(error => {
             const errorMessage = error.message;
