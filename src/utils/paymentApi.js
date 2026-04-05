@@ -37,4 +37,10 @@ async function confirmPayment(paymentID, transactionID, token) {
     });
 }
 
-export { getManagerPayments, getUserPayments, createPayment, confirmPayment };
+async function rejectPayment(paymentID, transactionID, token) {
+    return authorizedRequest(`/api/payment/reject/${paymentID}`, "POST", token, {
+        transactionID,
+    });
+}
+
+export { getManagerPayments, getUserPayments, createPayment, confirmPayment, rejectPayment };

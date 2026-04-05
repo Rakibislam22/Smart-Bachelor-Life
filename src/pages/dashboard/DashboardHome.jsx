@@ -53,9 +53,14 @@ const DashboardHome = () => {
         [expenses],
     );
 
-    const totalPaymentAmount = useMemo(
-        () => payments.reduce((sum, item) => sum + Number(item.amount || 0), 0),
+    const completedPaymentItems = useMemo(
+        () => payments.filter((item) => item.status === 'COMPLETED'),
         [payments],
+    );
+
+    const totalPaymentAmount = useMemo(
+        () => completedPaymentItems.reduce((sum, item) => sum + Number(item.amount || 0), 0),
+        [completedPaymentItems],
     );
 
     const pendingPayments = useMemo(
@@ -64,7 +69,12 @@ const DashboardHome = () => {
     );
 
     const completedPayments = useMemo(
-        () => payments.filter((item) => item.status === 'COMPLETED').length,
+        () => completedPaymentItems.length,
+        [completedPaymentItems],
+    );
+
+    const pendingPaymentItems = useMemo(
+        () => payments.filter((item) => item.status === 'PENDING').slice(0, 5),
         [payments],
     );
 
@@ -142,6 +152,34 @@ const DashboardHome = () => {
                             ৳ {balance.toLocaleString()}
                         </span>
                     </p>
+                </div>
+                <div className="mt-4 space-y-2">
+                    <p className={`text-sm font-medium ${isLight ? 'text-gray-900' : 'text-white'}`}>Pending payment details</p>
+                    {pendingPaymentItems.length === 0 ? (
+                        <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>No pending payments right now.</p>
+                    ) : (
+                        pendingPaymentItems.map((item) => (
+                            <div
+                                key={item._id}
+                                className={`flex flex-col gap-1 rounded-lg border px-3 py-2 text-sm ${isLight ? 'border-yellow-200 bg-yellow-50' : 'border-yellow-800 bg-yellow-900/20'}`}
+                            >
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className={`font-medium ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                                        ৳ {Number(item.amount || 0).toLocaleString()}
+                                    </span>
+                                    <span className="rounded-full bg-yellow-500/10 px-2 py-0.5 text-xs font-medium text-yellow-600">
+                                        Pending
+                                    </span>
+                                    <span className={`font-mono text-xs ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>
+                                        {item.transactionID || 'N/A'}
+                                    </span>
+                                </div>
+                                <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
+                                    Method: {item.paymentMethod || 'N/A'} • {new Date(item.createdAt).toLocaleString()}
+                                </p>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
 

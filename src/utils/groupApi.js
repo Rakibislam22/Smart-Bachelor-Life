@@ -68,6 +68,10 @@ async function updateGroupTitle(title, token) {
     return authorizedRequest("/api/group/title", "PATCH", token, { title });
 }
 
+async function updateGroupPaymentNotice(paymentNotice, token) {
+    return authorizedRequest("/api/group/notice", "PATCH", token, { paymentNotice });
+}
+
 async function joinAsMember(joinCode, token) {
     return authorizedPost("/api/group/join", { joinCode }, token);
 }
@@ -112,6 +116,7 @@ export {
     registerAsManager,
     createManagerGroup,
     updateGroupTitle,
+    updateGroupPaymentNotice,
     ensureManagerGroupExists,
     joinAsMember,
     leaveGroup,
