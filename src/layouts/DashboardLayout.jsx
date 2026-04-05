@@ -285,9 +285,9 @@ const DashboardLayout = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/meal-expense" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Meal Expense">
+                        <Link to="/dashboard/meal-expense" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Expense">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M16 8V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"></path><path d="M12 11v10"></path><path d="M8 11h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"></path></svg>
-                            <span className="is-drawer-close:hidden">Meal Expense</span>
+                            <span className="is-drawer-close:hidden">My Expense</span>
                         </Link>
                     </li>
                     <li>
@@ -646,7 +646,7 @@ const DashboardLayout = () => {
                                         </Link>
                                         <Link to="/dashboard/meal-expense" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/meal-expense' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-5"><path d="M16 8V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"></path><path d="M12 11v10"></path><path d="M8 11h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"></path></svg>
-                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">M.Expense</span>
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">My Exp.</span>
                                         </Link>
                                         <Link to="/dashboard/total-expense" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/total-expense' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
                                             <TbCoinTakaFilled className="size-5" />

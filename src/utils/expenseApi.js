@@ -24,4 +24,28 @@ async function getExpenses(token, { dateFrom, dateTo } = {}) {
     return data;
 }
 
-export { getExpenses };
+async function createExpense(payload, token) {
+    const formData = new FormData();
+    formData.append("title", payload.title);
+    formData.append("amount", String(payload.amount));
+    formData.append("category", payload.category);
+    formData.append("file", payload.file);
+
+    const response = await fetch(`${API_BASE_URL}/api/expenses`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to create expense");
+    }
+
+    return data;
+}
+
+export { getExpenses, createExpense };
