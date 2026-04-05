@@ -6,26 +6,83 @@ import ButtonPrimary from '../component/common/ButtonPrimary';
 import ButtonSecondary from '../component/common/ButtonSecondary';
 import Logo from '../component/common/Logo';
 import ThemeToggle from '../component/common/ThemeToggle';
+import { toast } from 'react-toastify';
+import { ensureManagerGroupExists, joinAsMember, registerAsManager } from '../utils/groupApi';
+import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 
 const GroupSelection = () => {
-    const { isLight, setUserRole } = use(AuthContext);
+    const { isLight, user, setUserRole, setIsRoleSelectionCompleted } = use(AuthContext);
     const navigate = useNavigate();
     const [showJoinForm, setShowJoinForm] = useState(false);
     const [groupCode, setGroupCode] = useState('');
+    const [isManagerSubmitting, setIsManagerSubmitting] = useState(false);
+    const [isJoinSubmitting, setIsJoinSubmitting] = useState(false);
 
-    const handleCreateGroup = () => {
-        // Set user role as Manager and navigate to dashboard
-        setUserRole('manager');
-        navigate('/dashboard');
+    const handleCreateGroup = async () => {
+        if (!user) {
+            toast.error('Please login first');
+            navigate('/auth/login');
+            return;
+        }
+
+        try {
+            setIsManagerSubmitting(true);
+            await registerUserInBackend(user);
+            const token = await user.getIdToken();
+            await registerAsManager(user.email, token);
+            await ensureManagerGroupExists(
+                {
+                    title: `${user.displayName || 'Manager'} Group`,
+                    address: 'Address not set',
+                },
+                token,
+            );
+
+            const session = await syncUserSession(token);
+            const backendRole = session?.user?.role ? session.user.role.toLowerCase() : 'manager';
+
+            setUserRole(backendRole);
+            setIsRoleSelectionCompleted(true);
+            toast.success('You are now registered as manager');
+            navigate('/dashboard');
+        } catch (error) {
+            toast.error(error.message || 'Failed to register as manager');
+        } finally {
+            setIsManagerSubmitting(false);
+        }
     };
 
-    const handleJoinGroup = (e) => {
+    const handleJoinGroup = async (e) => {
         e.preventDefault();
-        if (groupCode.trim()) {
-            // Set user role as user and navigate to dashboard
-            // In a real app, you would validate the group code with the backend
-            setUserRole('user');
+
+        if (!groupCode.trim()) {
+            toast.error('Please enter a group code');
+            return;
+        }
+
+        if (!user) {
+            toast.error('Please login first');
+            navigate('/auth/login');
+            return;
+        }
+
+        try {
+            setIsJoinSubmitting(true);
+            await registerUserInBackend(user);
+            const token = await user.getIdToken();
+            await joinAsMember(groupCode.trim(), token);
+
+            const session = await syncUserSession(token);
+            const backendRole = session?.user?.role ? session.user.role.toLowerCase() : 'user';
+
+            setUserRole(backendRole);
+            setIsRoleSelectionCompleted(true);
+            toast.success('Joined group successfully');
             navigate('/dashboard');
+        } catch (error) {
+            toast.error(error.message || 'Failed to join group');
+        } finally {
+            setIsJoinSubmitting(false);
         }
     };
 
@@ -77,8 +134,8 @@ const GroupSelection = () => {
                                     <p className={`mb-6 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
                                         Start as a manager and create a new group for your bachelor life management
                                     </p>
-                                    <ButtonPrimary onClick={handleCreateGroup}>
-                                        Create Group as Manager
+                                    <ButtonPrimary onClick={handleCreateGroup} disabled={isManagerSubmitting}>
+                                        {isManagerSubmitting ? 'Creating...' : 'Create Group as Manager'}
                                     </ButtonPrimary>
                                 </div>
                             </Card>
@@ -107,7 +164,7 @@ const GroupSelection = () => {
                                     <p className={`mb-6 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
                                         Join an existing group using a group code shared by your manager
                                     </p>
-                                    <ButtonSecondary onClick={() => setShowJoinForm(true)}>
+                                    <ButtonSecondary onClick={() => setShowJoinForm(true)} disabled={isJoinSubmitting || isManagerSubmitting}>
                                         Join Group by Code
                                     </ButtonSecondary>
                                 </div>
@@ -155,15 +212,15 @@ const GroupSelection = () => {
                                             onChange={(e) => setGroupCode(e.target.value)}
                                             placeholder="Enter group code"
                                             className={`w-full px-4 py-3 rounded-lg border ${isLight
-                                                    ? 'border-gray-300 bg-white text-gray-900'
-                                                    : 'border-gray-600 bg-gray-700 text-white'
+                                                ? 'border-gray-300 bg-white text-gray-900'
+                                                : 'border-gray-600 bg-gray-700 text-white'
                                                 } focus:outline-none focus:ring-2 focus:ring-blue-500`}
                                             required
                                         />
                                     </div>
 
-                                    <ButtonPrimary type="submit" className="w-full">
-                                        Join Group
+                                    <ButtonPrimary type="submit" className="w-full" disabled={isJoinSubmitting}>
+                                        {isJoinSubmitting ? 'Joining...' : 'Join Group'}
                                     </ButtonPrimary>
                                 </form>
                             </div>

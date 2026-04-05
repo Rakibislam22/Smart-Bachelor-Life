@@ -7,7 +7,7 @@ import { Link } from 'react-router';
 
 
 const Avatar = () => {
-    const { user } = use(AuthContext);
+    const { user, isLight } = use(AuthContext);
 
     const handleLogOut = () => {
         signOut(auth).then(() => { toast.success('Logout successful!'); }).catch(err => { toast.error(err) });
@@ -18,12 +18,12 @@ const Avatar = () => {
                 <div className="w-10 rounded-full">
                     <img
                         alt="Avatar"
-                        src={user?.photoURL || "https://w7.pngwing.com/pngs/129/292/png-transparent-female-avatar-girl-face-woman-user-flat-classy-users-icon.png"}  />
+                        src={user?.photoURL || "https://w7.pngwing.com/pngs/129/292/png-transparent-female-avatar-girl-face-woman-user-flat-classy-users-icon.png"} />
                 </div>
             </div>
             <ul
                 tabIndex="-1"
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-\[9999\] mt-3 w-52 p-2 shadow">
+                className={`menu menu-sm dropdown-content rounded-xl z-50 mt-3 w-52 p-2 border shadow-lg ${isLight ? 'bg-white border-gray-200 text-gray-900' : 'bg-gray-800 border-gray-700 text-gray-100'}`}>
                 <li className='font-bold'><Link to={"/my-profile"}>Profile</Link></li>
                 <li className='font-bold'><Link to={"/dashboard"}>Dashboard</Link></li>
                 <li className='text-red-400 font-semibold' onClick={handleLogOut}><a>Logout</a></li>
