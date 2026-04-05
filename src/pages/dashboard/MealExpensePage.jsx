@@ -1,8 +1,12 @@
-import React, { use } from 'react';
+import React, { use, useEffect, useMemo, useState } from 'react';
 import { AuthContext } from '../../provider/AuthContext';
+import { toast } from 'react-toastify';
+import { getExpenses } from '../../utils/expenseApi';
 
 const MealExpensePage = () => {
-    const { isLight } = use(AuthContext);
+    const { isLight, user } = use(AuthContext);
+    const [expenses, setExpenses] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Demo data: Group members' meals
     const mealLog = [
@@ -20,14 +24,42 @@ const MealExpensePage = () => {
         { name: 'Miscellaneous', amount: 1500 },
     ];
 
-    // Total bazar cost from shopping
-    const totalBazarCost = 5130; // ৳ 1900 + 1760 + 850 + 620
+    useEffect(() => {
+        const loadExpenses = async () => {
+            if (!user) {
+                return;
+            }
+
+            try {
+                setIsLoading(true);
+                const token = await user.getIdToken();
+                const data = await getExpenses(token);
+                setExpenses(data?.expenses || []);
+            } catch (error) {
+                toast.error(error.message || 'Failed to load expenses');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadExpenses();
+    }, [user]);
+
+    const totalBazarCost = useMemo(
+        () => expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0),
+        [expenses],
+    );
+
+    const latestExpenses = useMemo(
+        () => expenses.slice(0, 6),
+        [expenses],
+    );
 
     // Calculate total group meals
     const totalGroupMeals = mealLog.reduce((sum, item) => sum + item.meals, 0);
 
     // Calculate meal rate
-    const mealRate = totalBazarCost / totalGroupMeals;
+    const mealRate = totalGroupMeals > 0 ? totalBazarCost / totalGroupMeals : 0;
 
     // Calculate total other expenses
     const totalOtherExpenses = otherExpenses.reduce((sum, exp) => sum + exp.amount, 0);
@@ -53,6 +85,7 @@ const MealExpensePage = () => {
             {/* Meal Rate Calculation */}
             <div className={`rounded-xl border p-4 sm:p-5 ${isLight ? 'bg-white border-gray-200' : 'bg-gray-800 border-gray-700'}`}>
                 <h2 className={`text-lg font-semibold mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>Meal Rate Calculation</h2>
+                {isLoading && <p className="text-sm mb-3">Loading expense data...</p>}
                 <div className="space-y-3">
                     <div className={`p-3 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-gray-700/40'}`}>
                         <p className="text-sm">Total Bazaar Cost</p>
@@ -69,6 +102,24 @@ const MealExpensePage = () => {
                             {totalBazarCost.toLocaleString()} ÷ {totalGroupMeals} = {mealRate.toFixed(2)}
                         </p>
                     </div>
+                </div>
+            </div>
+
+            <div className={`rounded-xl border p-4 sm:p-5 ${isLight ? 'bg-white border-gray-200' : 'bg-gray-800 border-gray-700'}`}>
+                <h2 className={`text-lg font-semibold mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>Recent Expense Entries</h2>
+                <div className="space-y-2">
+                    {latestExpenses.length === 0 && (
+                        <p className="text-sm">No expense entries found.</p>
+                    )}
+                    {latestExpenses.map((expense) => (
+                        <div key={expense._id} className={`flex items-center justify-between p-3 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-gray-700/40'}`}>
+                            <div>
+                                <p className="text-sm font-medium">{expense.title}</p>
+                                <p className="text-xs opacity-70">{expense.category} • {new Date(expense.createdAt).toLocaleDateString()}</p>
+                            </div>
+                            <p className="text-sm font-semibold">৳ {Number(expense.amount || 0).toLocaleString()}</p>
+                        </div>
+                    ))}
                 </div>
             </div>
 

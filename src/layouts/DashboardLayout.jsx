@@ -11,11 +11,11 @@ import ButtonPrimary from '../component/common/ButtonPrimary';
 import ButtonSecondary from '../component/common/ButtonSecondary';
 import { AuthContext } from '../provider/AuthContext';
 import { toast } from 'react-toastify';
-import { joinAsMember, registerAsManager } from '../utils/groupApi';
-import { registerUserInBackend } from '../utils/authApi';
+import { ensureManagerGroupExists, joinAsMember, registerAsManager } from '../utils/groupApi';
+import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 
 const DashboardLayout = () => {
-    const { isLight, user, loading, userRole, setUserRole, isRoleSelectionCompleted, setIsRoleSelectionCompleted } = use(AuthContext);
+    const { isLight, user, loading, userRole, setUserRole, isRoleSelectionCompleted, setIsRoleSelectionCompleted, currentGroup, setCurrentGroup } = use(AuthContext);
     const [showGroupModal, setShowGroupModal] = useState(false);
     const [showJoinForm, setShowJoinForm] = useState(false);
     const [groupCode, setGroupCode] = useState('');
@@ -141,12 +141,23 @@ const DashboardLayout = () => {
             await registerUserInBackend(user);
             const token = await user.getIdToken();
             await registerAsManager(user.email, token);
+            const groupResponse = await ensureManagerGroupExists(
+                {
+                    title: `${user.displayName || 'Manager'} Group`,
+                    address: 'Address not set',
+                },
+                token,
+            );
 
-            setUserRole('manager');
+            const session = await syncUserSession(token);
+            const backendRole = session?.user?.role ? session.user.role.toLowerCase() : 'manager';
+
+            setUserRole(backendRole);
+            setCurrentGroup(groupResponse?.group || groupResponse?.currentGroup || null);
             setIsRoleSelectionCompleted(true);
             setShowGroupModal(false);
             setShowJoinForm(false);
-            toast.success('You are now registered as manager');
+            toast.success('Manager setup completed successfully');
         } catch (error) {
             toast.error(error.message || 'Failed to register as manager');
         } finally {
@@ -171,9 +182,13 @@ const DashboardLayout = () => {
             setIsJoinSubmitting(true);
             await registerUserInBackend(user);
             const token = await user.getIdToken();
-            await joinAsMember(groupCode.trim(), token);
+            const joinResponse = await joinAsMember(groupCode.trim(), token);
 
-            setUserRole('user');
+            const session = await syncUserSession(token);
+            const backendRole = session?.user?.role ? session.user.role.toLowerCase() : 'user';
+
+            setUserRole(backendRole);
+            setCurrentGroup(joinResponse?.group || session?.currentGroup || null);
             setIsRoleSelectionCompleted(true);
             setShowGroupModal(false);
             setShowJoinForm(false);
@@ -333,6 +348,22 @@ const DashboardLayout = () => {
 
                         </div>
 
+                        {currentGroup && (
+                            <div className={`mb-4 rounded-2xl border px-4 py-3 sm:px-5 sm:py-4 ${isLight ? 'bg-white border-gray-200' : 'bg-gray-800 border-gray-700'}`}>
+                                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <p className={`text-xs uppercase tracking-wide ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>Current Group</p>
+                                        <h3 className={`text-lg sm:text-xl font-semibold ${isLight ? 'text-gray-900' : 'text-white'}`}>{currentGroup.title}</h3>
+                                        <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>{currentGroup.address || 'No address set'}</p>
+                                    </div>
+                                    <div className={`text-sm ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>
+                                        <p>Members: <span className="font-semibold">{currentGroup.memberCount ?? 0}</span></p>
+                                        {currentGroup.joinCode && <p>Join code: <span className="font-semibold">{currentGroup.joinCode}</span></p>}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Meal Sections - Stacked on Mobile, Side by Side on PC */}
 
                         <div>
@@ -358,6 +389,21 @@ const DashboardLayout = () => {
                                                 ✕
                                             </button>
                                         </div>
+
+                                        {currentGroup && (
+                                            <div className={`mb-6 rounded-xl border p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gray-900/40 border-gray-700'}`}>
+                                                <div className="flex flex-col gap-1">
+                                                    <p className={`text-xs uppercase tracking-wide ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>Current Group</p>
+                                                    <h3 className={`text-lg font-semibold ${isLight ? 'text-gray-900' : 'text-white'}`}>{currentGroup.title}</h3>
+                                                    <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>{currentGroup.address || 'No address set'}</p>
+                                                    {currentGroup.joinCode && (
+                                                        <p className={`text-sm mt-1 ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>
+                                                            Join code: <span className="font-semibold">{currentGroup.joinCode}</span>
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {!showJoinForm ? (
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">

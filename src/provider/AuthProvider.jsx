@@ -13,6 +13,14 @@ const AuthProvider = ({ children }) => {
         return localStorage.getItem('userRole') || null;
     });
     const [isRoleSelectionCompleted, setIsRoleSelectionCompleted] = useState(false);
+    const [currentGroup, setCurrentGroup] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const storedGroup = localStorage.getItem('currentGroup');
+            return storedGroup ? JSON.parse(storedGroup) : null;
+        }
+
+        return null;
+    });
     const provider = new GoogleAuthProvider();
 
     // for theme toggle
@@ -44,6 +52,14 @@ const AuthProvider = ({ children }) => {
     }, [userRole]);
 
     useEffect(() => {
+        if (currentGroup) {
+            localStorage.setItem('currentGroup', JSON.stringify(currentGroup));
+        } else {
+            localStorage.removeItem('currentGroup');
+        }
+    }, [currentGroup]);
+
+    useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
 
@@ -62,9 +78,12 @@ const AuthProvider = ({ children }) => {
                 const backendRole = session?.user?.role ? session.user.role.toLowerCase() : null;
                 setUserRole(backendRole);
                 setIsRoleSelectionCompleted(Boolean(session?.user?.roleSelectionCompleted));
+                setCurrentGroup(session?.currentGroup || null);
             } catch {
-                // Keep the app usable with existing local role if backend sync fails temporarily.
+                // Avoid stale local role to prevent unauthorized role-only API calls.
+                setUserRole(null);
                 setIsRoleSelectionCompleted(false);
+                setCurrentGroup(null);
             } finally {
                 setLoading(false);
             }
@@ -110,7 +129,9 @@ const AuthProvider = ({ children }) => {
         userRole,
         setUserRole,
         isRoleSelectionCompleted,
-        setIsRoleSelectionCompleted
+        setIsRoleSelectionCompleted,
+        currentGroup,
+        setCurrentGroup,
     }
 
     return (<AuthContext value={authData}>
