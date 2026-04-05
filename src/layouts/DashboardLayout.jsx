@@ -10,12 +10,17 @@ import ThemeToggle from '../component/common/ThemeToggle';
 import ButtonPrimary from '../component/common/ButtonPrimary';
 import ButtonSecondary from '../component/common/ButtonSecondary';
 import { AuthContext } from '../provider/AuthContext';
+import { toast } from 'react-toastify';
+import { joinAsMember, registerAsManager } from '../utils/groupApi';
+import { registerUserInBackend } from '../utils/authApi';
 
 const DashboardLayout = () => {
-    const { isLight, userRole, setUserRole } = use(AuthContext);
+    const { isLight, user, loading, userRole, setUserRole, isRoleSelectionCompleted, setIsRoleSelectionCompleted } = use(AuthContext);
     const [showGroupModal, setShowGroupModal] = useState(false);
     const [showJoinForm, setShowJoinForm] = useState(false);
     const [groupCode, setGroupCode] = useState('');
+    const [isManagerSubmitting, setIsManagerSubmitting] = useState(false);
+    const [isJoinSubmitting, setIsJoinSubmitting] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSidebarHovered, setIsSidebarHovered] = useState(false);
     const [isNavbarVisible, setIsNavbarVisible] = useState(true);
@@ -23,6 +28,7 @@ const DashboardLayout = () => {
     const sidebarHoverCloseTimer = useRef(null);
     const lastScrollY = useRef(0);
     const location = useLocation();
+    const normalizedRole = userRole ? userRole.toLowerCase() : null;
 
     const isLargeScreen = () => {
         return typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches;
@@ -59,6 +65,22 @@ const DashboardLayout = () => {
             window.removeEventListener('scroll', handleScroll);
         };
     }, []);
+
+    useEffect(() => {
+        if (loading || !user?.uid) {
+            return;
+        }
+
+        if (isRoleSelectionCompleted || normalizedRole) {
+            setShowGroupModal(false);
+            return;
+        }
+
+        if (!normalizedRole) {
+            setShowGroupModal(true);
+            setShowJoinForm(false);
+        }
+    }, [loading, user?.uid, normalizedRole, isRoleSelectionCompleted]);
 
     const clearSidebarHoverTimers = () => {
         if (sidebarHoverOpenTimer.current) {
@@ -108,19 +130,59 @@ const DashboardLayout = () => {
         }, 180);
     };
 
-    const handleCreateGroup = () => {
-        setUserRole('manager');
-        setShowGroupModal(false);
-        setShowJoinForm(false);
+    const handleCreateGroup = async () => {
+        if (!user) {
+            toast.error('Please login first');
+            return;
+        }
+
+        try {
+            setIsManagerSubmitting(true);
+            await registerUserInBackend(user);
+            const token = await user.getIdToken();
+            await registerAsManager(user.email, token);
+
+            setUserRole('manager');
+            setIsRoleSelectionCompleted(true);
+            setShowGroupModal(false);
+            setShowJoinForm(false);
+            toast.success('You are now registered as manager');
+        } catch (error) {
+            toast.error(error.message || 'Failed to register as manager');
+        } finally {
+            setIsManagerSubmitting(false);
+        }
     };
 
-    const handleJoinGroup = (e) => {
+    const handleJoinGroup = async (e) => {
         e.preventDefault();
-        if (groupCode.trim()) {
+
+        if (!groupCode.trim()) {
+            toast.error('Please enter a group code');
+            return;
+        }
+
+        if (!user) {
+            toast.error('Please login first');
+            return;
+        }
+
+        try {
+            setIsJoinSubmitting(true);
+            await registerUserInBackend(user);
+            const token = await user.getIdToken();
+            await joinAsMember(groupCode.trim(), token);
+
             setUserRole('user');
+            setIsRoleSelectionCompleted(true);
             setShowGroupModal(false);
             setShowJoinForm(false);
             setGroupCode('');
+            toast.success('Joined group successfully');
+        } catch (error) {
+            toast.error(error.message || 'Failed to join group');
+        } finally {
+            setIsJoinSubmitting(false);
         }
     };
 
@@ -322,8 +384,8 @@ const DashboardLayout = () => {
                                                     <p className={`mb-4 sm:mb-6 text-sm sm:text-base ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>
                                                         Start as a manager and create a new group for your bachelor life management
                                                     </p>
-                                                    <ButtonPrimary onClick={handleCreateGroup}>
-                                                        Create Group as Manager
+                                                    <ButtonPrimary onClick={handleCreateGroup} disabled={isManagerSubmitting}>
+                                                        {isManagerSubmitting ? 'Creating...' : 'Create Group as Manager'}
                                                     </ButtonPrimary>
                                                 </div>
 
@@ -404,8 +466,8 @@ const DashboardLayout = () => {
                                                         />
                                                     </div>
 
-                                                    <ButtonPrimary type="submit" className="w-full">
-                                                        Join Group
+                                                    <ButtonPrimary type="submit" className="w-full" disabled={isJoinSubmitting}>
+                                                        {isJoinSubmitting ? 'Joining...' : 'Join Group'}
                                                     </ButtonPrimary>
                                                 </form>
                                             </div>

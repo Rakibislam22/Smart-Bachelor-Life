@@ -6,12 +6,20 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { AuthContext } from '../provider/AuthContext';
 import { toast } from 'react-toastify';
 import ButtonPrimary from '../component/common/ButtonPrimary';
-import { registerUserInBackend } from '../utils/authApi';
+import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 
 const Login = () => {
     const { google, userLogin, setUser, isLight } = use(AuthContext);
     const [eye, setEye] = useState(false);
     const navigate = useNavigate();
+
+    const getPostLoginPath = async (firebaseUser) => {
+        const token = await firebaseUser.getIdToken();
+        const session = await syncUserSession(token);
+        const roleSelectionCompleted = Boolean(session?.user?.roleSelectionCompleted);
+
+        return roleSelectionCompleted ? "/dashboard" : "/group-selection";
+    };
 
     const {
         register,
@@ -20,10 +28,12 @@ const Login = () => {
     } = useForm();
 
     const onSubmit = (data) => {
-        userLogin(data.email, data.password).then(result => {
+        userLogin(data.email, data.password).then(async result => {
             setUser(result.user);
+            await registerUserInBackend(result.user);
+            const postLoginPath = await getPostLoginPath(result.user);
             toast.success('Login successful!');
-            navigate("/group-selection");
+            navigate(postLoginPath);
         }).catch(error => {
             const errorMessage = error.message;
             toast.error(errorMessage);
@@ -36,7 +46,8 @@ const Login = () => {
             toast.success('Login successful!');
             setUser(result.user);
             await registerUserInBackend(result.user);
-            navigate("/group-selection");
+            const postLoginPath = await getPostLoginPath(result.user);
+            navigate(postLoginPath);
 
         }).catch(error => {
             const errorMessage = error.message;

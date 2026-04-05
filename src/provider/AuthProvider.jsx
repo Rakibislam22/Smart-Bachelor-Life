@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/firebase.init';
+import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 
 const AuthProvider = ({ children }) => {
 
@@ -11,6 +12,7 @@ const AuthProvider = ({ children }) => {
         // Check if role exists in localStorage
         return localStorage.getItem('userRole') || null;
     });
+    const [isRoleSelectionCompleted, setIsRoleSelectionCompleted] = useState(false);
     const provider = new GoogleAuthProvider();
 
     // for theme toggle
@@ -42,9 +44,30 @@ const AuthProvider = ({ children }) => {
     }, [userRole]);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
-            setLoading(false);
+
+            if (!currentUser) {
+                setUserRole(null);
+                setIsRoleSelectionCompleted(false);
+                setLoading(false);
+                return;
+            }
+
+            try {
+                await registerUserInBackend(currentUser);
+                const token = await currentUser.getIdToken();
+                const session = await syncUserSession(token);
+
+                const backendRole = session?.user?.role ? session.user.role.toLowerCase() : null;
+                setUserRole(backendRole);
+                setIsRoleSelectionCompleted(Boolean(session?.user?.roleSelectionCompleted));
+            } catch {
+                // Keep the app usable with existing local role if backend sync fails temporarily.
+                setIsRoleSelectionCompleted(false);
+            } finally {
+                setLoading(false);
+            }
         })
 
         return () => {
@@ -85,7 +108,9 @@ const AuthProvider = ({ children }) => {
         loading,
         setLoading,
         userRole,
-        setUserRole
+        setUserRole,
+        isRoleSelectionCompleted,
+        setIsRoleSelectionCompleted
     }
 
     return (<AuthContext value={authData}>
