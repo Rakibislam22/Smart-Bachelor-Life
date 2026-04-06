@@ -1,17 +1,83 @@
-import React, { useState, use } from 'react';
+import React, { useState, use, useEffect } from 'react';
 import { AuthContext } from '../provider/AuthContext';
+import { toast } from 'react-toastify';
+import { createMeal, getMeals, updateMeal } from '../utils/mealApi';
 
 const MealCalendar = () => {
-    const { isLight } = use(AuthContext);
+    const { isLight, user, currentGroup } = use(AuthContext);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [mealData, setMealData] = useState({});
+    const [mealEntryIdByDate, setMealEntryIdByDate] = useState({});
     const [selectedDate, setSelectedDate] = useState(null);
     const [showMealModal, setShowMealModal] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [meals, setMeals] = useState({
         breakfast: 0,
         lunch: 0,
         dinner: 0,
     });
+
+    // Format date as YYYY-MM-DD in local time (avoids UTC day shift).
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    useEffect(() => {
+        const loadMeals = async () => {
+            if (!user || !currentGroup?.id) {
+                return;
+            }
+
+            try {
+                const token = await user.getIdToken();
+                const data = await getMeals(token, { groupID: currentGroup.id });
+                const entries = data?.data || [];
+
+                const mapped = {};
+                const entryMap = {};
+                entries.forEach((entry) => {
+                    const entryFirebaseUid = entry?.userID?.firebaseUid;
+                    if (entryFirebaseUid !== user.uid) {
+                        return;
+                    }
+
+                    const date = new Date(entry.date || entry.createdAt);
+                    const dateKey = formatDate(date);
+                    const breakfastValue = Number(entry.breakfast ?? 0);
+                    const lunchValue = Number(entry.lunch ?? 0);
+                    const dinnerValue = Number(entry.dinner ?? 0);
+
+                    // Backward compatibility for old records that only have mealCount.
+                    const fallbackBreakfast =
+                        breakfastValue === 0 && lunchValue === 0 && dinnerValue === 0
+                            ? Number(entry.mealCount || 0)
+                            : 0;
+
+                    if (!mapped[dateKey]) {
+                        mapped[dateKey] = { breakfast: 0, lunch: 0, dinner: 0 };
+                    }
+
+                    // Keep latest entry per date for edit/update in personal calendar view.
+                    mapped[dateKey] = {
+                        breakfast: breakfastValue + fallbackBreakfast,
+                        lunch: lunchValue,
+                        dinner: dinnerValue,
+                    };
+                    entryMap[dateKey] = entry._id;
+                });
+
+                setMealData(mapped);
+                setMealEntryIdByDate(entryMap);
+            } catch (error) {
+                toast.error(error.message || 'Failed to load meal records');
+            }
+        };
+
+        loadMeals();
+    }, [user, currentGroup?.id]);
 
     // Get days in month
     const getDaysInMonth = (date) => {
@@ -23,9 +89,14 @@ const MealCalendar = () => {
         return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
     };
 
-    // Format date as YYYY-MM-DD
-    const formatDate = (date) => {
-        return date.toISOString().split('T')[0];
+    const isPastDate = (date) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const compareDate = new Date(date);
+        compareDate.setHours(0, 0, 0, 0);
+
+        return compareDate < today;
     };
 
     // Get meal data for a specific date
@@ -64,22 +135,70 @@ const MealCalendar = () => {
     };
 
     // Save meal
-    const saveMeal = () => {
-        if (selectedDate) {
-            const dateStr = formatDate(selectedDate);
-            setMealData({
-                ...mealData,
+    const saveMeal = async () => {
+        if (!selectedDate) {
+            return;
+        }
+
+        if (!user || !currentGroup?.id) {
+            toast.error('Login and group selection are required');
+            return;
+        }
+
+        const totalMealCount = meals.breakfast + meals.lunch + meals.dinner;
+        const dateStr = formatDate(selectedDate);
+        const mealEntryId = mealEntryIdByDate[dateStr];
+
+        try {
+            setIsSaving(true);
+            const token = await user.getIdToken();
+
+            const payload = {
+                groupID: currentGroup.id,
+                mealCount: totalMealCount,
+                breakfast: meals.breakfast,
+                lunch: meals.lunch,
+                dinner: meals.dinner,
+                date: dateStr,
+            };
+
+            if (mealEntryId) {
+                await updateMeal(mealEntryId, payload, token);
+            } else {
+                const created = await createMeal(payload, token);
+                const createdId = created?.data?._id;
+                if (createdId) {
+                    setMealEntryIdByDate((prev) => ({
+                        ...prev,
+                        [dateStr]: createdId,
+                    }));
+                }
+            }
+
+            setMealData((prev) => ({
+                ...prev,
                 [dateStr]: meals,
-            });
+            }));
+
             setShowMealModal(false);
             setSelectedDate(null);
             setMeals({ breakfast: 0, lunch: 0, dinner: 0 });
+            toast.success(mealEntryId ? 'Meal updated successfully' : 'Meal added successfully');
+        } catch (error) {
+            toast.error(error.message || 'Failed to save meal');
+        } finally {
+            setIsSaving(false);
         }
     };
 
     // Open meal modal
     const openMealModal = (day) => {
         const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+
+        if (isPastDate(date)) {
+            return;
+        }
+
         setSelectedDate(date);
         const dateMeals = getMealForDate(date);
         setMeals(dateMeals);
@@ -168,18 +287,27 @@ const MealCalendar = () => {
                             {days.map((day, index) => (
                                 <div key={index} className="w-full aspect-square">
                                     {day ? (
-                                        <button
-                                            onClick={() => openMealModal(day)}
-                                            className={`w-full h-full rounded-md sm:rounded-lg font-semibold text-[10px] sm:text-sm flex flex-col items-center justify-center cursor-pointer transition-all hover:ring-2 ${isLight ? 'hover:ring-green-400' : 'hover:ring-green-500'} ${getIntensityColor(getTotalMeals(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)))} ${isLight ? 'text-gray-800' : 'text-white'}`}
-                                            title={`${day} meals: ${getTotalMeals(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day))}`}
-                                        >
-                                            <span className="text-xs sm:text-sm font-bold">{day}</span>
-                                            <span className="text-[8px] sm:text-xs opacity-80">
-                                                {getTotalMeals(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)) > 0
-                                                    ? `${getTotalMeals(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day))} meals`
-                                                    : ''}
-                                            </span>
-                                        </button>
+                                        (() => {
+                                            const dateObj = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+                                            const isPast = isPastDate(dateObj);
+                                            const totalMeals = getTotalMeals(dateObj);
+
+                                            return (
+                                                <button
+                                                    onClick={() => openMealModal(day)}
+                                                    disabled={isPast}
+                                                    className={`w-full h-full rounded-md sm:rounded-lg font-semibold text-[10px] sm:text-sm flex flex-col items-center justify-center transition-all ${isPast ? 'opacity-40 cursor-not-allowed' : `cursor-pointer hover:ring-2 ${isLight ? 'hover:ring-green-400' : 'hover:ring-green-500'}`} ${getIntensityColor(totalMeals)} ${isLight ? 'text-gray-800' : 'text-white'}`}
+                                                    title={isPast ? 'Past date is locked' : `${day} meals: ${totalMeals}`}
+                                                >
+                                                    <span className="text-xs sm:text-sm font-bold">{day}</span>
+                                                    <span className="text-[8px] sm:text-xs opacity-80">
+                                                        {totalMeals > 0
+                                                            ? `${totalMeals} meals`
+                                                            : ''}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })()
                                     ) : (
                                         <div className="w-full h-full"></div>
                                     )}
@@ -349,9 +477,10 @@ const MealCalendar = () => {
                                 </button>
                                 <button
                                     onClick={saveMeal}
+                                    disabled={isSaving}
                                     className={`flex-1 px-4 py-3 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors`}
                                 >
-                                    Save Meals
+                                    {isSaving ? 'Saving...' : 'Save Meals'}
                                 </button>
                             </div>
                         </div>
