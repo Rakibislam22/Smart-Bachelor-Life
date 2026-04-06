@@ -3,6 +3,7 @@ import { AuthContext } from './AuthContext';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/firebase.init';
 import { registerUserInBackend, syncUserSession } from '../utils/authApi';
+import { toast } from 'react-toastify';
 
 const AuthProvider = ({ children }) => {
 
@@ -80,11 +81,13 @@ const AuthProvider = ({ children }) => {
                 setUserRole(hasCurrentGroup ? backendRole : null);
                 setIsRoleSelectionCompleted(Boolean(session?.user?.roleSelectionCompleted));
                 setCurrentGroup(session?.currentGroup || null);
-            } catch {
+            } catch (error) {
                 // Avoid stale local role to prevent unauthorized role-only API calls.
                 setUserRole(null);
                 setIsRoleSelectionCompleted(false);
                 setCurrentGroup(null);
+                console.error('Auth sync failed:', error);
+                toast.error(error?.message || 'Failed to sync account with server');
             } finally {
                 setLoading(false);
             }
