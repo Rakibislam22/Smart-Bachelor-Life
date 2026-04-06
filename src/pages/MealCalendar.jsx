@@ -38,9 +38,18 @@ const MealCalendar = () => {
 
                 const mapped = {};
                 const entryMap = {};
+                const authUserId = user?.uid;
+                const authUserEmail = String(user?.email || '').toLowerCase();
+
                 entries.forEach((entry) => {
-                    const entryFirebaseUid = entry?.userID?.firebaseUid;
-                    if (entryFirebaseUid !== user.uid) {
+                    const entryUser = entry?.userID || {};
+                    const entryFirebaseUid = entryUser?.firebaseUid;
+                    const entryEmail = String(entryUser?.email || '').toLowerCase();
+                    const isSameUser =
+                        (entryFirebaseUid && authUserId && entryFirebaseUid === authUserId) ||
+                        (entryEmail && authUserEmail && entryEmail === authUserEmail);
+
+                    if (!isSameUser) {
                         return;
                     }
 
