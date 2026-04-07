@@ -9,9 +9,14 @@ import ButtonPrimary from '../component/common/ButtonPrimary';
 import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 
 const Login = () => {
-    const { google, userLogin, setUser, isLight } = use(AuthContext);
+    const { google, userLogin, setUser, isLight, user } = use(AuthContext);
     const [eye, setEye] = useState(false);
     const navigate = useNavigate();
+
+    if (user) {
+        navigate("/dashboard");
+    }
+
 
     const getPostLoginPath = async (firebaseUser) => {
         const token = await firebaseUser.getIdToken();
