@@ -29,7 +29,7 @@ const DailyMenuPage = () => {
                 const token = await user.getIdToken();
                 const data = await getMenus(token, { groupID: groupId });
                 setMenus(data?.data || []);
-            } catch (error) {
+            } catch {
                 toast.error('We could not load menu entries right now. Please try again.');
             } finally {
                 setIsLoading(false);
@@ -76,16 +76,6 @@ const DailyMenuPage = () => {
         setMenuForm((prev) => ({ ...prev, [name]: value }));
     };
 
-    const loadMenus = async () => {
-        if (!user || !groupId) {
-            return;
-        }
-
-        const token = await user.getIdToken();
-        const data = await getMenus(token, { groupID: groupId });
-        setMenus(data?.data || []);
-    };
-
     const handleSaveMenu = async (event) => {
         event.preventDefault();
 
@@ -110,15 +100,19 @@ const DailyMenuPage = () => {
             };
 
             if (latestMenu?._id) {
-                await updateMenu(latestMenu._id, payload, token);
+                const response = await updateMenu(latestMenu._id, payload, token);
+                const updatedMenu = response?.menu || response?.data || response?.item || { ...latestMenu, ...payload, _id: latestMenu._id };
+                setMenus((prev) => prev.map((menuItem) => (menuItem._id === latestMenu._id ? updatedMenu : menuItem)));
                 toast.success('Menu updated successfully');
             } else {
-                await createMenu(payload, token);
+                const response = await createMenu(payload, token);
+                const createdMenu = response?.menu || response?.data || response?.item || response;
+                if (createdMenu) {
+                    setMenus((prev) => [createdMenu, ...prev]);
+                }
                 toast.success('Menu created successfully');
             }
-
-            await loadMenus();
-        } catch (error) {
+        } catch {
             toast.error('We could not save menu right now. Please try again.');
         } finally {
             setIsSaving(false);
@@ -134,9 +128,9 @@ const DailyMenuPage = () => {
             setIsDeleting(true);
             const token = await user.getIdToken();
             await deleteMenu(latestMenu._id, token);
+            setMenus((prev) => prev.filter((menuItem) => menuItem._id !== latestMenu._id));
             toast.success('Menu deleted successfully');
-            await loadMenus();
-        } catch (error) {
+        } catch {
             toast.error('We could not delete menu right now. Please try again.');
         } finally {
             setIsDeleting(false);

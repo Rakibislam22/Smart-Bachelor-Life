@@ -1,4 +1,4 @@
-import React, { useState, use, useEffect, useMemo } from 'react';
+import React, { useState, use, useEffect, useMemo, useCallback } from 'react';
 import { AuthContext } from '../provider/AuthContext';
 import { toast } from 'react-toastify';
 import { getMeals } from '../utils/mealApi';
@@ -9,26 +9,42 @@ const GroupMealView = () => {
     const [mealEntries, setMealEntries] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        const loadMeals = async () => {
-            if (!user || !currentGroup?.id) {
-                return;
-            }
+    const loadMeals = useCallback(async () => {
+        if (!user || !currentGroup?.id) {
+            return;
+        }
 
-            try {
-                setIsLoading(true);
-                const token = await user.getIdToken();
-                const data = await getMeals(token, { groupID: currentGroup.id });
-                setMealEntries(data?.data || []);
-            } catch {
-                toast.error('We could not load group meals right now. Please try again.');
-            } finally {
-                setIsLoading(false);
+        try {
+            setIsLoading(true);
+            const token = await user.getIdToken();
+            const data = await getMeals(token, { groupID: currentGroup.id });
+            setMealEntries(data?.data || []);
+        } catch {
+            toast.error('We could not load group meals right now. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [user, currentGroup?.id]);
+
+    useEffect(() => {
+        loadMeals();
+    }, [loadMeals]);
+
+    useEffect(() => {
+        const handleMealUpdate = (event) => {
+            const eventGroupId = event?.detail?.groupId;
+
+            if (!eventGroupId || eventGroupId === currentGroup?.id) {
+                loadMeals();
             }
         };
 
-        loadMeals();
-    }, [user, currentGroup?.id]);
+        window.addEventListener('group-meals-updated', handleMealUpdate);
+
+        return () => {
+            window.removeEventListener('group-meals-updated', handleMealUpdate);
+        };
+    }, [loadMeals, currentGroup?.id]);
 
     // Get days in month
     const getDaysInMonth = (date) => {

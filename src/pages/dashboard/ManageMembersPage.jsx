@@ -69,7 +69,7 @@ const ManageMembersPage = () => {
 
             setMembers(mappedMembers);
             setPendingInvites(pendingEmails);
-        } catch (error) {
+        } catch {
             toast.error('We could not load group members right now. Please try again.');
         } finally {
             setIsLoading(false);
@@ -92,13 +92,15 @@ const ManageMembersPage = () => {
             setIsInviting(true);
             const token = await user.getIdToken();
             const data = await sendJoinCodeInvites(inviteList, token);
+            const invitedEmails = data?.successfullyInvitedEmails || inviteList;
             setLastInviteResult({
-                sent: data?.successfullyInvitedEmails || inviteList,
+                sent: invitedEmails,
                 failed: data?.invalidEmails || [],
             });
+            setPendingInvites((prev) => Array.from(new Set([...prev, ...invitedEmails])));
             toast.success('Invite sent successfully');
             setInviteEmails('');
-        } catch (error) {
+        } catch {
             toast.error('We could not send invite right now. Please try again.');
         } finally {
             setIsInviting(false);
@@ -113,9 +115,12 @@ const ManageMembersPage = () => {
         try {
             const token = await user.getIdToken();
             await changeGroupUserRole(memberId, token);
+            setMembers((prev) => prev.map((member) => ({
+                ...member,
+                role: member.id === memberId ? 'Manager' : member.role,
+            })));
             toast.success('Manager role transferred successfully');
-            await loadGroupDetails();
-        } catch (error) {
+        } catch {
             toast.error('We could not change role right now. Please try again.');
         }
     };
@@ -128,9 +133,9 @@ const ManageMembersPage = () => {
         try {
             const token = await user.getIdToken();
             await removeGroupUser(email, token);
+            setMembers((prev) => prev.filter((member) => member.email !== email));
             toast.success('Member removed successfully');
-            await loadGroupDetails();
-        } catch (error) {
+        } catch {
             toast.error('We could not remove member right now. Please try again.');
         }
     };
@@ -144,9 +149,9 @@ const ManageMembersPage = () => {
             setIsRevoking(email);
             const token = await user.getIdToken();
             await revokeGroupInvite(email, token);
+            setPendingInvites((prev) => prev.filter((inviteEmail) => inviteEmail !== email));
             toast.success('Invite revoked successfully');
-            await loadGroupDetails();
-        } catch (error) {
+        } catch {
             toast.error('We could not revoke invite right now. Please try again.');
         } finally {
             setIsRevoking('');

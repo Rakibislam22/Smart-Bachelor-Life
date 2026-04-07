@@ -80,7 +80,7 @@ const MealCalendar = () => {
 
                 setMealData(mapped);
                 setMealEntryIdByDate(entryMap);
-            } catch (error) {
+            } catch {
                 toast.error('We could not load meal records right now. Please try again.');
             }
         };
@@ -192,8 +192,11 @@ const MealCalendar = () => {
             setShowMealModal(false);
             setSelectedDate(null);
             setMeals({ breakfast: 0, lunch: 0, dinner: 0 });
+            window.dispatchEvent(new CustomEvent('group-meals-updated', {
+                detail: { groupId: currentGroup.id },
+            }));
             toast.success(mealEntryId ? 'Meal updated successfully' : 'Meal added successfully');
-        } catch (error) {
+        } catch {
             toast.error('We could not save meal right now. Please try again.');
         } finally {
             setIsSaving(false);

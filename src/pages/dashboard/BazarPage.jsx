@@ -36,7 +36,7 @@ const BazarPage = () => {
                 const token = await user.getIdToken();
                 const data = await getBazar(token, { groupID: groupId });
                 setItems(data?.data || []);
-            } catch (error) {
+            } catch {
                 toast.error('We could not load bazar entries right now. Please try again.');
             } finally {
                 setIsLoading(false);
@@ -75,13 +75,18 @@ const BazarPage = () => {
         try {
             setIsSaving(true);
             const token = await user.getIdToken();
-            await createBazar({
+            const response = await createBazar({
                 groupID: groupId,
                 item: itemList,
                 quantity: quantityList,
                 price: priceList,
                 file: bazarForm.file,
             }, token);
+
+            const createdBazar = response?.bazar || response?.data || response?.item || response;
+            if (createdBazar) {
+                setItems((prev) => [createdBazar, ...prev]);
+            }
 
             toast.success('Bazar detail added successfully');
             setIsSheetOpen(false);
@@ -91,10 +96,7 @@ const BazarPage = () => {
                 price: '',
                 file: null,
             });
-
-            const refreshed = await getBazar(token, { groupID: groupId });
-            setItems(refreshed?.data || []);
-        } catch (error) {
+        } catch {
             toast.error('We could not add bazar detail right now. Please try again.');
         } finally {
             setIsSaving(false);
