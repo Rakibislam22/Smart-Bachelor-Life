@@ -24,7 +24,6 @@ const Avatar = () => {
             <ul
                 tabIndex="-1"
                 className={`menu menu-sm dropdown-content rounded-xl z-50 mt-3 w-52 p-2 border shadow-lg ${isLight ? 'bg-white border-gray-200 text-gray-900' : 'bg-gray-800 border-gray-700 text-gray-100'}`}>
-                <li className='font-bold'><Link to={"/my-profile"}>Profile</Link></li>
                 <li className='font-bold'><Link to={"/dashboard"}>Dashboard</Link></li>
                 <li className='text-red-400 font-semibold' onClick={handleLogOut}><a>Logout</a></li>
             </ul>
