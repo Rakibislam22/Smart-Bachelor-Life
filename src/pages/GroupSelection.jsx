@@ -38,7 +38,7 @@ const GroupSelection = () => {
                 token,
             );
 
-            const session = await syncUserSession(token);
+            const session = await syncUserSession(token, user);
             const backendRole = session?.user?.role ? session.user.role.toLowerCase() : 'manager';
 
             setUserRole(backendRole);
@@ -72,7 +72,7 @@ const GroupSelection = () => {
             const token = await user.getIdToken();
             await joinAsMember(groupCode.trim(), token);
 
-            const session = await syncUserSession(token);
+            const session = await syncUserSession(token, user);
             const backendRole = session?.user?.role ? session.user.role.toLowerCase() : 'user';
 
             setUserRole(backendRole);

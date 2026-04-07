@@ -18,6 +18,8 @@ import TotalExpensePage from "../pages/dashboard/TotalExpensePage";
 import DailyMenuPage from "../pages/dashboard/DailyMenuPage";
 import BazarPage from "../pages/dashboard/BazarPage";
 import PaymentPage from "../pages/dashboard/PaymentPage";
+import NotFound from "../pages/NotFound";
+import ManagerRoute from "./ManagerRoute";
 
 const router = createBrowserRouter([
     {
@@ -74,7 +76,7 @@ const router = createBrowserRouter([
             },
             {
                 path: "members",
-                element: <ManageMembersPage />,
+                element: <ManagerRoute><ManageMembersPage /></ManagerRoute>,
             },
             {
                 path: "meal-expense",
@@ -97,6 +99,10 @@ const router = createBrowserRouter([
                 element: <PaymentPage />,
             }
         ]
+    },
+    {
+        path: "*",
+        element: <NotFound />,
     }
 ]);
 
