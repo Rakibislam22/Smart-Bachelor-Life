@@ -1,5 +1,5 @@
 import React, { use, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import logoImg from '../assets/images/google.svg';
 import { Link, useNavigate } from 'react-router';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -15,18 +15,20 @@ const Signup = () => {
     const {
         register,
         handleSubmit,
-        watch,
+        control,
         formState: { errors }
     } = useForm();
 
-    const password = watch("password");
+    const password = useWatch({ control, name: 'password' });
 
     const [eye, setEye] = useState(false);
     const [cEye, setCeye] = useState(false);
     const [showTip, setShowTip] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
 
     const onSubmit = (data) => {
+        setIsSubmitting(true);
 
         const fullName = `${data.firstName} ${data.lastName}`;
 
@@ -51,11 +53,15 @@ const Signup = () => {
             .catch(() => {
                 toast.error('Something went wrong. Please try again.');
             })
+            .finally(() => {
+                setIsSubmitting(false);
+            });
 
     };
 
 
     const handleGoogle = () => {
+        setIsSubmitting(true);
         google().then(async result => {
             toast.success('Login successful!');
             setUser(result.user);
@@ -64,6 +70,8 @@ const Signup = () => {
 
         }).catch(() => {
             toast.error('Something went wrong. Please try again.');
+        }).finally(() => {
+            setIsSubmitting(false);
         });
     }
 
@@ -182,6 +190,8 @@ const Signup = () => {
                     <ButtonPrimary
                         type="submit"
                         className="w-full"
+                        loading={isSubmitting}
+                        loadingText="Creating account..."
                     >
                         Sign Up
                     </ButtonPrimary>
@@ -189,6 +199,7 @@ const Signup = () => {
                     <button
                         type="button"
                         onClick={handleGoogle}
+                        disabled={isSubmitting}
                         className='flex items-center justify-center active:scale-[.98] active:duration-75 hover:scale-[1.01] transition-all ease-in-out py-2.5 sm:py-3 border border-gray-300 dark:border-gray-700 rounded-lg sm:rounded-xl bg-white dark:bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm sm:text-base font-medium'
                     >
                         <img className='mr-2 w-5 h-5 sm:w-6 sm:h-6' src={logoImg} alt="google" />

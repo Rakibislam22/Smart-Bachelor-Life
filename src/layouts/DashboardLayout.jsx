@@ -445,7 +445,7 @@ const DashboardLayout = () => {
                                                 }}
                                                 className={`${isLight ? 'text-gray-600 hover:text-gray-800' : 'text-gray-400 hover:text-gray-200'} text-2xl shrink-0 ml-2`}
                                             >
-                                                âœ•
+                                                X
                                             </button>
                                         </div>
 
@@ -475,8 +475,8 @@ const DashboardLayout = () => {
                                                         className={`w-full rounded-lg border px-3 py-2 text-sm ${isLight ? 'bg-white border-gray-300 text-gray-900' : 'bg-gray-800 border-gray-600 text-white'}`}
                                                         placeholder="Enter group name"
                                                     />
-                                                    <ButtonPrimary onClick={handleSaveGroupTitle} disabled={isSavingGroupTitle}>
-                                                        {isSavingGroupTitle ? 'Saving...' : 'Save'}
+                                                    <ButtonPrimary onClick={handleSaveGroupTitle} loading={isSavingGroupTitle} loadingText="Saving...">
+                                                        Save
                                                     </ButtonPrimary>
                                                 </div>
                                                 <p className={`mt-2 text-xs ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
@@ -496,8 +496,8 @@ const DashboardLayout = () => {
                                                                 : 'Leave the group from your account settings.'}
                                                         </p>
                                                     </div>
-                                                    <ButtonSecondary onClick={handleLeaveGroup} disabled={isLeavingGroup}>
-                                                        {isLeavingGroup ? 'Leaving...' : 'Leave Group'}
+                                                    <ButtonSecondary onClick={handleLeaveGroup} loading={isLeavingGroup} loadingText="Leaving...">
+                                                        Leave Group
                                                     </ButtonSecondary>
                                                 </div>
                                             </div>
@@ -528,8 +528,8 @@ const DashboardLayout = () => {
                                                     <p className={`mb-4 sm:mb-6 text-sm sm:text-base ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>
                                                         Start as a manager and create a new group for your bachelor life management
                                                     </p>
-                                                    <ButtonPrimary onClick={handleCreateGroup} disabled={isManagerSubmitting}>
-                                                        {isManagerSubmitting ? 'Creating...' : 'Create Group as Manager'}
+                                                    <ButtonPrimary onClick={handleCreateGroup} loading={isManagerSubmitting} loadingText="Creating...">
+                                                        Create Group as Manager
                                                     </ButtonPrimary>
                                                 </div>
 
@@ -610,8 +610,8 @@ const DashboardLayout = () => {
                                                         />
                                                     </div>
 
-                                                    <ButtonPrimary type="submit" className="w-full" disabled={isJoinSubmitting}>
-                                                        {isJoinSubmitting ? 'Joining...' : 'Join Group'}
+                                                    <ButtonPrimary type="submit" className="w-full" loading={isJoinSubmitting} loadingText="Joining...">
+                                                        Join Group
                                                     </ButtonPrimary>
                                                 </form>
                                             </div>

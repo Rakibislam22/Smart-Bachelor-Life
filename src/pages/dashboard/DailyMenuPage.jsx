@@ -1,5 +1,6 @@
 import React, { use, useEffect, useMemo, useState } from 'react';
 import { AuthContext } from '../../provider/AuthContext';
+import Loading from '../../component/Loading';
 import { toast } from 'react-toastify';
 import { createMenu, deleteMenu, getMenus, updateMenu } from '../../utils/menuApi';
 
@@ -144,6 +145,10 @@ const DailyMenuPage = () => {
             { meal: 'Dinner', items: latestMenu.dinner || 'Not set' },
         ]
         : [];
+
+    if (isLoading && menus.length === 0) {
+        return <Loading />;
+    }
 
     return (
         <div className="space-y-4 sm:space-y-6">

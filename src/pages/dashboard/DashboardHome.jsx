@@ -1,5 +1,6 @@
 import React, { use, useCallback, useEffect, useMemo, useState } from 'react';
 import { AuthContext } from '../../provider/AuthContext';
+import Loading from '../../component/Loading';
 import { toast } from 'react-toastify';
 import { getExpenses } from '../../utils/expenseApi';
 import { getManagerGroupDetails } from '../../utils/groupApi';
@@ -83,7 +84,7 @@ const DashboardHome = () => {
             } else {
                 setMemberCount(1);
             }
-        } catch (error) {
+        } catch {
             toast.error('We could not load dashboard data right now. Please try again.');
         } finally {
             setIsLoading(false);
@@ -214,11 +215,6 @@ const DashboardHome = () => {
         [completedPaymentItems],
     );
 
-    const pendingPaymentItems = useMemo(
-        () => payments.filter((item) => item.status === 'PENDING').slice(0, 5),
-        [payments],
-    );
-
     const myPaymentItems = useMemo(() => {
         if (!user?.email) {
             return [];
@@ -242,11 +238,6 @@ const DashboardHome = () => {
 
     const myCompletedPayments = useMemo(
         () => (isManager ? myPaymentItems : payments).filter((item) => item.status === 'COMPLETED').length,
-        [isManager, myPaymentItems, payments],
-    );
-
-    const myRecentPaymentItems = useMemo(
-        () => (isManager ? myPaymentItems : payments).slice(0, 5),
         [isManager, myPaymentItems, payments],
     );
 
@@ -299,6 +290,10 @@ const DashboardHome = () => {
             .sort((a, b) => new Date(b.time) - new Date(a.time))
             .slice(0, 5);
     }, [expenses, payments]);
+
+    if (isLoading && expenses.length === 0 && payments.length === 0 && meals.length === 0 && bazarItems.length === 0) {
+        return <Loading />;
+    }
 
     return (
         <div className="space-y-4 sm:space-y-6">
@@ -457,7 +452,7 @@ const DashboardHome = () => {
                             </span>
                         </p>
                     </div>
-                )}                
+                )}
             </div>
 
             {/* Manager Only: Net Balance */}

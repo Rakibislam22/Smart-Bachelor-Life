@@ -1,6 +1,7 @@
 import React, { useState, use, useEffect, useMemo, useCallback } from 'react';
 import { AuthContext } from '../provider/AuthContext';
 import { toast } from 'react-toastify';
+import Loading from '../component/Loading';
 import { getMeals } from '../utils/mealApi';
 
 const GroupMealView = () => {
@@ -127,6 +128,9 @@ const GroupMealView = () => {
 
     return (
         <div>
+            {isLoading && mealEntries.length === 0 ? (
+                <Loading />
+            ) : null}
             <div>
                 {/* Header */}
                 <div className="mb-4 sm:mb-6">

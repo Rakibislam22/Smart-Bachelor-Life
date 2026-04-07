@@ -1,5 +1,6 @@
 import React, { use, useCallback, useEffect, useState } from 'react';
 import { AuthContext } from '../../provider/AuthContext';
+import Loading from '../../component/Loading';
 import { toast } from 'react-toastify';
 import {
     changeGroupUserRole,
@@ -157,6 +158,10 @@ const ManageMembersPage = () => {
             setIsRevoking('');
         }
     };
+
+    if (isLoading && members.length === 0 && pendingInvites.length === 0) {
+        return <Loading />;
+    }
 
     return (
         <div className="space-y-4 sm:space-y-6">

@@ -1,5 +1,6 @@
 import React, { use, useEffect, useMemo, useState } from 'react';
 import { AuthContext } from '../../provider/AuthContext';
+import Loading from '../../component/Loading';
 import { toast } from 'react-toastify';
 import { createBazar, getBazar } from '../../utils/bazarApi';
 
@@ -122,6 +123,10 @@ const BazarPage = () => {
 
         return 'Unknown';
     };
+
+    if (isLoading && items.length === 0) {
+        return <Loading />;
+    }
 
     return (
         <div className="space-y-4 sm:space-y-6">
