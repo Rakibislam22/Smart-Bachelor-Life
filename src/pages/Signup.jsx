@@ -34,6 +34,7 @@ const Signup = () => {
             .then(async (result) => {
                 const newUser = result.user;
                 setUser(newUser);
+                const token = await newUser.getIdToken();
 
                 await forUpdateProfile(fullName, data?.photoUrl);
 
@@ -43,7 +44,7 @@ const Signup = () => {
                     photoURL: data?.photoUrl || newUser.photoURL,
                 };
 
-                await registerUserInBackend(updatedUser);
+                await registerUserInBackend(updatedUser, token);
                 toast.success('Register successful!');
                 navigate('/group-selection');
             })

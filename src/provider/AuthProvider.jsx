@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, onIdTokenChanged, signInWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/firebase.init';
 import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 import { toast } from 'react-toastify';
@@ -61,7 +61,7 @@ const AuthProvider = ({ children }) => {
     }, [currentGroup]);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+        const unsubscribe = onIdTokenChanged(auth, async (currentUser) => {
             setUser(currentUser);
 
             if (!currentUser) {
