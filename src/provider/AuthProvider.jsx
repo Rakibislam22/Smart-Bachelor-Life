@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/firebase.init';
+import { registerUserInBackend, syncUserSession } from '../utils/authApi';
+import { toast } from 'react-toastify';
 
 const AuthProvider = ({ children }) => {
 
@@ -10,6 +12,15 @@ const AuthProvider = ({ children }) => {
     const [userRole, setUserRole] = useState(() => {
         // Check if role exists in localStorage
         return localStorage.getItem('userRole') || null;
+    });
+    const [isRoleSelectionCompleted, setIsRoleSelectionCompleted] = useState(false);
+    const [currentGroup, setCurrentGroup] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const storedGroup = localStorage.getItem('currentGroup');
+            return storedGroup ? JSON.parse(storedGroup) : null;
+        }
+
+        return null;
     });
     const provider = new GoogleAuthProvider();
 
@@ -42,9 +53,44 @@ const AuthProvider = ({ children }) => {
     }, [userRole]);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        if (currentGroup) {
+            localStorage.setItem('currentGroup', JSON.stringify(currentGroup));
+        } else {
+            localStorage.removeItem('currentGroup');
+        }
+    }, [currentGroup]);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
-            setLoading(false);
+
+            if (!currentUser) {
+                setUserRole(null);
+                setIsRoleSelectionCompleted(false);
+                setLoading(false);
+                return;
+            }
+
+            try {
+                await registerUserInBackend(currentUser);
+                const token = await currentUser.getIdToken();
+                const session = await syncUserSession(token);
+
+                const backendRole = session?.user?.role ? session.user.role.toLowerCase() : null;
+                const hasCurrentGroup = Boolean(session?.currentGroup);
+                setUserRole(hasCurrentGroup ? backendRole : null);
+                setIsRoleSelectionCompleted(Boolean(session?.user?.roleSelectionCompleted));
+                setCurrentGroup(session?.currentGroup || null);
+            } catch (error) {
+                // Avoid stale local role to prevent unauthorized role-only API calls.
+                setUserRole(null);
+                setIsRoleSelectionCompleted(false);
+                setCurrentGroup(null);
+                console.error('Auth sync failed:', error);
+                toast.error(error?.message || 'Failed to sync account with server');
+            } finally {
+                setLoading(false);
+            }
         })
 
         return () => {
@@ -85,7 +131,11 @@ const AuthProvider = ({ children }) => {
         loading,
         setLoading,
         userRole,
-        setUserRole
+        setUserRole,
+        isRoleSelectionCompleted,
+        setIsRoleSelectionCompleted,
+        currentGroup,
+        setCurrentGroup,
     }
 
     return (<AuthContext value={authData}>

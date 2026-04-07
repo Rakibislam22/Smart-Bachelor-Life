@@ -1,6 +1,6 @@
-import React, { use, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import Logo from '../component/common/Logo';
-import { Link, Outlet, useLocation } from 'react-router';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { TbCoinTakaFilled } from 'react-icons/tb';
 import { MdOutlineRestaurantMenu } from 'react-icons/md';
 import { FaAmazonPay, FaCartPlus } from 'react-icons/fa';
@@ -10,33 +10,253 @@ import ThemeToggle from '../component/common/ThemeToggle';
 import ButtonPrimary from '../component/common/ButtonPrimary';
 import ButtonSecondary from '../component/common/ButtonSecondary';
 import { AuthContext } from '../provider/AuthContext';
+import { toast } from 'react-toastify';
+import { ensureManagerGroupExists, joinAsMember, leaveGroup, registerAsManager, updateGroupTitle } from '../utils/groupApi';
+import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 
 const DashboardLayout = () => {
-    const { isLight, userRole, setUserRole } = use(AuthContext);
+    const { isLight, user, loading, userRole, setUserRole, isRoleSelectionCompleted, setIsRoleSelectionCompleted, currentGroup, setCurrentGroup } = use(AuthContext);
     const [showGroupModal, setShowGroupModal] = useState(false);
     const [showJoinForm, setShowJoinForm] = useState(false);
     const [groupCode, setGroupCode] = useState('');
+    const [groupTitleInput, setGroupTitleInput] = useState('');
+    const [isManagerSubmitting, setIsManagerSubmitting] = useState(false);
+    const [isJoinSubmitting, setIsJoinSubmitting] = useState(false);
+    const [isSavingGroupTitle, setIsSavingGroupTitle] = useState(false);
+    const [isLeavingGroup, setIsLeavingGroup] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+    const [isNavbarVisible, setIsNavbarVisible] = useState(true);
+    const sidebarHoverOpenTimer = useRef(null);
+    const sidebarHoverCloseTimer = useRef(null);
+    const lastScrollY = useRef(0);
     const location = useLocation();
+    const navigate = useNavigate();
+    const normalizedRole = userRole ? userRole.toLowerCase() : null;
 
-    const handleCreateGroup = () => {
-        setUserRole('manager');
-        setShowGroupModal(false);
-        setShowJoinForm(false);
+    useEffect(() => {
+        setGroupTitleInput(currentGroup?.title || '');
+    }, [currentGroup?.title]);
+
+    const isLargeScreen = () => {
+        return typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches;
     };
 
-    const handleJoinGroup = (e) => {
+    useEffect(() => {
+        return () => {
+            clearSidebarHoverTimers();
+        };
+    }, []);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+
+            if (currentScrollY <= 16) {
+                setIsNavbarVisible(true);
+                lastScrollY.current = currentScrollY;
+                return;
+            }
+
+            if (currentScrollY > lastScrollY.current + 4) {
+                setIsNavbarVisible(false);
+            } else if (currentScrollY < lastScrollY.current - 4) {
+                setIsNavbarVisible(true);
+            }
+
+            lastScrollY.current = currentScrollY;
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (loading || !user?.uid) {
+            return;
+        }
+
+        if (isRoleSelectionCompleted || normalizedRole) {
+            setShowGroupModal(false);
+            return;
+        }
+
+        if (!normalizedRole) {
+            setShowGroupModal(true);
+            setShowJoinForm(false);
+        }
+    }, [loading, user?.uid, normalizedRole, isRoleSelectionCompleted]);
+
+    const clearSidebarHoverTimers = () => {
+        if (sidebarHoverOpenTimer.current) {
+            clearTimeout(sidebarHoverOpenTimer.current);
+            sidebarHoverOpenTimer.current = null;
+        }
+
+        if (sidebarHoverCloseTimer.current) {
+            clearTimeout(sidebarHoverCloseTimer.current);
+            sidebarHoverCloseTimer.current = null;
+        }
+    };
+
+    const handleSidebarMouseEnter = () => {
+        if (!isLargeScreen()) {
+            return;
+        }
+
+        if (sidebarHoverCloseTimer.current) {
+            clearTimeout(sidebarHoverCloseTimer.current);
+            sidebarHoverCloseTimer.current = null;
+        }
+
+        if (isSidebarHovered) {
+            return;
+        }
+
+        sidebarHoverOpenTimer.current = setTimeout(() => {
+            setIsSidebarHovered(true);
+            sidebarHoverOpenTimer.current = null;
+        }, 120);
+    };
+
+    const handleSidebarMouseLeave = () => {
+        if (!isLargeScreen()) {
+            return;
+        }
+
+        if (sidebarHoverOpenTimer.current) {
+            clearTimeout(sidebarHoverOpenTimer.current);
+            sidebarHoverOpenTimer.current = null;
+        }
+
+        sidebarHoverCloseTimer.current = setTimeout(() => {
+            setIsSidebarHovered(false);
+            sidebarHoverCloseTimer.current = null;
+        }, 180);
+    };
+
+    const handleCreateGroup = async () => {
+        if (!user) {
+            toast.error('Please login first');
+            return;
+        }
+
+        try {
+            setIsManagerSubmitting(true);
+            await registerUserInBackend(user);
+            const token = await user.getIdToken();
+            await registerAsManager(user.email, token);
+            const groupResponse = await ensureManagerGroupExists(
+                {
+                    title: `${user.displayName || 'Manager'} Group`,
+                    address: 'Address not set',
+                },
+                token,
+            );
+
+            const session = await syncUserSession(token);
+            const backendRole = session?.user?.role ? session.user.role.toLowerCase() : 'manager';
+
+            setUserRole(backendRole);
+            setCurrentGroup(groupResponse?.group || groupResponse?.currentGroup || null);
+            setIsRoleSelectionCompleted(true);
+            setShowGroupModal(false);
+            setShowJoinForm(false);
+            toast.success('Manager setup completed successfully');
+        } catch (error) {
+            toast.error(error.message || 'Failed to register as manager');
+        } finally {
+            setIsManagerSubmitting(false);
+        }
+    };
+
+    const handleJoinGroup = async (e) => {
         e.preventDefault();
-        if (groupCode.trim()) {
-            setUserRole('user');
+
+        if (!groupCode.trim()) {
+            toast.error('Please enter a group code');
+            return;
+        }
+
+        if (!user) {
+            toast.error('Please login first');
+            return;
+        }
+
+        try {
+            setIsJoinSubmitting(true);
+            await registerUserInBackend(user);
+            const token = await user.getIdToken();
+            const joinResponse = await joinAsMember(groupCode.trim(), token);
+
+            const session = await syncUserSession(token);
+            const backendRole = session?.user?.role ? session.user.role.toLowerCase() : 'user';
+
+            setUserRole(backendRole);
+            setCurrentGroup(joinResponse?.group || session?.currentGroup || null);
+            setIsRoleSelectionCompleted(true);
             setShowGroupModal(false);
             setShowJoinForm(false);
             setGroupCode('');
+            toast.success('Joined group successfully');
+        } catch (error) {
+            toast.error(error.message || 'Failed to join group');
+        } finally {
+            setIsJoinSubmitting(false);
         }
     };
 
     const handleOpenGroupModal = () => {
         setShowGroupModal(true);
         setShowJoinForm(false);
+    };
+
+    const handleSaveGroupTitle = async () => {
+        if (!user || normalizedRole !== 'manager') {
+            return;
+        }
+
+        if (!groupTitleInput.trim()) {
+            toast.error('Please enter a group name');
+            return;
+        }
+
+        try {
+            setIsSavingGroupTitle(true);
+            const token = await user.getIdToken();
+            const data = await updateGroupTitle(groupTitleInput.trim(), token);
+            setCurrentGroup(data?.group || currentGroup);
+            toast.success('Group name updated successfully');
+        } catch (error) {
+            toast.error(error.message || 'Failed to update group name');
+        } finally {
+            setIsSavingGroupTitle(false);
+        }
+    };
+
+    const handleLeaveGroup = async () => {
+        if (!user || !currentGroup) {
+            return;
+        }
+
+        try {
+            setIsLeavingGroup(true);
+            const token = await user.getIdToken();
+            await leaveGroup(token);
+            setCurrentGroup(null);
+            setUserRole(null);
+            setIsRoleSelectionCompleted(false);
+            setShowGroupModal(false);
+            toast.success('You left the group successfully');
+            navigate('/group-selection');
+        } catch (error) {
+            toast.error(error.message || 'Failed to leave the group');
+        } finally {
+            setIsLeavingGroup(false);
+        }
     };
 
     // Render different sidebar items based on role
@@ -65,9 +285,9 @@ const DashboardLayout = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/meal-expense" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Meal Expense">
+                        <Link to="/dashboard/meal-expense" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Expense">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M16 8V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"></path><path d="M12 11v10"></path><path d="M8 11h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"></path></svg>
-                            <span className="is-drawer-close:hidden">Meal Expense</span>
+                            <span className="is-drawer-close:hidden">My Expense</span>
                         </Link>
                     </li>
                     <li>
@@ -131,6 +351,12 @@ const DashboardLayout = () => {
                         </Link>
                     </li>
                     <li>
+                        <Link to="/dashboard/bazar" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Bazar">
+                            <FaCartPlus className="my-1.5 inline-block size-6" />
+                            <span className="is-drawer-close:hidden">Bazar</span>
+                        </Link>
+                    </li>
+                    <li>
                         <Link to="/dashboard/payment" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Make Payment">
                             <FaAmazonPay className="my-1.5 inline-block size-6" />
                             <span className="is-drawer-close:hidden">Make Payment</span>
@@ -150,11 +376,17 @@ const DashboardLayout = () => {
     return (
         <div>
             <div className="drawer lg:drawer-open">
-                <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
+                <input
+                    id="my-drawer-4"
+                    type="checkbox"
+                    className="drawer-toggle"
+                    checked={isSidebarOpen || isSidebarHovered}
+                    onChange={(e) => setIsSidebarOpen(e.target.checked)}
+                />
                 <div className="drawer-content relative">
                     {/* Navbar */}
-                    <nav className={`navbar w-full  ${isLight ? 'bg-[#eeeeee]' : 'bg-[#15191e]'}`}>
-                        <label htmlFor="my-drawer-4" aria-label="open sidebar" className="hidden lg:inline-flex btn btn-square btn-ghost">
+                    <nav className={`sticky top-0 z-40 navbar w-full transition-transform duration-300 ${isNavbarVisible ? 'translate-y-0' : '-translate-y-full'} ${isLight ? 'bg-[#eeeeee]' : 'bg-[#15191e]'}`}>
+                        <label htmlFor="my-drawer-4" aria-label="open sidebar" className="hidden md:inline-flex lg:hidden btn btn-square btn-ghost">
                             {/* Sidebar toggle icon */}
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path><path d="M9 4v16"></path><path d="M14 10l2 2l-2 2"></path></svg>
                         </label>
@@ -174,6 +406,22 @@ const DashboardLayout = () => {
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4">
 
                         </div>
+
+                        {currentGroup && (
+                            <div className={`mb-4 rounded-2xl border px-4 py-3 sm:px-5 sm:py-4 ${isLight ? 'bg-white border-gray-200' : 'bg-gray-800 border-gray-700'}`}>
+                                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <p className={`text-xs uppercase tracking-wide ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>Current Group</p>
+                                        <h3 className={`text-lg sm:text-xl font-semibold ${isLight ? 'text-gray-900' : 'text-white'}`}>{currentGroup.title}</h3>
+                                        <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>{currentGroup.address || 'No address set'}</p>
+                                    </div>
+                                    <div className={`text-sm ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>
+                                        <p>Members: <span className="font-semibold">{currentGroup.memberCount ?? 0}</span></p>
+                                        {currentGroup.joinCode && <p>Join code: <span className="font-semibold">{currentGroup.joinCode}</span></p>}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Meal Sections - Stacked on Mobile, Side by Side on PC */}
 
@@ -201,7 +449,61 @@ const DashboardLayout = () => {
                                             </button>
                                         </div>
 
-                                        {!showJoinForm ? (
+                                        {currentGroup && (
+                                            <div className={`mb-6 rounded-xl border p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gray-900/40 border-gray-700'}`}>
+                                                <div className="flex flex-col gap-1">
+                                                    <p className={`text-xs uppercase tracking-wide ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>Current Group</p>
+                                                    <h3 className={`text-lg font-semibold ${isLight ? 'text-gray-900' : 'text-white'}`}>{currentGroup.title}</h3>
+                                                    <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>{currentGroup.address || 'No address set'}</p>
+                                                    {currentGroup.joinCode && (
+                                                        <p className={`text-sm mt-1 ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>
+                                                            Join code: <span className="font-semibold">{currentGroup.joinCode}</span>
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {currentGroup && normalizedRole === 'manager' && (
+                                            <div className={`mb-6 rounded-xl border p-4 ${isLight ? 'bg-white border-gray-200' : 'bg-gray-900/40 border-gray-700'}`}>
+                                                <h3 className={`text-base font-semibold mb-3 ${isLight ? 'text-gray-900' : 'text-white'}`}>Edit Group Name</h3>
+                                                <div className="flex flex-col sm:flex-row gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={groupTitleInput}
+                                                        onChange={(e) => setGroupTitleInput(e.target.value)}
+                                                        className={`w-full rounded-lg border px-3 py-2 text-sm ${isLight ? 'bg-white border-gray-300 text-gray-900' : 'bg-gray-800 border-gray-600 text-white'}`}
+                                                        placeholder="Enter group name"
+                                                    />
+                                                    <ButtonPrimary onClick={handleSaveGroupTitle} disabled={isSavingGroupTitle}>
+                                                        {isSavingGroupTitle ? 'Saving...' : 'Save'}
+                                                    </ButtonPrimary>
+                                                </div>
+                                                <p className={`mt-2 text-xs ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
+                                                    Manager can edit the group name from here.
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {currentGroup && (
+                                            <div className={`mb-6 rounded-xl border p-4 ${isLight ? 'bg-white border-gray-200' : 'bg-gray-900/40 border-gray-700'}`}>
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                                    <div>
+                                                        <h3 className={`text-base font-semibold ${isLight ? 'text-gray-900' : 'text-white'}`}>Leave Group</h3>
+                                                        <p className={`text-xs sm:text-sm ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
+                                                            {normalizedRole === 'manager'
+                                                                ? 'Manager can leave only after transferring the manager role.'
+                                                                : 'Leave the group from your account settings.'}
+                                                        </p>
+                                                    </div>
+                                                    <ButtonSecondary onClick={handleLeaveGroup} disabled={isLeavingGroup}>
+                                                        {isLeavingGroup ? 'Leaving...' : 'Leave Group'}
+                                                    </ButtonSecondary>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {!currentGroup && (!showJoinForm ? (
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                                 {/* Create Group Option */}
                                                 <div className={`p-4 sm:p-8 rounded-xl border-2 ${isLight ? 'border-blue-200 bg-blue-50 hover:border-blue-400' : 'border-blue-700 bg-blue-900 hover:border-blue-500'} transition-all text-center`}>
@@ -226,8 +528,8 @@ const DashboardLayout = () => {
                                                     <p className={`mb-4 sm:mb-6 text-sm sm:text-base ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>
                                                         Start as a manager and create a new group for your bachelor life management
                                                     </p>
-                                                    <ButtonPrimary onClick={handleCreateGroup}>
-                                                        Create Group as Manager
+                                                    <ButtonPrimary onClick={handleCreateGroup} disabled={isManagerSubmitting}>
+                                                        {isManagerSubmitting ? 'Creating...' : 'Create Group as Manager'}
                                                     </ButtonPrimary>
                                                 </div>
 
@@ -308,12 +610,12 @@ const DashboardLayout = () => {
                                                         />
                                                     </div>
 
-                                                    <ButtonPrimary type="submit" className="w-full">
-                                                        Join Group
+                                                    <ButtonPrimary type="submit" className="w-full" disabled={isJoinSubmitting}>
+                                                        {isJoinSubmitting ? 'Joining...' : 'Join Group'}
                                                     </ButtonPrimary>
                                                 </form>
                                             </div>
-                                        )}
+                                        ))}
                                     </div>
                                 </div>
                             </div>
@@ -350,7 +652,7 @@ const DashboardLayout = () => {
                                         </Link>
                                         <Link to="/dashboard/meal-expense" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/meal-expense' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-5"><path d="M16 8V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"></path><path d="M12 11v10"></path><path d="M8 11h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"></path></svg>
-                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">M.Expense</span>
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">My Exp.</span>
                                         </Link>
                                         <Link to="/dashboard/total-expense" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/total-expense' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
                                             <TbCoinTakaFilled className="size-5" />
@@ -391,6 +693,10 @@ const DashboardLayout = () => {
                                             <MdOutlineRestaurantMenu className="size-5" />
                                             <span className="text-[10px] mt-0.5 truncate w-full text-center">Menu</span>
                                         </Link>
+                                        <Link to="/dashboard/bazar" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/bazar' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <FaCartPlus className="size-5" />
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Bazar</span>
+                                        </Link>
                                         <Link to="/dashboard/payment" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/payment' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
                                             <FaAmazonPay className="size-5" />
                                             <span className="text-[10px] mt-0.5 truncate w-full text-center">Payment</span>
@@ -413,7 +719,11 @@ const DashboardLayout = () => {
                     </nav>
                 </div>
 
-                <div className="drawer-side is-drawer-close:overflow-visible hidden lg:block">
+                <div
+                    className="drawer-side is-drawer-close:overflow-visible hidden lg:block"
+                    onMouseEnter={handleSidebarMouseEnter}
+                    onMouseLeave={handleSidebarMouseLeave}
+                >
                     <label htmlFor="my-drawer-4" aria-label="close sidebar" className="drawer-overlay"></label>
                     <div className={`${isLight ? 'bg-[#e5e7eb]' : 'bg-[#191e24]'} flex min-h-full flex-col items-start is-drawer-close:w-16 is-drawer-open:w-64`}>
                         {/* Sidebar content here */}

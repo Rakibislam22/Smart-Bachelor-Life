@@ -6,6 +6,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { AuthContext } from '../provider/AuthContext';
 import { toast } from 'react-toastify';
 import ButtonPrimary from '../component/common/ButtonPrimary';
+import { registerUserInBackend } from '../utils/authApi';
 
 const Signup = () => {
 
@@ -30,20 +31,21 @@ const Signup = () => {
         const fullName = `${data.firstName} ${data.lastName}`;
 
         createUser(data.email, data.password)
-            .then((result) => {
+            .then(async (result) => {
                 const newUser = result.user;
                 setUser(newUser);
+
+                await forUpdateProfile(fullName, data?.photoUrl);
+
+                const updatedUser = {
+                    ...newUser,
+                    displayName: fullName,
+                    photoURL: data?.photoUrl || newUser.photoURL,
+                };
+
+                await registerUserInBackend(updatedUser);
                 toast.success('Register successful!');
-
-                // const userToDatabase = { name: data.name, email: data.email, photoURL: data?.photoUrl, role: "Student" };
-
-                // axiosIn.post('/users', userToDatabase).then();
-
-                forUpdateProfile(fullName, data?.photoUrl)
-                    .then(() => {
-                        navigate('/group-selection');
-                    })
-                    .catch((err) => toast.error(err.message));
+                navigate('/group-selection');
             })
             .catch((error) => {
                 toast.error(error.message);
@@ -53,14 +55,11 @@ const Signup = () => {
 
 
     const handleGoogle = () => {
-        google().then(result => {
+        google().then(async result => {
             toast.success('Login successful!');
             setUser(result.user);
+            await registerUserInBackend(result.user);
             navigate("/group-selection");
-            // const newUser = result.user;
-
-            // const userToDatabase = { name: newUser.displayName, email: newUser.email, photoURL: newUser.photoUrl, role: "Student" };
-            // axiosIn.post('/users', userToDatabase).then();
 
         }).catch(error => {
             const errorMessage = error.message;

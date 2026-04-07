@@ -1,120 +1,292 @@
-import React, { use } from 'react';
+import React, { use, useEffect, useMemo, useState } from 'react';
 import { AuthContext } from '../../provider/AuthContext';
+import { toast } from 'react-toastify';
+import { getExpenses } from '../../utils/expenseApi';
+import { getUserPayments } from '../../utils/paymentApi';
+import { getMeals } from '../../utils/mealApi';
+import { getBazar } from '../../utils/bazarApi';
+
+const getCurrentMonthValue = () => {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${now.getFullYear()}-${month}`;
+};
+
+const getMonthRange = (monthValue) => {
+    const [year, month] = String(monthValue || '').split('-').map(Number);
+    if (!year || !month) {
+        return { dateFrom: null, dateTo: null };
+    }
+
+    const dateFrom = new Date(year, month - 1, 1);
+    const dateTo = new Date(year, month, 0);
+
+    return {
+        dateFrom: dateFrom.toISOString().slice(0, 10),
+        dateTo: dateTo.toISOString().slice(0, 10),
+    };
+};
+
+const isWithinSelectedMonth = (dateValue, selectedMonth) => {
+    if (!dateValue || !selectedMonth) {
+        return false;
+    }
+
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) {
+        return false;
+    }
+
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    return monthKey === selectedMonth;
+};
 
 const MealExpensePage = () => {
-    const { isLight } = use(AuthContext);
+    const { isLight, user, currentGroup } = use(AuthContext);
+    const groupId = currentGroup?.id || currentGroup?._id || null;
+    const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthValue());
+    const [expenses, setExpenses] = useState([]);
+    const [meals, setMeals] = useState([]);
+    const [bazarItems, setBazarItems] = useState([]);
+    const [myPayments, setMyPayments] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Demo data: Group members' meals
-    const mealLog = [
-        { member: 'You', meals: 20 },
-        { member: 'Ahmed', meals: 22 },
-        { member: 'Karim', meals: 18 },
-        { member: 'Rashed', meals: 20 },
-    ];
+    useEffect(() => {
+        const loadData = async () => {
+            if (!user || !groupId) {
+                return;
+            }
 
-    // Other group expenses
-    const otherExpenses = [
-        { name: 'Rent', amount: 8000 },
-        { name: 'Utilities (Gas, Water, Electric)', amount: 2500 },
-        { name: 'Cook Bill', amount: 3000 },
-        { name: 'Miscellaneous', amount: 1500 },
-    ];
+            try {
+                setIsLoading(true);
+                const token = await user.getIdToken();
+                const { dateFrom, dateTo } = getMonthRange(selectedMonth);
+                const [expenseData, paymentData, mealData, bazarData] = await Promise.all([
+                    getExpenses(token, { dateFrom, dateTo }),
+                    getUserPayments(token),
+                    getMeals(token, { groupID: groupId }),
+                    getBazar(token, { groupID: groupId }),
+                ]);
+                setExpenses(expenseData?.expenses || []);
+                setMyPayments(paymentData?.payments || []);
+                setMeals(mealData?.data || []);
+                setBazarItems(bazarData?.data || []);
+            } catch (error) {
+                toast.error(error.message || 'Failed to load expense data');
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-    // Total bazar cost from shopping
-    const totalBazarCost = 5130; // ৳ 1900 + 1760 + 850 + 620
+        loadData();
+    }, [user, groupId, selectedMonth]);
 
-    // Calculate total group meals
-    const totalGroupMeals = mealLog.reduce((sum, item) => sum + item.meals, 0);
+    const selectedMeals = useMemo(
+        () => meals.filter((item) => isWithinSelectedMonth(item.date || item.createdAt, selectedMonth)),
+        [meals, selectedMonth],
+    );
 
-    // Calculate meal rate
-    const mealRate = totalBazarCost / totalGroupMeals;
+    const selectedBazarItems = useMemo(
+        () => bazarItems.filter((item) => isWithinSelectedMonth(item.date || item.createdAt, selectedMonth)),
+        [bazarItems, selectedMonth],
+    );
 
-    // Calculate total other expenses
-    const totalOtherExpenses = otherExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const totalBazarCost = useMemo(
+        () => selectedBazarItems.reduce((sum, item) => {
+            const itemTotal = Array.isArray(item?.price)
+                ? item.price.reduce((acc, value) => acc + Number(value || 0), 0)
+                : Number(item?.price || 0);
+            return sum + itemTotal;
+        }, 0),
+        [selectedBazarItems],
+    );
 
-    // Number of members
-    const totalMembers = mealLog.length;
+    const totalMealCount = useMemo(
+        () => selectedMeals.reduce((sum, item) => sum + Number(item?.mealCount || 0), 0),
+        [selectedMeals],
+    );
 
-    // Per member share of other expenses
-    const perMemberOtherExpenses = totalOtherExpenses / totalMembers;
+    const mealRate = useMemo(
+        () => (totalMealCount > 0 ? totalBazarCost / totalMealCount : 0),
+        [totalBazarCost, totalMealCount],
+    );
 
-    // Your meal cost (assuming "You" is the first member)
-    const yourMeals = mealLog[0].meals;
-    const yourMealCost = yourMeals * mealRate;
-    const yourTotalCost = yourMealCost + perMemberOtherExpenses;
+    const myMealCount = useMemo(
+        () => selectedMeals
+            .filter((item) => item?.userID?.email && user?.email && item.userID.email.toLowerCase() === user.email.toLowerCase())
+            .reduce((sum, item) => sum + Number(item?.mealCount || 0), 0),
+        [selectedMeals, user?.email],
+    );
+
+    const myMealExpense = useMemo(
+        () => myMealCount * mealRate,
+        [myMealCount, mealRate],
+    );
+
+    const otherGroupExpense = useMemo(
+        () => expenses
+            .filter((item) => String(item.category || '').toLowerCase() !== 'bazar')
+            .reduce((sum, item) => sum + Number(item.amount || 0), 0),
+        [expenses],
+    );
+
+    const latestExpenses = useMemo(
+        () => expenses.slice(0, 6),
+        [expenses],
+    );
+
+    const memberCount = useMemo(() => {
+        const parsed = Number(currentGroup?.memberCount);
+        if (Number.isFinite(parsed) && parsed > 0) {
+            return parsed;
+        }
+
+        if (Array.isArray(currentGroup?.userIDs)) {
+            return currentGroup.userIDs.length + 1;
+        }
+
+        return 1;
+    }, [currentGroup?.memberCount, currentGroup?.userIDs]);
+
+    const myOtherSharedExpense = useMemo(
+        () => otherGroupExpense / memberCount,
+        [otherGroupExpense, memberCount],
+    );
+
+    const myTotalExpense = useMemo(
+        () => myMealExpense + myOtherSharedExpense,
+        [myMealExpense, myOtherSharedExpense],
+    );
+
+    const myCompletedPaymentsTotal = useMemo(
+        () => myPayments
+            .filter((item) => isWithinSelectedMonth(item.createdAt, selectedMonth))
+            .filter((item) => item.status === 'COMPLETED')
+            .reduce((sum, item) => sum + Number(item.amount || 0), 0),
+        [myPayments, selectedMonth],
+    );
+
+    const myBalance = useMemo(
+        () => myCompletedPaymentsTotal - myTotalExpense,
+        [myCompletedPaymentsTotal, myTotalExpense],
+    );
+
+    const categorySummary = useMemo(() => {
+        return expenses.reduce((acc, item) => {
+            const key = item.category || 'other';
+            acc[key] = (acc[key] || 0) + Number(item.amount || 0);
+            return acc;
+        }, {});
+    }, [expenses]);
 
     return (
         <div className="space-y-4 sm:space-y-6">
             <div>
-                <h1 className={`text-xl sm:text-3xl font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>Meal Expense</h1>
-                <p className={`${isLight ? 'text-gray-600' : 'text-gray-400'} mt-1 text-sm sm:text-base`}>Meal cost calculation based on group bazaar</p>
+                <h1 className={`text-xl sm:text-3xl font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>My Expense</h1>
+                <p className={`${isLight ? 'text-gray-600' : 'text-gray-400'} mt-1 text-sm sm:text-base`}>Timeline meal rate, your meal expense, and final due or advance</p>
             </div>
 
-            {/* Meal Rate Calculation */}
             <div className={`rounded-xl border p-4 sm:p-5 ${isLight ? 'bg-white border-gray-200' : 'bg-gray-800 border-gray-700'}`}>
-                <h2 className={`text-lg font-semibold mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>Meal Rate Calculation</h2>
-                <div className="space-y-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h2 className={`text-lg font-semibold ${isLight ? 'text-gray-900' : 'text-white'}`}>Expense Timeline</h2>
+                        <p className={`text-xs sm:text-sm ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>Select month to calculate meal rate and expense summary</p>
+                    </div>
+                    <input
+                        type="month"
+                        value={selectedMonth}
+                        onChange={(event) => setSelectedMonth(event.target.value)}
+                        className={`rounded-lg border px-3 py-2 text-sm ${isLight ? 'bg-white border-gray-300 text-gray-900' : 'bg-gray-700 border-gray-600 text-white'}`}
+                    />
+                </div>
+
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div className={`p-3 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-gray-700/40'}`}>
-                        <p className="text-sm">Total Bazaar Cost</p>
-                        <p className="font-semibold">৳ {totalBazarCost.toLocaleString()}</p>
+                        <p className="text-xs uppercase tracking-wide opacity-70">Total Bazar Cost</p>
+                        <p className="font-semibold">৳ {totalBazarCost.toFixed(2)}</p>
                     </div>
                     <div className={`p-3 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-gray-700/40'}`}>
-                        <p className="text-sm">Total Group Meals</p>
-                        <p className="font-semibold">{totalGroupMeals} meals</p>
+                        <p className="text-xs uppercase tracking-wide opacity-70">Total Meal Count</p>
+                        <p className="font-semibold">{totalMealCount.toFixed(2)}</p>
                     </div>
                     <div className={`p-3 rounded-lg ${isLight ? 'bg-blue-50 border border-blue-200' : 'bg-blue-900/20 border border-blue-800'}`}>
-                        <p className="text-sm">Meal Rate</p>
-                        <p className="font-bold text-lg">৳ {mealRate.toFixed(2)} <span className="text-sm font-normal">per meal</span></p>
+                        <p className="text-xs uppercase tracking-wide opacity-70">Meal Rate</p>
+                        <p className="font-bold">৳ {mealRate.toFixed(2)}</p>
+                    </div>
+                    <div className={`p-3 rounded-lg ${isLight ? 'bg-violet-50 border border-violet-200' : 'bg-violet-900/20 border border-violet-800'}`}>
+                        <p className="text-xs uppercase tracking-wide opacity-70">My Meal Count</p>
+                        <p className="font-bold">{myMealCount.toFixed(2)}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div className={`rounded-xl border p-4 sm:p-5 ${isLight ? 'bg-white border-gray-200' : 'bg-gray-800 border-gray-700'}`}>
+                <h2 className={`text-lg font-semibold mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>My Expense Summary</h2>
+                {isLoading && <p className="text-sm mb-3">Loading expense data...</p>}
+                <div className="space-y-3">
+                    <div className={`p-3 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-gray-700/40'}`}>
+                        <p className="text-sm">My Meal Expense</p>
+                        <p className="font-semibold">৳ {myMealExpense.toFixed(2)}</p>
+                    </div>
+                    <div className={`p-3 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-gray-700/40'}`}>
+                        <p className="text-sm">Other Shared Expense</p>
+                        <p className="font-semibold">৳ {myOtherSharedExpense.toFixed(2)}</p>
+                    </div>
+                    <div className={`p-3 rounded-lg ${isLight ? 'bg-blue-50 border border-blue-200' : 'bg-blue-900/20 border border-blue-800'}`}>
+                        <p className="text-sm">My Total Expense</p>
+                        <p className="font-bold text-lg">৳ {myTotalExpense.toFixed(2)}</p>
                         <p className={`text-xs mt-1 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
-                            {totalBazarCost.toLocaleString()} ÷ {totalGroupMeals} = {mealRate.toFixed(2)}
+                            Meal {myMealExpense.toFixed(2)} + Shared {myOtherSharedExpense.toFixed(2)}
+                        </p>
+                    </div>
+                    <div className={`p-3 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-gray-700/40'}`}>
+                        <p className="text-sm">My Deposit (Completed)</p>
+                        <p className="font-semibold">৳ {myCompletedPaymentsTotal.toFixed(2)}</p>
+                    </div>
+                    <div
+                        className={`p-3 rounded-lg ${myBalance >= 0
+                            ? (isLight ? 'bg-green-50 border border-green-200' : 'bg-green-900/20 border-green-800')
+                            : (isLight ? 'bg-red-50 border border-red-200' : 'bg-red-900/20 border-red-800')
+                            }`}
+                    >
+                        <p className="text-sm">My Balance</p>
+                        <p className={`font-bold text-lg ${myBalance >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                            {myBalance >= 0
+                                ? `Advance ৳ ${myBalance.toFixed(2)}`
+                                : `Due ৳ ${Math.abs(myBalance).toFixed(2)}`}
                         </p>
                     </div>
                 </div>
             </div>
 
-            {/* Other Group Expenses */}
             <div className={`rounded-xl border p-4 sm:p-5 ${isLight ? 'bg-white border-gray-200' : 'bg-gray-800 border-gray-700'}`}>
-                <h2 className={`text-lg font-semibold mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>Other Group Expenses</h2>
+                <h2 className={`text-lg font-semibold mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>Recent Expense Entries</h2>
                 <div className="space-y-2">
-                    {otherExpenses.map((expense) => (
-                        <div key={expense.name} className={`flex items-center justify-between p-3 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-gray-700/40'}`}>
-                            <p className="text-sm">{expense.name}</p>
-                            <p className="font-semibold">৳ {expense.amount.toLocaleString()}</p>
+                    {latestExpenses.length === 0 && (
+                        <p className="text-sm">No expense entries found.</p>
+                    )}
+                    {latestExpenses.map((expense) => (
+                        <div key={expense._id} className={`flex items-center justify-between p-3 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-gray-700/40'}`}>
+                            <div>
+                                <p className="text-sm font-medium">{expense.title}</p>
+                                <p className="text-xs opacity-70">{expense.category} • {new Date(expense.createdAt).toLocaleDateString()}</p>
+                            </div>
+                            <p className="text-sm font-semibold">৳ {Number(expense.amount || 0).toLocaleString()}</p>
                         </div>
                     ))}
                 </div>
-                <div className={`mt-4 pt-4 border-t ${isLight ? 'border-gray-200' : 'border-gray-700'} flex items-center justify-between`}>
-                    <p className="font-semibold">Total Other Expenses</p>
-                    <p className="font-bold text-lg">৳ {totalOtherExpenses.toLocaleString()}</p>
-                </div>
-                <div className={`mt-3 p-3 rounded-lg ${isLight ? 'bg-orange-50 border border-orange-200' : 'bg-orange-900/20 border border-orange-800'}`}>
-                    <p className="text-sm">Per Member Share</p>
-                    <p className="font-bold">৳ {perMemberOtherExpenses.toFixed(2)}</p>
-                    <p className={`text-xs mt-1 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
-                        {totalOtherExpenses.toLocaleString()} ÷ {totalMembers} members = {perMemberOtherExpenses.toFixed(2)}
-                    </p>
-                </div>
             </div>
 
-            {/* Your Total Expense */}
             <div className={`rounded-xl border p-4 sm:p-5 ${isLight ? 'bg-white border-gray-200' : 'bg-gray-800 border-gray-700'}`}>
-                <h2 className={`text-lg font-semibold mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>Your Total Expense</h2>
-                <div className="space-y-3">
-                    <div className={`p-3 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-gray-700/40'}`}>
-                        <p className="text-sm">Meal Cost</p>
-                        <p className="font-semibold">{yourMeals} meals × ৳ {mealRate.toFixed(2)} = ৳ {yourMealCost.toFixed(2)}</p>
-                    </div>
-                    <div className={`p-3 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-gray-700/40'}`}>
-                        <p className="text-sm">Other Expense Share</p>
-                        <p className="font-semibold">৳ {perMemberOtherExpenses.toFixed(2)}</p>
-                    </div>
-                    <div className={`p-3 rounded-lg ${isLight ? 'bg-green-50 border border-green-200' : 'bg-green-900/20 border border-green-800'}`}>
-                        <p className="text-sm">Total Amount</p>
-                        <p className="font-bold text-lg">৳ {yourTotalCost.toFixed(2)}</p>
-                        <p className={`text-xs mt-1 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
-                            {yourMealCost.toFixed(2)} + {perMemberOtherExpenses.toFixed(2)} = {yourTotalCost.toFixed(2)}
-                        </p>
-                    </div>
+                <h2 className={`text-lg font-semibold mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>Expense by Category</h2>
+                <div className="space-y-2">
+                    {Object.keys(categorySummary).length === 0 && <p className="text-sm">No category data found.</p>}
+                    {Object.entries(categorySummary).map(([category, amount]) => (
+                        <div key={category} className={`flex items-center justify-between p-3 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-gray-700/40'}`}>
+                            <p className="text-sm capitalize">{category}</p>
+                            <p className="font-semibold">৳ {Number(amount).toLocaleString()}</p>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
