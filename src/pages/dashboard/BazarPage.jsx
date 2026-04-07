@@ -37,7 +37,7 @@ const BazarPage = () => {
                 const data = await getBazar(token, { groupID: groupId });
                 setItems(data?.data || []);
             } catch (error) {
-                toast.error(error.message || 'Failed to load bazar entries');
+                toast.error('We could not load bazar entries right now. Please try again.');
             } finally {
                 setIsLoading(false);
             }
@@ -95,7 +95,7 @@ const BazarPage = () => {
             const refreshed = await getBazar(token, { groupID: groupId });
             setItems(refreshed?.data || []);
         } catch (error) {
-            toast.error(error.message || 'Failed to add bazar detail');
+            toast.error('We could not add bazar detail right now. Please try again.');
         } finally {
             setIsSaving(false);
         }

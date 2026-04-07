@@ -84,7 +84,7 @@ const DashboardHome = () => {
                 setMemberCount(1);
             }
         } catch (error) {
-            toast.error(error.message || 'Failed to load dashboard data');
+            toast.error('We could not load dashboard data right now. Please try again.');
         } finally {
             setIsLoading(false);
         }

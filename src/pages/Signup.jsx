@@ -48,8 +48,8 @@ const Signup = () => {
                 toast.success('Register successful!');
                 navigate('/group-selection');
             })
-            .catch((error) => {
-                toast.error(error.message);
+            .catch(() => {
+                toast.error('Something went wrong. Please try again.');
             })
 
     };
@@ -62,9 +62,8 @@ const Signup = () => {
             await registerUserInBackend(result.user);
             navigate("/group-selection");
 
-        }).catch(error => {
-            const errorMessage = error.message;
-            toast.error(errorMessage);
+        }).catch(() => {
+            toast.error('Something went wrong. Please try again.');
         });
     }
 

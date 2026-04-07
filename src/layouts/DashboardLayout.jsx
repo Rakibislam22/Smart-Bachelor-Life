@@ -167,7 +167,7 @@ const DashboardLayout = () => {
             setShowJoinForm(false);
             toast.success('Manager setup completed successfully');
         } catch (error) {
-            toast.error(error.message || 'Failed to register as manager');
+            toast.error('We could not register as manager right now. Please try again.');
         } finally {
             setIsManagerSubmitting(false);
         }
@@ -203,7 +203,7 @@ const DashboardLayout = () => {
             setGroupCode('');
             toast.success('Joined group successfully');
         } catch (error) {
-            toast.error(error.message || 'Failed to join group');
+            toast.error('We could not join group right now. Please try again.');
         } finally {
             setIsJoinSubmitting(false);
         }
@@ -231,7 +231,7 @@ const DashboardLayout = () => {
             setCurrentGroup(data?.group || currentGroup);
             toast.success('Group name updated successfully');
         } catch (error) {
-            toast.error(error.message || 'Failed to update group name');
+            toast.error('We could not update group name right now. Please try again.');
         } finally {
             setIsSavingGroupTitle(false);
         }
@@ -253,7 +253,7 @@ const DashboardLayout = () => {
             toast.success('You left the group successfully');
             navigate('/group-selection');
         } catch (error) {
-            toast.error(error.message || 'Failed to leave the group');
+            toast.error('We could not leave the group right now. Please try again.');
         } finally {
             setIsLeavingGroup(false);
         }

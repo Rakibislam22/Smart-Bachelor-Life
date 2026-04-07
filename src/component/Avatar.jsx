@@ -10,7 +10,7 @@ const Avatar = () => {
     const { user, isLight } = use(AuthContext);
 
     const handleLogOut = () => {
-        signOut(auth).then(() => { toast.success('Logout successful!'); }).catch(err => { toast.error(err) });
+        signOut(auth).then(() => { toast.success('You have logged out successfully.'); }).catch(() => { toast.error('Could not log you out right now. Please try again.'); });
     }
     return (
         <div className="dropdown dropdown-end ">

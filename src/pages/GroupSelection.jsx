@@ -46,7 +46,7 @@ const GroupSelection = () => {
             toast.success('You are now registered as manager');
             navigate('/dashboard');
         } catch (error) {
-            toast.error(error.message || 'Failed to register as manager');
+            toast.error('We could not register as manager right now. Please try again.');
         } finally {
             setIsManagerSubmitting(false);
         }
@@ -80,7 +80,7 @@ const GroupSelection = () => {
             toast.success('Joined group successfully');
             navigate('/dashboard');
         } catch (error) {
-            toast.error(error.message || 'Failed to join group');
+            toast.error('We could not join group right now. Please try again.');
         } finally {
             setIsJoinSubmitting(false);
         }

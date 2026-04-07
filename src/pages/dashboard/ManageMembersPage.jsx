@@ -70,7 +70,7 @@ const ManageMembersPage = () => {
             setMembers(mappedMembers);
             setPendingInvites(pendingEmails);
         } catch (error) {
-            toast.error(error.message || 'Failed to load group members');
+            toast.error('We could not load group members right now. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -99,7 +99,7 @@ const ManageMembersPage = () => {
             toast.success('Invite sent successfully');
             setInviteEmails('');
         } catch (error) {
-            toast.error(error.message || 'Failed to send invite');
+            toast.error('We could not send invite right now. Please try again.');
         } finally {
             setIsInviting(false);
         }
@@ -116,7 +116,7 @@ const ManageMembersPage = () => {
             toast.success('Manager role transferred successfully');
             await loadGroupDetails();
         } catch (error) {
-            toast.error(error.message || 'Failed to change role');
+            toast.error('We could not change role right now. Please try again.');
         }
     };
 
@@ -131,7 +131,7 @@ const ManageMembersPage = () => {
             toast.success('Member removed successfully');
             await loadGroupDetails();
         } catch (error) {
-            toast.error(error.message || 'Failed to remove member');
+            toast.error('We could not remove member right now. Please try again.');
         }
     };
 
@@ -147,7 +147,7 @@ const ManageMembersPage = () => {
             toast.success('Invite revoked successfully');
             await loadGroupDetails();
         } catch (error) {
-            toast.error(error.message || 'Failed to revoke invite');
+            toast.error('We could not revoke invite right now. Please try again.');
         } finally {
             setIsRevoking('');
         }

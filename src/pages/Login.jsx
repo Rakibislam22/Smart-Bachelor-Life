@@ -39,9 +39,8 @@ const Login = () => {
             const postLoginPath = await getPostLoginPath(result.user);
             toast.success('Login successful!');
             navigate(postLoginPath);
-        }).catch(error => {
-            const errorMessage = error.message;
-            toast.error(errorMessage);
+        }).catch(() => {
+            toast.error('Something went wrong. Please try again.');
 
         })
     };
@@ -54,9 +53,8 @@ const Login = () => {
             const postLoginPath = await getPostLoginPath(result.user);
             navigate(postLoginPath);
 
-        }).catch(error => {
-            const errorMessage = error.message;
-            toast.error(errorMessage);
+        }).catch(() => {
+            toast.error('Something went wrong. Please try again.');
         });
     }
 

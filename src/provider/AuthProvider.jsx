@@ -87,7 +87,7 @@ const AuthProvider = ({ children }) => {
                 setIsRoleSelectionCompleted(false);
                 setCurrentGroup(null);
                 console.error('Auth sync failed:', error);
-                toast.error(error?.message || 'Failed to sync account with server');
+                toast.error('We could not sync account with server right now. Please try again.');
             } finally {
                 setLoading(false);
             }

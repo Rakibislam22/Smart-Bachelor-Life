@@ -20,8 +20,8 @@ const GroupMealView = () => {
                 const token = await user.getIdToken();
                 const data = await getMeals(token, { groupID: currentGroup.id });
                 setMealEntries(data?.data || []);
-            } catch (error) {
-                toast.error(error.message || 'Failed to load group meals');
+            } catch {
+                toast.error('We could not load group meals right now. Please try again.');
             } finally {
                 setIsLoading(false);
             }
@@ -177,7 +177,7 @@ const GroupMealView = () => {
                                     >
                                         <td className={`sticky left-0 z-10 px-4 py-3 border-r ${isLight ? 'bg-white border-gray-300' : 'bg-gray-800 border-gray-600'}`}>
                                             <div className="flex items-center gap-3 pr-5">
-                                                
+
                                                 <span className="font-semibold whitespace-nowrap">
                                                     {member.name}
                                                 </span>

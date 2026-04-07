@@ -73,7 +73,7 @@ const PaymentPage = () => {
             return true;
         } catch (error) {
             if (!silent) {
-                toast.error(error.message || 'Failed to load payments');
+                toast.error('We could not load payments right now. Please try again.');
             }
             return false;
         } finally {
@@ -213,7 +213,7 @@ const PaymentPage = () => {
             setCurrentGroup(response?.group || currentGroup);
             toast.success('Payment notice updated successfully');
         } catch (error) {
-            toast.error(error.message || 'Failed to update payment notice');
+            toast.error('We could not update payment notice right now. Please try again.');
         } finally {
             setIsSavingNotice(false);
         }
@@ -273,7 +273,7 @@ const PaymentPage = () => {
             toast.success('Payment created successfully');
             setFormData({ amount: '', paymentMethod: 'Bkash', senderNumber: '', transactionID: '' });
         } catch (error) {
-            toast.error(error.message || 'Failed to create payment');
+            toast.error('We could not create payment right now. Please try again.');
         } finally {
             setIsStripeRedirecting(false);
         }
@@ -292,7 +292,7 @@ const PaymentPage = () => {
             )));
             toast.success('Payment confirmed successfully');
         } catch (error) {
-            toast.error(error.message || 'Failed to confirm payment');
+            toast.error('We could not confirm payment right now. Please try again.');
         }
     };
 
@@ -309,7 +309,7 @@ const PaymentPage = () => {
             )));
             toast.success('Payment rejected successfully');
         } catch (error) {
-            toast.error(error.message || 'Failed to reject payment');
+            toast.error('We could not reject payment right now. Please try again.');
         }
     };
 

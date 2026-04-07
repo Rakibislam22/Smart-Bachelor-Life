@@ -81,7 +81,7 @@ const MealCalendar = () => {
                 setMealData(mapped);
                 setMealEntryIdByDate(entryMap);
             } catch (error) {
-                toast.error(error.message || 'Failed to load meal records');
+                toast.error('We could not load meal records right now. Please try again.');
             }
         };
 
@@ -194,7 +194,7 @@ const MealCalendar = () => {
             setMeals({ breakfast: 0, lunch: 0, dinner: 0 });
             toast.success(mealEntryId ? 'Meal updated successfully' : 'Meal added successfully');
         } catch (error) {
-            toast.error(error.message || 'Failed to save meal');
+            toast.error('We could not save meal right now. Please try again.');
         } finally {
             setIsSaving(false);
         }

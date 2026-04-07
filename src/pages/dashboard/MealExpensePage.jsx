@@ -72,7 +72,7 @@ const MealExpensePage = () => {
                 setMeals(mealData?.data || []);
                 setBazarItems(bazarData?.data || []);
             } catch (error) {
-                toast.error(error.message || 'Failed to load expense data');
+                toast.error('We could not load expense data right now. Please try again.');
             } finally {
                 setIsLoading(false);
             }

@@ -30,7 +30,7 @@ const DailyMenuPage = () => {
                 const data = await getMenus(token, { groupID: groupId });
                 setMenus(data?.data || []);
             } catch (error) {
-                toast.error(error.message || 'Failed to load menu entries');
+                toast.error('We could not load menu entries right now. Please try again.');
             } finally {
                 setIsLoading(false);
             }
@@ -119,7 +119,7 @@ const DailyMenuPage = () => {
 
             await loadMenus();
         } catch (error) {
-            toast.error(error.message || 'Failed to save menu');
+            toast.error('We could not save menu right now. Please try again.');
         } finally {
             setIsSaving(false);
         }
@@ -137,7 +137,7 @@ const DailyMenuPage = () => {
             toast.success('Menu deleted successfully');
             await loadMenus();
         } catch (error) {
-            toast.error(error.message || 'Failed to delete menu');
+            toast.error('We could not delete menu right now. Please try again.');
         } finally {
             setIsDeleting(false);
         }

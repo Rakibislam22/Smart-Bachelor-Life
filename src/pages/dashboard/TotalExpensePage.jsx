@@ -105,7 +105,7 @@ const TotalExpensePage = () => {
 
                 setGroupMembers(deduped);
             } catch (error) {
-                toast.error(error.message || 'Failed to load expenses');
+                toast.error('We could not load expenses right now. Please try again.');
             } finally {
                 setIsLoading(false);
             }
@@ -270,7 +270,7 @@ const TotalExpensePage = () => {
             setExpenseForm({ title: '', amount: '', category: 'bazar', file: null });
             toast.success('Expense added successfully');
         } catch (error) {
-            toast.error(error.message || 'Failed to add expense');
+            toast.error('We could not add expense right now. Please try again.');
         } finally {
             setIsCreatingExpense(false);
         }
