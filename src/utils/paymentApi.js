@@ -19,8 +19,16 @@ async function authorizedRequest(endpoint, method, token, payload) {
     return data;
 }
 
-async function getManagerPayments(token) {
-    return authorizedRequest("/api/payment", "GET", token);
+async function getManagerPayments(token, { fromDate, toDate, userID } = {}) {
+    const params = new URLSearchParams();
+
+    if (fromDate) params.append("fromDate", fromDate);
+    if (toDate) params.append("toDate", toDate);
+    if (userID) params.append("userID", userID);
+
+    const query = params.toString() ? `?${params.toString()}` : "";
+
+    return authorizedRequest(`/api/payment${query}`, "GET", token);
 }
 
 async function getUserPayments(token) {

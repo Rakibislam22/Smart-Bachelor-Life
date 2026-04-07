@@ -177,11 +177,7 @@ const GroupMealView = () => {
                                     >
                                         <td className={`sticky left-0 z-10 px-4 py-3 border-r ${isLight ? 'bg-white border-gray-300' : 'bg-gray-800 border-gray-600'}`}>
                                             <div className="flex items-center gap-3 pr-5">
-                                                <img
-                                                    src={member.avatar}
-                                                    alt={member.name}
-                                                    className="w-6 h-6 rounded-full"
-                                                />
+                                                
                                                 <span className="font-semibold whitespace-nowrap">
                                                     {member.name}
                                                 </span>
@@ -211,6 +207,43 @@ const GroupMealView = () => {
                                         </td>
                                     </tr>
                                 ))}
+
+                                <tr className={`${isLight ? 'bg-amber-50 border-t border-amber-200' : 'bg-amber-900/20 border-t border-amber-700'}`}>
+                                    <td className={`sticky left-0 z-10 px-4 py-3 border-r font-bold ${isLight ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-amber-900/20 border-amber-700 text-amber-100'}`}>
+                                        Group Total
+                                    </td>
+                                    {days.map((day) => {
+                                        const dateStr = formatDate(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+
+                                        const totals = groupMembers.reduce(
+                                            (acc, member) => {
+                                                const breakdown = getMealBreakdownForDate(member.mealData, dateStr);
+                                                acc.breakfast += breakdown.breakfast;
+                                                acc.lunch += breakdown.lunch;
+                                                acc.dinner += breakdown.dinner;
+                                                return acc;
+                                            },
+                                            { breakfast: 0, lunch: 0, dinner: 0 },
+                                        );
+
+                                        const dayTotal = totals.breakfast + totals.lunch + totals.dinner;
+
+                                        return (
+                                            <td
+                                                key={`group-total-${day}`}
+                                                className={`px-2 py-3 text-center text-xs border-r font-bold ${isLight ? 'border-amber-200 text-amber-900' : 'border-amber-700 text-amber-100'}`}
+                                                title={`Group Total (B/L/D): ${totals.breakfast}/${totals.lunch}/${totals.dinner}`}
+                                            >
+                                                {dayTotal > 0
+                                                    ? `${totals.breakfast}/${totals.lunch}/${totals.dinner}`
+                                                    : '-'}
+                                            </td>
+                                        );
+                                    })}
+                                    <td className={`px-4 py-3 text-center font-bold text-lg ${isLight ? 'bg-amber-100 text-amber-900' : 'bg-amber-900/40 text-amber-100'}`}>
+                                        {groupMembers.reduce((sum, member) => sum + getTotalMealsForMonth(member.mealData), 0)}
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>}
