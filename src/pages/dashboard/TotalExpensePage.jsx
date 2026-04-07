@@ -287,7 +287,9 @@ const TotalExpensePage = () => {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <h2 className={`text-lg font-semibold ${isLight ? 'text-gray-900' : 'text-white'}`}>Monthly Timeline</h2>
-                        <p className={`text-xs sm:text-sm ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>Timeline থেকে meal rate, expense sum, deposit, আর group balance দেখা যাবে</p>
+                        <p className={`text-xs sm:text-sm ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
+                            Meal rate, expense sum, deposit, and group balance can be viewed from the timeline.
+                        </p>
                     </div>
                     <input
                         type="month"
