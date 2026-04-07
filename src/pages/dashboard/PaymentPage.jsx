@@ -1,5 +1,6 @@
 import React, { use, useCallback, useEffect, useRef, useState } from 'react';
 import { AuthContext } from '../../provider/AuthContext';
+import Loading from '../../component/Loading';
 import { toast } from 'react-toastify';
 import { updateGroupPaymentNotice } from '../../utils/groupApi';
 import {
@@ -71,9 +72,9 @@ const PaymentPage = () => {
 
             setPayments(data?.payments || []);
             return true;
-        } catch (error) {
+        } catch {
             if (!silent) {
-                toast.error(error.message || 'Failed to load payments');
+                toast.error('We could not load payments right now. Please try again.');
             }
             return false;
         } finally {
@@ -212,8 +213,8 @@ const PaymentPage = () => {
             const response = await updateGroupPaymentNotice(paymentNoticeInput, token);
             setCurrentGroup(response?.group || currentGroup);
             toast.success('Payment notice updated successfully');
-        } catch (error) {
-            toast.error(error.message || 'Failed to update payment notice');
+        } catch {
+            toast.error('We could not update payment notice right now. Please try again.');
         } finally {
             setIsSavingNotice(false);
         }
@@ -272,8 +273,8 @@ const PaymentPage = () => {
 
             toast.success('Payment created successfully');
             setFormData({ amount: '', paymentMethod: 'Bkash', senderNumber: '', transactionID: '' });
-        } catch (error) {
-            toast.error(error.message || 'Failed to create payment');
+        } catch {
+            toast.error('We could not create payment right now. Please try again.');
         } finally {
             setIsStripeRedirecting(false);
         }
@@ -291,8 +292,8 @@ const PaymentPage = () => {
                 item._id === paymentID ? { ...item, status: 'COMPLETED' } : item
             )));
             toast.success('Payment confirmed successfully');
-        } catch (error) {
-            toast.error(error.message || 'Failed to confirm payment');
+        } catch {
+            toast.error('We could not confirm payment right now. Please try again.');
         }
     };
 
@@ -308,10 +309,14 @@ const PaymentPage = () => {
                 item._id === paymentID ? { ...item, status: 'FAILED' } : item
             )));
             toast.success('Payment rejected successfully');
-        } catch (error) {
-            toast.error(error.message || 'Failed to reject payment');
+        } catch {
+            toast.error('We could not reject payment right now. Please try again.');
         }
     };
+
+    if (isLoading && payments.length === 0) {
+        return <Loading />;
+    }
 
     return (
         <div className="space-y-4 sm:space-y-6">

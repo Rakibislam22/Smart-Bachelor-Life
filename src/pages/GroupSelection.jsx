@@ -45,8 +45,8 @@ const GroupSelection = () => {
             setIsRoleSelectionCompleted(true);
             toast.success('You are now registered as manager');
             navigate('/dashboard');
-        } catch (error) {
-            toast.error(error.message || 'Failed to register as manager');
+        } catch {
+            toast.error('We could not register as manager right now. Please try again.');
         } finally {
             setIsManagerSubmitting(false);
         }
@@ -79,8 +79,8 @@ const GroupSelection = () => {
             setIsRoleSelectionCompleted(true);
             toast.success('Joined group successfully');
             navigate('/dashboard');
-        } catch (error) {
-            toast.error(error.message || 'Failed to join group');
+        } catch {
+            toast.error('We could not join group right now. Please try again.');
         } finally {
             setIsJoinSubmitting(false);
         }
@@ -134,8 +134,8 @@ const GroupSelection = () => {
                                     <p className={`mb-6 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
                                         Start as a manager and create a new group for your bachelor life management
                                     </p>
-                                    <ButtonPrimary onClick={handleCreateGroup} disabled={isManagerSubmitting}>
-                                        {isManagerSubmitting ? 'Creating...' : 'Create Group as Manager'}
+                                    <ButtonPrimary onClick={handleCreateGroup} loading={isManagerSubmitting} loadingText="Creating...">
+                                        Create Group as Manager
                                     </ButtonPrimary>
                                 </div>
                             </Card>
@@ -164,7 +164,7 @@ const GroupSelection = () => {
                                     <p className={`mb-6 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
                                         Join an existing group using a group code shared by your manager
                                     </p>
-                                    <ButtonSecondary onClick={() => setShowJoinForm(true)} disabled={isJoinSubmitting || isManagerSubmitting}>
+                                    <ButtonSecondary onClick={() => setShowJoinForm(true)} loading={isJoinSubmitting || isManagerSubmitting} loadingText="Opening...">
                                         Join Group by Code
                                     </ButtonSecondary>
                                 </div>
@@ -219,8 +219,8 @@ const GroupSelection = () => {
                                         />
                                     </div>
 
-                                    <ButtonPrimary type="submit" className="w-full" disabled={isJoinSubmitting}>
-                                        {isJoinSubmitting ? 'Joining...' : 'Join Group'}
+                                    <ButtonPrimary type="submit" className="w-full" loading={isJoinSubmitting} loadingText="Joining...">
+                                        Join Group
                                     </ButtonPrimary>
                                 </form>
                             </div>

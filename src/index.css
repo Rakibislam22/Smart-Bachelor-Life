@@ -89,6 +89,27 @@
 }
 
 @layer utilities {
+	.app-toast {
+		min-height: 52px;
+		border-radius: 14px;
+		padding: 10px 12px;
+		backdrop-filter: blur(4px);
+		box-shadow: 0 12px 26px rgba(2, 6, 23, 0.22);
+		font-family: var(--font-urbanist);
+		font-size: 0.92rem;
+		font-weight: 600;
+	}
+
+	.app-toast-body {
+		margin: 0;
+		padding: 0;
+		line-height: 1.35;
+	}
+
+	.app-toast-progress {
+		height: 3px;
+		opacity: 0.95;
+	}
 
 	/* Hide scrollbar for Chrome, Safari and Opera */
 	.scrollbar-hide::-webkit-scrollbar {

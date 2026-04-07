@@ -5,10 +5,12 @@ import { motion } from "framer-motion";
 const ButtonPrimary = ({
 	className = "",
 	size = "default",
+	loading = false,
+	loadingText,
 	children,
 	...props
 }) => {
-	const baseClasses ="relative overflow-hidden rounded-lg font-urbanist font-medium bg-primary text-primary-foreground border border-transparent hover:border-primary hover:bg-highlight hover:text-secondary-foreground shadow-lg shadow-highlight/25 cursor-pointer";
+	const baseClasses = "relative overflow-hidden rounded-lg font-urbanist font-medium bg-primary text-primary-foreground border border-transparent hover:border-primary hover:bg-highlight hover:text-secondary-foreground shadow-lg shadow-highlight/25 cursor-pointer";
 
 	const sizeClasses = {
 		sm: "px-4 py-2 text-sm",
@@ -25,9 +27,13 @@ const ButtonPrimary = ({
 			transition={{ type: "spring", stiffness: 300, damping: 15 }}
 			className={classes}
 			{...props}
+			disabled={loading || props.disabled}
 		>
-			<span className="relative flex items-center justify-center gap-2 ">
-				{children}
+			<span className="relative flex items-center justify-center gap-2">
+				{loading && (
+					<span className="inline-block size-4 animate-spin rounded-full border-2 border-current border-r-transparent" aria-hidden="true" />
+				)}
+				<span>{loading ? (loadingText || children) : children}</span>
 			</span>
 		</motion.button>
 	);

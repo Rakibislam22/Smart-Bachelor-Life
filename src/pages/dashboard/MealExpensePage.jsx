@@ -1,5 +1,6 @@
 import React, { use, useEffect, useMemo, useState } from 'react';
 import { AuthContext } from '../../provider/AuthContext';
+import Loading from '../../component/Loading';
 import { toast } from 'react-toastify';
 import { getExpenses } from '../../utils/expenseApi';
 import { getUserPayments } from '../../utils/paymentApi';
@@ -71,8 +72,8 @@ const MealExpensePage = () => {
                 setMyPayments(paymentData?.payments || []);
                 setMeals(mealData?.data || []);
                 setBazarItems(bazarData?.data || []);
-            } catch (error) {
-                toast.error(error.message || 'Failed to load expense data');
+            } catch {
+                toast.error('We could not load expense data right now. Please try again.');
             } finally {
                 setIsLoading(false);
             }
@@ -178,6 +179,10 @@ const MealExpensePage = () => {
             return acc;
         }, {});
     }, [expenses]);
+
+    if (isLoading && expenses.length === 0 && meals.length === 0 && bazarItems.length === 0 && myPayments.length === 0) {
+        return <Loading />;
+    }
 
     return (
         <div className="space-y-4 sm:space-y-6">

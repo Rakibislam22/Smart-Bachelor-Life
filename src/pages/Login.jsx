@@ -11,6 +11,7 @@ import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 const Login = () => {
     const { google, userLogin, setUser, isLight, user } = use(AuthContext);
     const [eye, setEye] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
 
     if (user) {
@@ -33,20 +34,22 @@ const Login = () => {
     } = useForm();
 
     const onSubmit = (data) => {
+        setIsSubmitting(true);
         userLogin(data.email, data.password).then(async result => {
             setUser(result.user);
             await registerUserInBackend(result.user);
             const postLoginPath = await getPostLoginPath(result.user);
             toast.success('Login successful!');
             navigate(postLoginPath);
-        }).catch(error => {
-            const errorMessage = error.message;
-            toast.error(errorMessage);
-
-        })
+        }).catch(() => {
+            toast.error('Something went wrong. Please try again.');
+        }).finally(() => {
+            setIsSubmitting(false);
+        });
     };
 
     const handleGoogle = () => {
+        setIsSubmitting(true);
         google().then(async result => {
             toast.success('Login successful!');
             setUser(result.user);
@@ -54,9 +57,10 @@ const Login = () => {
             const postLoginPath = await getPostLoginPath(result.user);
             navigate(postLoginPath);
 
-        }).catch(error => {
-            const errorMessage = error.message;
-            toast.error(errorMessage);
+        }).catch(() => {
+            toast.error('Something went wrong. Please try again.');
+        }).finally(() => {
+            setIsSubmitting(false);
         });
     }
 
@@ -120,6 +124,8 @@ const Login = () => {
                     <ButtonPrimary
                         type="submit"
                         className="w-full"
+                        loading={isSubmitting}
+                        loadingText="Signing in..."
                     >
                         Sign in
                     </ButtonPrimary>
@@ -127,6 +133,7 @@ const Login = () => {
                     <button
                         type="button"
                         onClick={handleGoogle}
+                        disabled={isSubmitting}
                         className={`flex items-center justify-center active:scale-[.98] active:duration-75 hover:scale-[1.01] transition-all ease-in-out py-2.5 sm:py-3 border rounded-lg sm:rounded-xl text-sm sm:text-base font-medium border-gray-300 ${isLight
                             ? ' bg-white hover:bg-base text-gray-700'
                             : 'border-gray-700 bg-transparent hover:bg-prim text-gray-200'

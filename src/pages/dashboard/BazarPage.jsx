@@ -1,5 +1,6 @@
 import React, { use, useEffect, useMemo, useState } from 'react';
 import { AuthContext } from '../../provider/AuthContext';
+import Loading from '../../component/Loading';
 import { toast } from 'react-toastify';
 import { createBazar, getBazar } from '../../utils/bazarApi';
 
@@ -36,8 +37,8 @@ const BazarPage = () => {
                 const token = await user.getIdToken();
                 const data = await getBazar(token, { groupID: groupId });
                 setItems(data?.data || []);
-            } catch (error) {
-                toast.error(error.message || 'Failed to load bazar entries');
+            } catch {
+                toast.error('We could not load bazar entries right now. Please try again.');
             } finally {
                 setIsLoading(false);
             }
@@ -75,13 +76,18 @@ const BazarPage = () => {
         try {
             setIsSaving(true);
             const token = await user.getIdToken();
-            await createBazar({
+            const response = await createBazar({
                 groupID: groupId,
                 item: itemList,
                 quantity: quantityList,
                 price: priceList,
                 file: bazarForm.file,
             }, token);
+
+            const createdBazar = response?.bazar || response?.data || response?.item || response;
+            if (createdBazar) {
+                setItems((prev) => [createdBazar, ...prev]);
+            }
 
             toast.success('Bazar detail added successfully');
             setIsSheetOpen(false);
@@ -91,11 +97,8 @@ const BazarPage = () => {
                 price: '',
                 file: null,
             });
-
-            const refreshed = await getBazar(token, { groupID: groupId });
-            setItems(refreshed?.data || []);
-        } catch (error) {
-            toast.error(error.message || 'Failed to add bazar detail');
+        } catch {
+            toast.error('We could not add bazar detail right now. Please try again.');
         } finally {
             setIsSaving(false);
         }
@@ -120,6 +123,10 @@ const BazarPage = () => {
 
         return 'Unknown';
     };
+
+    if (isLoading && items.length === 0) {
+        return <Loading />;
+    }
 
     return (
         <div className="space-y-4 sm:space-y-6">
