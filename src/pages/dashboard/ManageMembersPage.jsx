@@ -15,12 +15,26 @@ const ManageMembersPage = () => {
 
     const [members, setMembers] = useState([]);
     const [pendingInvites, setPendingInvites] = useState([]);
-    const [inviteEmail, setInviteEmail] = useState('');
+    const [inviteEmails, setInviteEmails] = useState('');
     const [inviteCode, setInviteCode] = useState('');
     const [lastInviteResult, setLastInviteResult] = useState({ sent: [], failed: [] });
     const [isLoading, setIsLoading] = useState(false);
     const [isInviting, setIsInviting] = useState(false);
     const [isRevoking, setIsRevoking] = useState('');
+
+    const parseInviteEmails = (value) => {
+        const uniqueEmails = new Set();
+
+        String(value || '')
+            .split(/[\n,]/)
+            .map((email) => email.trim().toLowerCase())
+            .filter(Boolean)
+            .forEach((email) => {
+                uniqueEmails.add(email);
+            });
+
+        return Array.from(uniqueEmails);
+    };
 
     const loadGroupDetails = useCallback(async () => {
         if (!user || normalizedRole !== 'manager') {
@@ -68,20 +82,22 @@ const ManageMembersPage = () => {
 
     const handleInviteMember = async (e) => {
         e.preventDefault();
-        if (!inviteEmail.trim() || !user) {
+        const inviteList = parseInviteEmails(inviteEmails);
+
+        if (inviteList.length === 0 || !user) {
             return;
         }
 
         try {
             setIsInviting(true);
             const token = await user.getIdToken();
-            const data = await sendJoinCodeInvites([inviteEmail.trim()], token);
+            const data = await sendJoinCodeInvites(inviteList, token);
             setLastInviteResult({
-                sent: data?.successfullyInvitedEmails || [inviteEmail.trim()],
+                sent: data?.successfullyInvitedEmails || inviteList,
                 failed: data?.invalidEmails || [],
             });
             toast.success('Invite sent successfully');
-            setInviteEmail('');
+            setInviteEmails('');
         } catch (error) {
             toast.error(error.message || 'Failed to send invite');
         } finally {
@@ -156,22 +172,27 @@ const ManageMembersPage = () => {
                             </p>
                         </div>
 
-                        <form onSubmit={handleInviteMember} className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                            <input
-                                type="email"
-                                value={inviteEmail}
-                                onChange={(e) => setInviteEmail(e.target.value)}
-                                placeholder="Enter member email"
-                                className={`w-full rounded-lg border px-3 py-2 text-sm ${isLight
-                                    ? 'bg-white border-gray-300 text-gray-900'
-                                    : 'bg-gray-700 border-gray-600 text-white'
-                                    } focus:outline-none focus:ring-2 focus:ring-violet-500`}
-                                required
-                            />
+                        <form onSubmit={handleInviteMember} className="flex flex-col lg:flex-row gap-3 lg:items-stretch">
+                            <div className="flex-1 space-y-2">
+                                <textarea
+                                    value={inviteEmails}
+                                    onChange={(e) => setInviteEmails(e.target.value)}
+                                    placeholder="Enter one or more member emails separated by commas or new lines"
+                                    rows={1}
+                                    className={`w-full h-13 min-h-13 rounded-xl border px-4 py-3 text-sm leading-none resize-none shadow-sm transition-all duration-200 ${isLight
+                                        ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'
+                                        : 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-400'
+                                        } focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30`}
+                                    required
+                                />
+                                <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
+                                    Example: a@demo.com, b@demo.com or one email per line
+                                </p>
+                            </div>
                             <button
                                 type="submit"
                                 disabled={isInviting}
-                                className="rounded-lg px-4 py-2 text-sm font-medium bg-violet-600 hover:bg-violet-700 text-white transition-colors"
+                                className="inline-flex w-full h-12 min-h-12 lg:w-auto items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-1 text-sm font-semibold text-white shadow-lg shadow-violet-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-600/30 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                             >
                                 {isInviting ? 'Sending...' : 'Send Invite'}
                             </button>

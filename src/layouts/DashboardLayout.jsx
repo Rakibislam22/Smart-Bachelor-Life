@@ -351,6 +351,12 @@ const DashboardLayout = () => {
                         </Link>
                     </li>
                     <li>
+                        <Link to="/dashboard/bazar" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Bazar">
+                            <FaCartPlus className="my-1.5 inline-block size-6" />
+                            <span className="is-drawer-close:hidden">Bazar</span>
+                        </Link>
+                    </li>
+                    <li>
                         <Link to="/dashboard/payment" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Make Payment">
                             <FaAmazonPay className="my-1.5 inline-block size-6" />
                             <span className="is-drawer-close:hidden">Make Payment</span>
@@ -686,6 +692,10 @@ const DashboardLayout = () => {
                                         <Link to="/dashboard/menu" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/menu' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
                                             <MdOutlineRestaurantMenu className="size-5" />
                                             <span className="text-[10px] mt-0.5 truncate w-full text-center">Menu</span>
+                                        </Link>
+                                        <Link to="/dashboard/bazar" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/bazar' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <FaCartPlus className="size-5" />
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">Bazar</span>
                                         </Link>
                                         <Link to="/dashboard/payment" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/payment' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
                                             <FaAmazonPay className="size-5" />
