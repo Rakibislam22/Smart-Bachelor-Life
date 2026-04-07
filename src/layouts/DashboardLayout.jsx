@@ -157,7 +157,7 @@ const DashboardLayout = () => {
                 token,
             );
 
-            const session = await syncUserSession(token);
+            const session = await syncUserSession(token, user);
             const backendRole = session?.user?.role ? session.user.role.toLowerCase() : 'manager';
 
             setUserRole(backendRole);
@@ -192,7 +192,7 @@ const DashboardLayout = () => {
             const token = await user.getIdToken();
             const joinResponse = await joinAsMember(groupCode.trim(), token);
 
-            const session = await syncUserSession(token);
+            const session = await syncUserSession(token, user);
             const backendRole = session?.user?.role ? session.user.role.toLowerCase() : 'user';
 
             setUserRole(backendRole);

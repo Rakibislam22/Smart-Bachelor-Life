@@ -21,7 +21,7 @@ const Login = () => {
 
     const getPostLoginPath = async (firebaseUser) => {
         const token = await firebaseUser.getIdToken();
-        const session = await syncUserSession(token);
+        const session = await syncUserSession(token, firebaseUser);
         const roleSelectionCompleted = Boolean(session?.user?.roleSelectionCompleted);
 
         return roleSelectionCompleted ? "/dashboard" : "/group-selection";

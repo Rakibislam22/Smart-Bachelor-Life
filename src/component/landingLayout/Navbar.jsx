@@ -116,7 +116,11 @@ const Navbar = () => {
 						</div>
 						<div className="flex flex-col gap-6.25">
 							<ThemeToggle />
-							<Link to="/auth/login"><ButtonPrimary className="w-full">Get Started</ButtonPrimary></Link>
+							{user ? (
+										<Link to="/dashboard"><ButtonPrimary >Dashboard</ButtonPrimary></Link>
+									) : (
+										<Link to="/auth/login"><ButtonPrimary >Get Started</ButtonPrimary></Link>
+									)}
 						</div>
 					</motion.div>
 				)}

@@ -1,9 +1,12 @@
-import React from "react";
+import React, { use } from "react";
 import ButtonPrimary from "../common/ButtonPrimary.jsx";
 import ButtonSecondary from "../common/ButtonSecondary.jsx";
 import { Link } from "react-router";
+import { AuthContext } from "../../provider/AuthContext.jsx";
 
 const HeroSection = () => {
+	const { user } = use(AuthContext);
+
 	return (
 		<section className="flex items-center justify-center text-center min-h-screen">
 			<div className="max-w-3xl  px-8">
@@ -23,11 +26,11 @@ const HeroSection = () => {
 				</div>
 
 				<div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-					<Link to="/auth/login" className="w-full sm:w-auto cour">
-						<ButtonPrimary className="w-full sm:w-auto px-8 py-3">
-							Get Started
-						</ButtonPrimary>
-					</Link>
+					{user ? (
+										<Link to="/dashboard"><ButtonPrimary >Go to Dashboard</ButtonPrimary></Link>
+									) : (
+										<Link to="/auth/login"><ButtonPrimary >Get Started</ButtonPrimary></Link>
+									)}
 
 					<ButtonSecondary className="w-full sm:w-auto px-8 py-3">
 						Watch Demo

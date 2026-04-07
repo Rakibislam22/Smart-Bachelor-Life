@@ -8,6 +8,14 @@ import { toast } from 'react-toastify';
 import ButtonPrimary from '../component/common/ButtonPrimary';
 import { registerUserInBackend } from '../utils/authApi';
 
+const getSignupErrorMessage = (error) => {
+    if (error?.code === 'auth/email-already-in-use') {
+        return 'This email is already in use. Please login instead.';
+    }
+
+    return 'Something went wrong. Please try again.';
+};
+
 const Signup = () => {
 
     const { createUser, setUser, google, forUpdateProfile } = use(AuthContext);
@@ -36,22 +44,14 @@ const Signup = () => {
             .then(async (result) => {
                 const newUser = result.user;
                 setUser(newUser);
-                const token = await newUser.getIdToken();
 
-                await forUpdateProfile(fullName, data?.photoUrl);
-
-                const updatedUser = {
-                    ...newUser,
-                    displayName: fullName,
-                    photoURL: data?.photoUrl || newUser.photoURL,
-                };
-
-                await registerUserInBackend(updatedUser, token);
+                const updatedFirebaseUser = await forUpdateProfile(fullName, data?.photoUrl);
+                await registerUserInBackend(updatedFirebaseUser || newUser);
                 toast.success('Register successful!');
                 navigate('/group-selection');
             })
-            .catch(() => {
-                toast.error('Something went wrong. Please try again.');
+            .catch((error) => {
+                toast.error(getSignupErrorMessage(error));
             })
             .finally(() => {
                 setIsSubmitting(false);
@@ -65,7 +65,6 @@ const Signup = () => {
         google().then(async result => {
             toast.success('Login successful!');
             setUser(result.user);
-            await registerUserInBackend(result.user);
             navigate("/group-selection");
 
         }).catch(() => {

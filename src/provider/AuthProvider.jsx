@@ -74,7 +74,7 @@ const AuthProvider = ({ children }) => {
             try {
                 await registerUserInBackend(currentUser);
                 const token = await currentUser.getIdToken();
-                const session = await syncUserSession(token);
+                const session = await syncUserSession(token, currentUser);
 
                 const backendRole = session?.user?.role ? session.user.role.toLowerCase() : null;
                 const hasCurrentGroup = Boolean(session?.currentGroup);
@@ -114,7 +114,8 @@ const AuthProvider = ({ children }) => {
         return updateProfile(auth.currentUser, {
             displayName: Dname, photoURL: photo
         }).then(() => {
-            setUser({ ...auth.currentUser });
+            setUser(auth.currentUser);
+            return auth.currentUser;
         });
     }
 
