@@ -14,6 +14,14 @@ import { toast } from 'react-toastify';
 import { ensureManagerGroupExists, joinAsMember, leaveGroup, registerAsManager, updateGroupTitle } from '../utils/groupApi';
 import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 
+const getActionErrorMessage = (error, fallbackMessage) => {
+    if (error?.message && typeof error.message === 'string' && error.message.trim()) {
+        return error.message;
+    }
+
+    return fallbackMessage;
+};
+
 const DashboardLayout = () => {
     const { isLight, user, loading, userRole, setUserRole, isRoleSelectionCompleted, setIsRoleSelectionCompleted, currentGroup, setCurrentGroup } = use(AuthContext);
     const [showGroupModal, setShowGroupModal] = useState(false);
@@ -166,8 +174,8 @@ const DashboardLayout = () => {
             setShowGroupModal(false);
             setShowJoinForm(false);
             toast.success('Manager setup completed successfully');
-        } catch {
-            toast.error('We could not register as manager right now. Please try again.');
+        } catch (error) {
+            toast.error(getActionErrorMessage(error, 'We could not register as manager right now. Please try again.'));
         } finally {
             setIsManagerSubmitting(false);
         }
@@ -202,8 +210,8 @@ const DashboardLayout = () => {
             setShowJoinForm(false);
             setGroupCode('');
             toast.success('Joined group successfully');
-        } catch {
-            toast.error('We could not join group right now. Please try again.');
+        } catch (error) {
+            toast.error(getActionErrorMessage(error, 'We could not join group right now. Please try again.'));
         } finally {
             setIsJoinSubmitting(false);
         }
@@ -230,8 +238,8 @@ const DashboardLayout = () => {
             const data = await updateGroupTitle(groupTitleInput.trim(), token);
             setCurrentGroup(data?.group || currentGroup);
             toast.success('Group name updated successfully');
-        } catch {
-            toast.error('We could not update group name right now. Please try again.');
+        } catch (error) {
+            toast.error(getActionErrorMessage(error, 'We could not update group name right now. Please try again.'));
         } finally {
             setIsSavingGroupTitle(false);
         }
@@ -252,8 +260,8 @@ const DashboardLayout = () => {
             setShowGroupModal(false);
             toast.success('You left the group successfully');
             navigate('/group-selection');
-        } catch {
-            toast.error('We could not leave the group right now. Please try again.');
+        } catch (error) {
+            toast.error(getActionErrorMessage(error, 'We could not leave the group right now. Please try again.'));
         } finally {
             setIsLeavingGroup(false);
         }

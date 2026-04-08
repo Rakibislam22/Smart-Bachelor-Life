@@ -5,12 +5,20 @@ import { auth } from '../firebase/firebase.init';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router';
 
+const getLogoutErrorMessage = (error) => {
+    if (error?.code === 'auth/network-request-failed') {
+        return 'Network issue while logging out. Please check your internet connection.';
+    }
+
+    return 'Could not log you out right now. Please try again.';
+};
+
 
 const Avatar = () => {
     const { user, isLight } = use(AuthContext);
 
     const handleLogOut = () => {
-        signOut(auth).then(() => { toast.success('You have logged out successfully.'); }).catch(() => { toast.error('Could not log you out right now. Please try again.'); });
+        signOut(auth).then(() => { toast.success('You have logged out successfully.'); }).catch((error) => { toast.error(getLogoutErrorMessage(error)); });
     }
     return (
         <div className="dropdown dropdown-end ">

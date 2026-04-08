@@ -13,7 +13,23 @@ const getSignupErrorMessage = (error) => {
         return 'This email is already in use. Please login instead.';
     }
 
+    if (error?.code === 'auth/invalid-email') {
+        return 'Please enter a valid email address.';
+    }
+
     return 'Something went wrong. Please try again.';
+};
+
+const getGoogleSignupErrorMessage = (error) => {
+    if (error?.code === 'auth/popup-closed-by-user') {
+        return 'Google sign-in was cancelled.';
+    }
+
+    if (error?.code === 'auth/popup-blocked') {
+        return 'Popup was blocked by browser. Please allow popups and try again.';
+    }
+
+    return 'Google sign-in failed. Please try again.';
 };
 
 const Signup = () => {
@@ -67,8 +83,8 @@ const Signup = () => {
             setUser(result.user);
             navigate("/group-selection");
 
-        }).catch(() => {
-            toast.error('Something went wrong. Please try again.');
+        }).catch((error) => {
+            toast.error(getGoogleSignupErrorMessage(error));
         }).finally(() => {
             setIsSubmitting(false);
         });

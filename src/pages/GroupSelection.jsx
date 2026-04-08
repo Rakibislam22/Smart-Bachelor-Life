@@ -10,6 +10,14 @@ import { toast } from 'react-toastify';
 import { ensureManagerGroupExists, joinAsMember, registerAsManager } from '../utils/groupApi';
 import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 
+const getActionErrorMessage = (error, fallbackMessage) => {
+    if (error?.message && typeof error.message === 'string' && error.message.trim()) {
+        return error.message;
+    }
+
+    return fallbackMessage;
+};
+
 const GroupSelection = () => {
     const { isLight, user, setUserRole, setIsRoleSelectionCompleted } = use(AuthContext);
     const navigate = useNavigate();
@@ -45,8 +53,8 @@ const GroupSelection = () => {
             setIsRoleSelectionCompleted(true);
             toast.success('You are now registered as manager');
             navigate('/dashboard');
-        } catch {
-            toast.error('We could not register as manager right now. Please try again.');
+        } catch (error) {
+            toast.error(getActionErrorMessage(error, 'We could not register as manager right now. Please try again.'));
         } finally {
             setIsManagerSubmitting(false);
         }
@@ -79,8 +87,8 @@ const GroupSelection = () => {
             setIsRoleSelectionCompleted(true);
             toast.success('Joined group successfully');
             navigate('/dashboard');
-        } catch {
-            toast.error('We could not join group right now. Please try again.');
+        } catch (error) {
+            toast.error(getActionErrorMessage(error, 'We could not join group right now. Please try again.'));
         } finally {
             setIsJoinSubmitting(false);
         }
