@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, onIdTokenChanged, signInWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/firebase.init';
 import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 import { toast } from 'react-toastify';
@@ -61,7 +61,7 @@ const AuthProvider = ({ children }) => {
     }, [currentGroup]);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+        const unsubscribe = onIdTokenChanged(auth, async (currentUser) => {
             setUser(currentUser);
 
             if (!currentUser) {
@@ -74,7 +74,7 @@ const AuthProvider = ({ children }) => {
             try {
                 await registerUserInBackend(currentUser);
                 const token = await currentUser.getIdToken();
-                const session = await syncUserSession(token);
+                const session = await syncUserSession(token, currentUser);
 
                 const backendRole = session?.user?.role ? session.user.role.toLowerCase() : null;
                 const hasCurrentGroup = Boolean(session?.currentGroup);
@@ -87,7 +87,7 @@ const AuthProvider = ({ children }) => {
                 setIsRoleSelectionCompleted(false);
                 setCurrentGroup(null);
                 console.error('Auth sync failed:', error);
-                toast.error(error?.message || 'Failed to sync account with server');
+                toast.error('We could not sync account with server right now. Please try again.');
             } finally {
                 setLoading(false);
             }
@@ -114,7 +114,8 @@ const AuthProvider = ({ children }) => {
         return updateProfile(auth.currentUser, {
             displayName: Dname, photoURL: photo
         }).then(() => {
-            setUser({ ...auth.currentUser });
+            setUser(auth.currentUser);
+            return auth.currentUser;
         });
     }
 

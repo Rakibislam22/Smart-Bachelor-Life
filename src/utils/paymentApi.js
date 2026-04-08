@@ -40,7 +40,7 @@ async function createPayment(payload, token) {
 }
 
 async function confirmPayment(paymentID, transactionID, token) {
-    return authorizedRequest(`/api/payment/confirm/${paymentID}`, "POST", token, {
+    return authorizedRequest(`/api/payment/confirm/${paymentID}`, "PATCH", token, {
         transactionID,
     });
 }

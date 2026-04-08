@@ -1,4 +1,4 @@
-import React, { use, useEffect, useRef, useState } from 'react';
+﻿import React, { use, useEffect, useRef, useState } from 'react';
 import Logo from '../component/common/Logo';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { TbCoinTakaFilled } from 'react-icons/tb';
@@ -135,7 +135,7 @@ const DashboardLayout = () => {
         sidebarHoverCloseTimer.current = setTimeout(() => {
             setIsSidebarHovered(false);
             sidebarHoverCloseTimer.current = null;
-        }, 180);
+        }, 240);
     };
 
     const handleCreateGroup = async () => {
@@ -157,7 +157,7 @@ const DashboardLayout = () => {
                 token,
             );
 
-            const session = await syncUserSession(token);
+            const session = await syncUserSession(token, user);
             const backendRole = session?.user?.role ? session.user.role.toLowerCase() : 'manager';
 
             setUserRole(backendRole);
@@ -166,8 +166,8 @@ const DashboardLayout = () => {
             setShowGroupModal(false);
             setShowJoinForm(false);
             toast.success('Manager setup completed successfully');
-        } catch (error) {
-            toast.error(error.message || 'Failed to register as manager');
+        } catch {
+            toast.error('We could not register as manager right now. Please try again.');
         } finally {
             setIsManagerSubmitting(false);
         }
@@ -192,7 +192,7 @@ const DashboardLayout = () => {
             const token = await user.getIdToken();
             const joinResponse = await joinAsMember(groupCode.trim(), token);
 
-            const session = await syncUserSession(token);
+            const session = await syncUserSession(token, user);
             const backendRole = session?.user?.role ? session.user.role.toLowerCase() : 'user';
 
             setUserRole(backendRole);
@@ -202,8 +202,8 @@ const DashboardLayout = () => {
             setShowJoinForm(false);
             setGroupCode('');
             toast.success('Joined group successfully');
-        } catch (error) {
-            toast.error(error.message || 'Failed to join group');
+        } catch {
+            toast.error('We could not join group right now. Please try again.');
         } finally {
             setIsJoinSubmitting(false);
         }
@@ -230,8 +230,8 @@ const DashboardLayout = () => {
             const data = await updateGroupTitle(groupTitleInput.trim(), token);
             setCurrentGroup(data?.group || currentGroup);
             toast.success('Group name updated successfully');
-        } catch (error) {
-            toast.error(error.message || 'Failed to update group name');
+        } catch {
+            toast.error('We could not update group name right now. Please try again.');
         } finally {
             setIsSavingGroupTitle(false);
         }
@@ -252,8 +252,8 @@ const DashboardLayout = () => {
             setShowGroupModal(false);
             toast.success('You left the group successfully');
             navigate('/group-selection');
-        } catch (error) {
-            toast.error(error.message || 'Failed to leave the group');
+        } catch {
+            toast.error('We could not leave the group right now. Please try again.');
         } finally {
             setIsLeavingGroup(false);
         }
@@ -265,59 +265,59 @@ const DashboardLayout = () => {
             return (
                 <>
                     <li>
-                        <Link to="/dashboard" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Analytics">
+                        <Link to="/dashboard" className="">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
-                            <span className="is-drawer-close:hidden">Analytics</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Analytics</span>
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/members" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Manage Members">
+                        <Link to="/dashboard/members" className="">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
-                            <span className="is-drawer-close:hidden">Manage Members</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Manage Members</span>
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/meal" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Meal Calendar">
+                        <Link to="/dashboard/meal" className="">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path><path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path></svg>
-                            <span className="is-drawer-close:hidden">Meal Calendar</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Meal Calendar</span>
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/meal-expense" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Expense">
+                        <Link to="/dashboard/meal-expense" className="">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M16 8V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"></path><path d="M12 11v10"></path><path d="M8 11h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"></path></svg>
-                            <span className="is-drawer-close:hidden">My Expense</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">My Expense</span>
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/total-expense" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Total Expense">
+                        <Link to="/dashboard/total-expense" className="">
                             <TbCoinTakaFilled className="my-1.5 inline-block size-6" />
-                            <span className="is-drawer-close:hidden">Total Expense</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Total Expense</span>
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/menu" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Daily Menu">
+                        <Link to="/dashboard/menu" className="">
                             <MdOutlineRestaurantMenu className="my-1.5 inline-block size-6" />
-                            <span className="is-drawer-close:hidden">Daily Menu</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Daily Menu</span>
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/bazar" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Bazar">
+                        <Link to="/dashboard/bazar" className="">
                             <FaCartPlus className="my-1.5 inline-block size-6" />
-                            <span className="is-drawer-close:hidden">Bazar</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Bazar</span>
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/payment" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Payment & Receipt">
+                        <Link to="/dashboard/payment" className="">
                             <FaAmazonPay className="my-1.5 inline-block size-6" />
-                            <span className="is-drawer-close:hidden">Payment & Receipt</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Payment & Receipt</span>
                         </Link>
                     </li>
                     <li>
-                        <button onClick={handleOpenGroupModal} className={` is-drawer-close:tooltip is-drawer-close:tooltip-right min-w-18 h-full px-2 ${isLight ? 'text-gray-600' : 'text-gray-400'}`} data-tip="Settings">
+                        <button onClick={handleOpenGroupModal} className={` min-w-18 h-full px-2 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-6"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                            <span className="is-drawer-close:hidden">Settings</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Settings</span>
                         </button>
                     </li>
                 </>
@@ -327,45 +327,45 @@ const DashboardLayout = () => {
             return (
                 <>
                     <li>
-                        <Link to="/dashboard" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Dashboard">
+                        <Link to="/dashboard" className="">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
-                            <span className="is-drawer-close:hidden">My Dashboard</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">My Dashboard</span>
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/meal" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Meal Calendar">
+                        <Link to="/dashboard/meal" className="">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path><path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path></svg>
-                            <span className="is-drawer-close:hidden">Meal Calendar</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Meal Calendar</span>
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/meal-expense" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="My Expenses">
+                        <Link to="/dashboard/meal-expense" className="">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-6"><path d="M16 8V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"></path><path d="M12 11v10"></path><path d="M8 11h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"></path></svg>
-                            <span className="is-drawer-close:hidden">My Expenses</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">My Expenses</span>
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/menu" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Daily Menu">
+                        <Link to="/dashboard/menu" className="">
                             <MdOutlineRestaurantMenu className="my-1.5 inline-block size-6" />
-                            <span className="is-drawer-close:hidden">Daily Menu</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Daily Menu</span>
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/bazar" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Bazar">
+                        <Link to="/dashboard/bazar" className="">
                             <FaCartPlus className="my-1.5 inline-block size-6" />
-                            <span className="is-drawer-close:hidden">Bazar</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Bazar</span>
                         </Link>
                     </li>
                     <li>
-                        <Link to="/dashboard/payment" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Make Payment">
+                        <Link to="/dashboard/payment" className="">
                             <FaAmazonPay className="my-1.5 inline-block size-6" />
-                            <span className="is-drawer-close:hidden">Make Payment</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Make Payment</span>
                         </Link>
                     </li>
                     <li>
-                        <button onClick={handleOpenGroupModal} className={` is-drawer-close:tooltip is-drawer-close:tooltip-right min-w-18 h-full px-2 ${isLight ? 'text-gray-600' : 'text-gray-400'}`} data-tip="Settings">
+                        <button onClick={handleOpenGroupModal} className={` min-w-18 h-full px-2 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-6"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                            <span className="is-drawer-close:hidden">Settings</span>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Settings</span>
                         </button>
                     </li>
                 </>
@@ -445,7 +445,7 @@ const DashboardLayout = () => {
                                                 }}
                                                 className={`${isLight ? 'text-gray-600 hover:text-gray-800' : 'text-gray-400 hover:text-gray-200'} text-2xl shrink-0 ml-2`}
                                             >
-                                                ✕
+                                                X
                                             </button>
                                         </div>
 
@@ -475,8 +475,8 @@ const DashboardLayout = () => {
                                                         className={`w-full rounded-lg border px-3 py-2 text-sm ${isLight ? 'bg-white border-gray-300 text-gray-900' : 'bg-gray-800 border-gray-600 text-white'}`}
                                                         placeholder="Enter group name"
                                                     />
-                                                    <ButtonPrimary onClick={handleSaveGroupTitle} disabled={isSavingGroupTitle}>
-                                                        {isSavingGroupTitle ? 'Saving...' : 'Save'}
+                                                    <ButtonPrimary onClick={handleSaveGroupTitle} loading={isSavingGroupTitle} loadingText="Saving...">
+                                                        Save
                                                     </ButtonPrimary>
                                                 </div>
                                                 <p className={`mt-2 text-xs ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
@@ -496,8 +496,8 @@ const DashboardLayout = () => {
                                                                 : 'Leave the group from your account settings.'}
                                                         </p>
                                                     </div>
-                                                    <ButtonSecondary onClick={handleLeaveGroup} disabled={isLeavingGroup}>
-                                                        {isLeavingGroup ? 'Leaving...' : 'Leave Group'}
+                                                    <ButtonSecondary onClick={handleLeaveGroup} loading={isLeavingGroup} loadingText="Leaving...">
+                                                        Leave Group
                                                     </ButtonSecondary>
                                                 </div>
                                             </div>
@@ -528,8 +528,8 @@ const DashboardLayout = () => {
                                                     <p className={`mb-4 sm:mb-6 text-sm sm:text-base ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>
                                                         Start as a manager and create a new group for your bachelor life management
                                                     </p>
-                                                    <ButtonPrimary onClick={handleCreateGroup} disabled={isManagerSubmitting}>
-                                                        {isManagerSubmitting ? 'Creating...' : 'Create Group as Manager'}
+                                                    <ButtonPrimary onClick={handleCreateGroup} loading={isManagerSubmitting} loadingText="Creating...">
+                                                        Create Group as Manager
                                                     </ButtonPrimary>
                                                 </div>
 
@@ -610,8 +610,8 @@ const DashboardLayout = () => {
                                                         />
                                                     </div>
 
-                                                    <ButtonPrimary type="submit" className="w-full" disabled={isJoinSubmitting}>
-                                                        {isJoinSubmitting ? 'Joining...' : 'Join Group'}
+                                                    <ButtonPrimary type="submit" className="w-full" loading={isJoinSubmitting} loadingText="Joining...">
+                                                        Join Group
                                                     </ButtonPrimary>
                                                 </form>
                                             </div>
@@ -738,3 +738,6 @@ const DashboardLayout = () => {
 };
 
 export default DashboardLayout;
+
+
+

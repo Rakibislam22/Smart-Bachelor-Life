@@ -1,5 +1,6 @@
 import React, { use, useEffect, useMemo, useState } from 'react';
 import { AuthContext } from '../../provider/AuthContext';
+import Loading from '../../component/Loading';
 import { toast } from 'react-toastify';
 import { createExpense, getExpenses } from '../../utils/expenseApi';
 import { getMeals } from '../../utils/mealApi';
@@ -104,8 +105,8 @@ const TotalExpensePage = () => {
                 });
 
                 setGroupMembers(deduped);
-            } catch (error) {
-                toast.error(error.message || 'Failed to load expenses');
+            } catch {
+                toast.error('We could not load expenses right now. Please try again.');
             } finally {
                 setIsLoading(false);
             }
@@ -229,6 +230,10 @@ const TotalExpensePage = () => {
         }, {});
     }, [expenses]);
 
+    if (isLoading && expenses.length === 0 && meals.length === 0 && bazarItems.length === 0 && payments.length === 0) {
+        return <Loading />;
+    }
+
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         setExpenseForm((prev) => ({ ...prev, [name]: value }));
@@ -269,8 +274,8 @@ const TotalExpensePage = () => {
 
             setExpenseForm({ title: '', amount: '', category: 'bazar', file: null });
             toast.success('Expense added successfully');
-        } catch (error) {
-            toast.error(error.message || 'Failed to add expense');
+        } catch {
+            toast.error('We could not add expense right now. Please try again.');
         } finally {
             setIsCreatingExpense(false);
         }
