@@ -8,6 +8,32 @@ import { toast } from 'react-toastify';
 import ButtonPrimary from '../component/common/ButtonPrimary';
 import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 
+const getLoginErrorMessage = (error) => {
+    const code = error?.code;
+
+    if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found' || code === 'auth/invalid-email') {
+        return 'Invalid email or password.';
+    }
+
+    if (code === 'auth/too-many-requests') {
+        return 'Too many failed attempts. Please try again later.';
+    }
+
+    return 'Something went wrong. Please try again.';
+};
+
+const getGoogleLoginErrorMessage = (error) => {
+    if (error?.code === 'auth/popup-closed-by-user') {
+        return 'Google sign-in was cancelled.';
+    }
+
+    if (error?.code === 'auth/popup-blocked') {
+        return 'Popup was blocked by browser. Please allow popups and try again.';
+    }
+
+    return 'Google sign-in failed. Please try again.';
+};
+
 const Login = () => {
     const { google, userLogin, setUser, isLight, user } = use(AuthContext);
     const [eye, setEye] = useState(false);
@@ -41,8 +67,8 @@ const Login = () => {
             const postLoginPath = await getPostLoginPath(result.user);
             toast.success('Login successful!');
             navigate(postLoginPath);
-        }).catch(() => {
-            toast.error('Something went wrong. Please try again.');
+        }).catch((error) => {
+            toast.error(getLoginErrorMessage(error));
         }).finally(() => {
             setIsSubmitting(false);
         });
@@ -57,8 +83,8 @@ const Login = () => {
             const postLoginPath = await getPostLoginPath(result.user);
             navigate(postLoginPath);
 
-        }).catch(() => {
-            toast.error('Something went wrong. Please try again.');
+        }).catch((error) => {
+            toast.error(getGoogleLoginErrorMessage(error));
         }).finally(() => {
             setIsSubmitting(false);
         });

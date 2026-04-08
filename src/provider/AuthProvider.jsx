@@ -5,6 +5,14 @@ import { auth } from '../firebase/firebase.init';
 import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 import { toast } from 'react-toastify';
 
+const getSyncErrorMessage = (error) => {
+    if (error?.message && typeof error.message === 'string' && error.message.trim()) {
+        return error.message;
+    }
+
+    return 'We could not sync account with server right now. Please try again.';
+};
+
 const AuthProvider = ({ children }) => {
 
     const [user, setUser] = useState(null);
@@ -87,7 +95,7 @@ const AuthProvider = ({ children }) => {
                 setIsRoleSelectionCompleted(false);
                 setCurrentGroup(null);
                 console.error('Auth sync failed:', error);
-                toast.error('We could not sync account with server right now. Please try again.');
+                toast.error(getSyncErrorMessage(error));
             } finally {
                 setLoading(false);
             }
