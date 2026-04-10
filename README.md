@@ -31,7 +31,7 @@
 
 ---
 
-## 🎯 Overview
+## Overview
 
 **Smart Bachelor Life** is a full-stack web and mobile application designed to help bachelor groups and shared households manage their daily expenses, meal planning, and collaborative tasks seamlessly. With features like real-time group synchronization, expense tracking, meal calendar management, and payment settlement, it brings clarity and organization to chaotic shared living situations.
 
@@ -44,7 +44,7 @@
 
 ---
 
-## ✨ Features
+## Features
 
 ### 💰 **Expense Management**
 
@@ -102,7 +102,7 @@
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 
@@ -137,7 +137,7 @@
 
 ---
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before you begin, ensure you have the following installed:
 
@@ -156,7 +156,7 @@ git --version
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### Step 1: Clone the Repository
 
@@ -194,7 +194,7 @@ The application will be available at `http://localhost:5173`
 
 ---
 
-## 🔐 Environment Setup
+## Environment Setup
 
 ### Firebase Configuration
 
@@ -236,7 +236,7 @@ VITE_FIREBASE_APP_ID=your_app_id
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 smart-bachelor-life/
@@ -310,7 +310,7 @@ smart-bachelor-life/
 
 ---
 
-## 📊 Available Scripts
+## Available Scripts
 
 ### Development
 
@@ -343,7 +343,7 @@ npm run lint -- --fix
 
 ---
 
-## 🎮 Usage Guide
+## Usage Guide
 
 ### 1. **First Time Setup**
 
@@ -395,7 +395,7 @@ npm run lint -- --fix
 
 ---
 
-## 🔌 API Integration
+## API Integration
 
 The application communicates with a backend API for all data operations. Key API endpoints are located in `src/utils/`:
 
@@ -437,7 +437,7 @@ The application communicates with a backend API for all data operations. Key API
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
 ### Deploy to Firebase Hosting
 
@@ -481,7 +481,7 @@ The application communicates with a backend API for all data operations. Key API
 
 ---
 
-## 🤝 Contributing Guidelines
+## Contributing Guidelines
 
 We follow a strict branching and workflow strategy for collaboration.
 
@@ -581,7 +581,7 @@ git push origin your_branch_name
 
 ---
 
-## 👥 Team
+## Team
 
 Smart Bachelor Life is developed by a dedicated team of developers and contributors.
 
@@ -611,7 +611,7 @@ Smart Bachelor Life is developed by a dedicated team of developers and contribut
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
