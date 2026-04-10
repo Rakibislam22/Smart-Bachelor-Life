@@ -627,8 +627,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ## 📞 Support & Contact
 
 - **Issues:** [GitHub Issues](https://github.com/Rakibislam22/Smart-Bachelor-Life/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/Rakibislam22/Smart-Bachelor-Life/discussions)
-- **Email:** [Your team email]
+- **Discussions:** [GitHub Discussions](https://github.com/Rakibislam22/Smart-Bachelor-Life)
+- **Email:** [shinigamicoderz@gmail.com](mailto:shinigamicoderz@gmail.com)
 
 ---
 
