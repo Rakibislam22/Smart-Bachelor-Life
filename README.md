@@ -607,7 +607,7 @@ Smart Bachelor Life is developed by a dedicated team of developers and contribut
 
 - **Jisan Rahman**
     - 🌿 Branch: `jisan`
-    - 🔗 GitHub: [@alifjobaer12](https://github.com/alifjobaer12)
+    - 🔗 GitHub: [@jisan](https://github.com/jisan)
 
 ---
 
