@@ -11,11 +11,11 @@ const MealCalendar = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [showMealModal, setShowMealModal] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [meals, setMeals] = useState({
-        breakfast: 0,
-        lunch: 0,
-        dinner: 0,
-    });
+    const [meals, setMeals] = useState([
+        0, // breakfast
+        0, // lunch
+        0  // dinner
+    ]);
 
     // Format date as YYYY-MM-DD in local time (avoids UTC day shift).
     const formatDate = (date) => {
@@ -55,26 +55,24 @@ const MealCalendar = () => {
 
                     const date = new Date(entry.date || entry.createdAt);
                     const dateKey = formatDate(date);
-                    const breakfastValue = Number(entry.breakfast ?? 0);
-                    const lunchValue = Number(entry.lunch ?? 0);
-                    const dinnerValue = Number(entry.dinner ?? 0);
-
-                    // Backward compatibility for old records that only have mealCount.
-                    const fallbackBreakfast =
-                        breakfastValue === 0 && lunchValue === 0 && dinnerValue === 0
-                            ? Number(entry.mealCount || 0)
-                            : 0;
+                    const mealCountArray = Array.isArray(entry.mealCount) && entry.mealCount.length === 3
+                        ? [
+                            Number(entry.mealCount[0] ?? 0),
+                            Number(entry.mealCount[1] ?? 0),
+                            Number(entry.mealCount[2] ?? 0),
+                        ]
+                        : [
+                            Number(entry.breakfast ?? 0),
+                            Number(entry.lunch ?? 0),
+                            Number(entry.dinner ?? 0),
+                        ];
 
                     if (!mapped[dateKey]) {
-                        mapped[dateKey] = { breakfast: 0, lunch: 0, dinner: 0 };
+                        mapped[dateKey] = [0, 0, 0];
                     }
 
                     // Keep latest entry per date for edit/update in personal calendar view.
-                    mapped[dateKey] = {
-                        breakfast: breakfastValue + fallbackBreakfast,
-                        lunch: lunchValue,
-                        dinner: dinnerValue,
-                    };
+                    mapped[dateKey] = mealCountArray;
                     entryMap[dateKey] = entry._id;
                 });
 
@@ -108,16 +106,36 @@ const MealCalendar = () => {
         return compareDate < today;
     };
 
+    const normalizeMealArray = (value) => {
+        if (Array.isArray(value)) {
+            return [
+                Number(value[0] || 0),
+                Number(value[1] || 0),
+                Number(value[2] || 0),
+            ];
+        }
+
+        if (value && typeof value === 'object') {
+            return [
+                Number(value.breakfast || 0),
+                Number(value.lunch || 0),
+                Number(value.dinner || 0),
+            ];
+        }
+
+        return [0, 0, 0];
+    };
+
     // Get meal data for a specific date
     const getMealForDate = (date) => {
         const dateStr = formatDate(date);
-        return mealData[dateStr] || { breakfast: 0, lunch: 0, dinner: 0 };
+        return normalizeMealArray(mealData[dateStr]);
     };
 
     // Calculate total meals for a date
     const getTotalMeals = (date) => {
         const meal = getMealForDate(date);
-        return meal.breakfast + meal.lunch + meal.dinner;
+        return meal.reduce((acc, curr) => acc + curr, 0);
     };
 
     // Get intensity color based on meal count
@@ -136,10 +154,12 @@ const MealCalendar = () => {
     };
 
     // Handle meal input change
-    const handleMealChange = (type, value) => {
-        setMeals({
-            ...meals,
-            [type]: parseInt(value) || 0,
+    const handleMealChange = (index, value) => {
+        const parsedValue = parseInt(value, 10) || 0;
+        setMeals((prevMeals) => {
+            const nextMeals = [...prevMeals];
+            nextMeals[index] = parsedValue;
+            return nextMeals;
         });
     };
 
@@ -154,7 +174,6 @@ const MealCalendar = () => {
             return;
         }
 
-        const totalMealCount = meals.breakfast + meals.lunch + meals.dinner;
         const dateStr = formatDate(selectedDate);
         const mealEntryId = mealEntryIdByDate[dateStr];
 
@@ -164,15 +183,23 @@ const MealCalendar = () => {
 
             const payload = {
                 groupID: currentGroup.id,
-                mealCount: totalMealCount,
-                breakfast: meals.breakfast,
-                lunch: meals.lunch,
-                dinner: meals.dinner,
+                mealCount: [...meals],
                 date: dateStr,
             };
 
             if (mealEntryId) {
-                await updateMeal(mealEntryId, payload, token);
+                try {
+                    await updateMeal(mealEntryId, payload, token);
+                } catch {
+                    const created = await createMeal(payload, token);
+                    const createdId = created?.data?._id;
+                    if (createdId) {
+                        setMealEntryIdByDate((prev) => ({
+                            ...prev,
+                            [dateStr]: createdId,
+                        }));
+                    }
+                }
             } else {
                 const created = await createMeal(payload, token);
                 const createdId = created?.data?._id;
@@ -186,12 +213,12 @@ const MealCalendar = () => {
 
             setMealData((prev) => ({
                 ...prev,
-                [dateStr]: meals,
+                [dateStr]: [...meals],
             }));
 
             setShowMealModal(false);
             setSelectedDate(null);
-            setMeals({ breakfast: 0, lunch: 0, dinner: 0 });
+            setMeals([0, 0, 0]);
             window.dispatchEvent(new CustomEvent('group-meals-updated', {
                 detail: { groupId: currentGroup.id },
             }));
@@ -213,7 +240,7 @@ const MealCalendar = () => {
 
         setSelectedDate(date);
         const dateMeals = getMealForDate(date);
-        setMeals(dateMeals);
+        setMeals([...dateMeals]);
         setShowMealModal(true);
     };
 
@@ -370,7 +397,7 @@ const MealCalendar = () => {
                                     onClick={() => {
                                         setShowMealModal(false);
                                         setSelectedDate(null);
-                                        setMeals({ breakfast: 0, lunch: 0, dinner: 0 });
+                                        setMeals([0, 0, 0]);
                                     }}
                                     className={`text-2xl ${isLight ? 'text-gray-600 hover:text-gray-800' : 'text-gray-400 hover:text-gray-200'}`}
                                 >
@@ -387,7 +414,7 @@ const MealCalendar = () => {
                                     </label>
                                     <div className="flex items-center gap-2">
                                         <button
-                                            onClick={() => handleMealChange('breakfast', Math.max(0, meals.breakfast - 1))}
+                                            onClick={() => handleMealChange(0, Math.max(0, meals[0] - 1))}
                                             className={`px-3 py-2 rounded-lg ${isLight ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' : 'bg-gray-700 hover:bg-gray-600 text-white'} transition-colors`}
                                         >
                                             −
@@ -396,12 +423,12 @@ const MealCalendar = () => {
                                             type="number"
                                             min="0"
                                             max="10"
-                                            value={meals.breakfast}
-                                            onChange={(e) => handleMealChange('breakfast', e.target.value)}
+                                            value={meals[0]}
+                                            onChange={(e) => handleMealChange(0, e.target.value)}
                                             className={`flex-1 px-3 py-2 rounded-lg border text-center ${isLight ? 'border-gray-300 bg-white text-gray-900' : 'border-gray-600 bg-gray-700 text-white'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
                                         />
                                         <button
-                                            onClick={() => handleMealChange('breakfast', meals.breakfast + 1)}
+                                            onClick={() => handleMealChange(0, meals[0] + 1)}
                                             className={`px-3 py-2 rounded-lg ${isLight ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' : 'bg-gray-700 hover:bg-gray-600 text-white'} transition-colors`}
                                         >
                                             +
@@ -416,7 +443,7 @@ const MealCalendar = () => {
                                     </label>
                                     <div className="flex items-center gap-2">
                                         <button
-                                            onClick={() => handleMealChange('lunch', Math.max(0, meals.lunch - 1))}
+                                            onClick={() => handleMealChange(1, Math.max(0, meals[1] - 1))}
                                             className={`px-3 py-2 rounded-lg ${isLight ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' : 'bg-gray-700 hover:bg-gray-600 text-white'} transition-colors`}
                                         >
                                             −
@@ -425,12 +452,12 @@ const MealCalendar = () => {
                                             type="number"
                                             min="0"
                                             max="10"
-                                            value={meals.lunch}
-                                            onChange={(e) => handleMealChange('lunch', e.target.value)}
+                                            value={meals[1]}
+                                            onChange={(e) => handleMealChange(1, e.target.value)}
                                             className={`flex-1 px-3 py-2 rounded-lg border text-center ${isLight ? 'border-gray-300 bg-white text-gray-900' : 'border-gray-600 bg-gray-700 text-white'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
                                         />
                                         <button
-                                            onClick={() => handleMealChange('lunch', meals.lunch + 1)}
+                                            onClick={() => handleMealChange(1, meals[1] + 1)}
                                             className={`px-3 py-2 rounded-lg ${isLight ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' : 'bg-gray-700 hover:bg-gray-600 text-white'} transition-colors`}
                                         >
                                             +
@@ -445,7 +472,7 @@ const MealCalendar = () => {
                                     </label>
                                     <div className="flex items-center gap-2">
                                         <button
-                                            onClick={() => handleMealChange('dinner', Math.max(0, meals.dinner - 1))}
+                                            onClick={() => handleMealChange(2, Math.max(0, meals[2] - 1))}
                                             className={`px-3 py-2 rounded-lg ${isLight ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' : 'bg-gray-700 hover:bg-gray-600 text-white'} transition-colors`}
                                         >
                                             −
@@ -454,12 +481,12 @@ const MealCalendar = () => {
                                             type="number"
                                             min="0"
                                             max="10"
-                                            value={meals.dinner}
-                                            onChange={(e) => handleMealChange('dinner', e.target.value)}
+                                            value={meals[2]}
+                                            onChange={(e) => handleMealChange(2, e.target.value)}
                                             className={`flex-1 px-3 py-2 rounded-lg border text-center ${isLight ? 'border-gray-300 bg-white text-gray-900' : 'border-gray-600 bg-gray-700 text-white'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
                                         />
                                         <button
-                                            onClick={() => handleMealChange('dinner', meals.dinner + 1)}
+                                            onClick={() => handleMealChange(2, meals[2] + 1)}
                                             className={`px-3 py-2 rounded-lg ${isLight ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' : 'bg-gray-700 hover:bg-gray-600 text-white'} transition-colors`}
                                         >
                                             +
@@ -470,7 +497,7 @@ const MealCalendar = () => {
                                 {/* Total */}
                                 <div className={`p-4 rounded-lg ${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-900 border-blue-700'} border`}>
                                     <p className={`text-sm font-semibold ${isLight ? 'text-blue-800' : 'text-blue-200'}`}>
-                                        Total Meals: <span className="text-lg font-bold">{meals.breakfast + meals.lunch + meals.dinner}</span>
+                                        Total Meals: <span className="text-lg font-bold">{meals[0] + meals[1] + meals[2]}</span>
                                     </p>
                                 </div>
                             </div>
@@ -481,7 +508,7 @@ const MealCalendar = () => {
                                     onClick={() => {
                                         setShowMealModal(false);
                                         setSelectedDate(null);
-                                        setMeals({ breakfast: 0, lunch: 0, dinner: 0 });
+                                        setMeals([0, 0, 0]);
                                     }}
                                     className={`flex-1 px-4 py-3 rounded-lg font-semibold ${isLight ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' : 'bg-gray-700 hover:bg-gray-600 text-white'} transition-colors`}
                                 >

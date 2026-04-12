@@ -57,20 +57,33 @@ const GroupMealView = () => {
         return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     };
 
+    const normalizeMealBreakdown = (value) => {
+        if (Array.isArray(value)) {
+            return {
+                breakfast: Number(value[0] ?? 0),
+                lunch: Number(value[1] ?? 0),
+                dinner: Number(value[2] ?? 0),
+            };
+        }
+
+        if (value && typeof value === 'object') {
+            return {
+                breakfast: Number(value.breakfast ?? 0),
+                lunch: Number(value.lunch ?? 0),
+                dinner: Number(value.dinner ?? 0),
+            };
+        }
+
+        return { breakfast: 0, lunch: 0, dinner: 0 };
+    };
+
     const getMealBreakdownForDate = (memberData, dateStr) => {
-        const value = memberData[dateStr] || { breakfast: 0, lunch: 0, dinner: 0 };
-        return {
-            breakfast: Number(value.breakfast || 0),
-            lunch: Number(value.lunch || 0),
-            dinner: Number(value.dinner || 0),
-        };
+        return normalizeMealBreakdown(memberData[dateStr]);
     };
 
     const getTotalMealsForMonth = (memberData) => {
         return Object.values(memberData).reduce((sum, value) => {
-            const breakfast = Number(value?.breakfast || 0);
-            const lunch = Number(value?.lunch || 0);
-            const dinner = Number(value?.dinner || 0);
+            const { breakfast, lunch, dinner } = normalizeMealBreakdown(value);
             return sum + breakfast + lunch + dinner;
         }, 0);
     };
@@ -83,13 +96,8 @@ const GroupMealView = () => {
             const memberId = userData._id || userData.id || entry.userID || entry._id;
             const date = new Date(entry.date || entry.createdAt);
             const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-            const breakfastValue = Number(entry.breakfast ?? 0);
-            const lunchValue = Number(entry.lunch ?? 0);
-            const dinnerValue = Number(entry.dinner ?? 0);
-            const fallbackBreakfast =
-                breakfastValue === 0 && lunchValue === 0 && dinnerValue === 0
-                    ? Number(entry.mealCount || 0)
-                    : 0;
+            const breakdown = normalizeMealBreakdown(entry.mealCount);
+            const entrySortTime = new Date(entry.updatedAt || entry.createdAt || entry.date).getTime() || 0;
 
             if (!memberMap.has(memberId)) {
                 memberMap.set(memberId, {
@@ -101,13 +109,18 @@ const GroupMealView = () => {
             }
 
             const member = memberMap.get(memberId);
-            if (!member.mealData[dateStr]) {
-                member.mealData[dateStr] = { breakfast: 0, lunch: 0, dinner: 0 };
-            }
+            const existing = member.mealData[dateStr];
+            const existingSortTime = existing?._sortTime || 0;
 
-            member.mealData[dateStr].breakfast += breakfastValue + fallbackBreakfast;
-            member.mealData[dateStr].lunch += lunchValue;
-            member.mealData[dateStr].dinner += dinnerValue;
+            // If duplicate entries exist for the same member/day, keep only the latest one.
+            if (!existing || entrySortTime >= existingSortTime) {
+                member.mealData[dateStr] = {
+                    breakfast: breakdown.breakfast,
+                    lunch: breakdown.lunch,
+                    dinner: breakdown.dinner,
+                    _sortTime: entrySortTime,
+                };
+            }
         });
 
         return Array.from(memberMap.values());
