@@ -43,6 +43,44 @@ const isWithinSelectedMonth = (dateValue, selectedMonth) => {
     return monthKey === selectedMonth;
 };
 
+const getMealCountTotal = (mealCount) => {
+    if (Array.isArray(mealCount)) {
+        return mealCount.reduce((sum, value) => sum + Number(value || 0), 0);
+    }
+
+    const parsed = Number(mealCount || 0);
+    return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const getMealDateKey = (item) => {
+    const date = new Date(item?.date || item?.createdAt);
+    if (Number.isNaN(date.getTime())) {
+        return '';
+    }
+
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
+
+const getMealUserKey = (item) => {
+    return String(item?.userID?.email || item?.userID?._id || item?.userID || item?._id || '').toLowerCase();
+};
+
+const dedupeMealsByLatestEntry = (items) => {
+    const latestByKey = new Map();
+
+    items.forEach((item) => {
+        const key = `${getMealUserKey(item)}|${getMealDateKey(item)}`;
+        const sortTime = new Date(item?.updatedAt || item?.createdAt || item?.date).getTime() || 0;
+        const existing = latestByKey.get(key);
+
+        if (!existing || sortTime >= existing.sortTime) {
+            latestByKey.set(key, { item, sortTime });
+        }
+    });
+
+    return Array.from(latestByKey.values()).map((value) => value.item);
+};
+
 const TotalExpensePage = () => {
     const { isLight, user, userRole, currentGroup } = use(AuthContext);
     const normalizedRole = userRole ? userRole.toLowerCase() : null;
@@ -115,10 +153,10 @@ const TotalExpensePage = () => {
         loadExpenses();
     }, [user, groupId, selectedMonth]);
 
-    const selectedMeals = useMemo(
-        () => meals.filter((item) => isWithinSelectedMonth(item.date || item.createdAt, selectedMonth)),
-        [meals, selectedMonth],
-    );
+    const selectedMeals = useMemo(() => {
+        const monthMeals = meals.filter((item) => isWithinSelectedMonth(item.date || item.createdAt, selectedMonth));
+        return dedupeMealsByLatestEntry(monthMeals);
+    }, [meals, selectedMonth]);
 
     const selectedBazarItems = useMemo(
         () => bazarItems.filter((item) => isWithinSelectedMonth(item.date || item.createdAt, selectedMonth)),
@@ -136,7 +174,7 @@ const TotalExpensePage = () => {
     );
 
     const totalMealCount = useMemo(
-        () => selectedMeals.reduce((sum, item) => sum + Number(item?.mealCount || 0), 0),
+        () => selectedMeals.reduce((sum, item) => sum + getMealCountTotal(item?.mealCount), 0),
         [selectedMeals],
     );
 
@@ -166,7 +204,7 @@ const TotalExpensePage = () => {
         const normalizedMeals = selectedMeals.map((item) => ({
             ...item,
             email: String(item?.userID?.email || '').toLowerCase(),
-            mealCount: Number(item?.mealCount || 0),
+            mealCount: getMealCountTotal(item?.mealCount),
         }));
 
         const normalizedPayments = payments
