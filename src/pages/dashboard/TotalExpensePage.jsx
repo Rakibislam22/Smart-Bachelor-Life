@@ -1,4 +1,4 @@
-import React, { use, useEffect, useMemo, useState } from 'react';
+import React, { use, useEffect, useMemo, useRef, useState } from 'react';
 import { AuthContext } from '../../provider/AuthContext';
 import Loading from '../../component/Loading';
 import { toast } from 'react-toastify';
@@ -93,10 +93,11 @@ const TotalExpensePage = () => {
     const [groupMembers, setGroupMembers] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isCreatingExpense, setIsCreatingExpense] = useState(false);
+    const expenseFileInputRef = useRef(null);
     const [expenseForm, setExpenseForm] = useState({
         title: '',
         amount: '',
-        category: 'bazar',
+        category: 'Rent',
         file: null,
     });
 
@@ -310,7 +311,10 @@ const TotalExpensePage = () => {
                 setExpenses((prev) => [created, ...prev]);
             }
 
-            setExpenseForm({ title: '', amount: '', category: 'bazar', file: null });
+            setExpenseForm({ title: '', amount: '', category: 'Rent', file: null });
+            if (expenseFileInputRef.current) {
+                expenseFileInputRef.current.value = '';
+            }
             toast.success('Expense added successfully');
         } catch {
             toast.error('We could not add expense right now. Please try again.');
@@ -406,13 +410,13 @@ const TotalExpensePage = () => {
                         onChange={handleInputChange}
                         className={`rounded-lg border px-3 py-2 text-sm ${isLight ? 'bg-white border-gray-300 text-gray-900' : 'bg-gray-700 border-gray-600 text-white'}`}
                     >
-                        <option value="bazar">Bazar</option>
                         <option value="rent">Rent</option>
                         <option value="utilities">Utilities</option>
                         <option value="cook">Cook</option>
                         <option value="misc">Misc</option>
                     </select>
                     <input
+                        ref={expenseFileInputRef}
                         type="file"
                         accept="image/*,.pdf"
                         onChange={handleFileChange}

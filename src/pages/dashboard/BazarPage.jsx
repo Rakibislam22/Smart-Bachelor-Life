@@ -239,8 +239,8 @@ const BazarPage = () => {
             </div>
 
             {isSheetOpen && normalizedRole === 'manager' && (
-                <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 px-3 py-3 sm:px-6">
-                    <div className={`w-full max-w-3xl rounded-t-3xl border border-b-0 shadow-2xl ${isLight ? 'bg-white border-gray-200' : 'bg-gray-900 border-gray-700'}`}>
+                <div className="fixed inset-0 z-80 flex items-end justify-center bg-black/50 px-0 pb-16 pt-0 sm:px-6 sm:pb-6 sm:pt-6">
+                    <div className={`mx-2 flex w-[calc(100%-1rem)] max-w-3xl max-h-[90vh] flex-col rounded-t-3xl border shadow-2xl sm:mx-0 sm:w-full sm:max-h-[92vh] ${isLight ? 'bg-white border-gray-200' : 'bg-gray-900 border-gray-700'}`}>
                         <div className={`flex items-center justify-between px-4 sm:px-6 py-4 border-b ${isLight ? 'border-gray-200' : 'border-gray-700'}`}>
                             <div>
                                 <h2 className={`text-lg sm:text-xl font-semibold ${isLight ? 'text-gray-900' : 'text-white'}`}>Add Bazar Detail</h2>
@@ -256,63 +256,76 @@ const BazarPage = () => {
                             </button>
                         </div>
 
-                        <form onSubmit={handleCreateBazar} className="max-h-[75vh] overflow-y-auto px-4 sm:px-6 py-5 space-y-5">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <label className="space-y-2">
-                                    <span className={`text-sm font-medium ${isLight ? 'text-gray-700' : 'text-gray-200'}`}>Item details</span>
-                                    <textarea
-                                        value={bazarForm.item}
-                                        onChange={(e) => setBazarForm((prev) => ({ ...prev, item: e.target.value }))}
-                                        placeholder="Rice, oil, vegetables..."
-                                        rows={4}
-                                        className={`w-full rounded-xl border px-4 py-3 text-sm shadow-sm resize-none transition-all duration-200 ${isLight ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400' : 'bg-gray-800 border-gray-700 text-white placeholder:text-gray-500'} focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30`}
-                                        required
-                                    />
-                                </label>
+                        <form onSubmit={handleCreateBazar} className="flex-1 overflow-y-auto">
+                            <div className="space-y-5 px-4 sm:px-6 py-5">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <label className="space-y-2">
+                                        <span className={`text-sm font-medium ${isLight ? 'text-gray-700' : 'text-gray-200'}`}>Item details</span>
+                                        <textarea
+                                            value={bazarForm.item}
+                                            onChange={(e) => setBazarForm((prev) => ({ ...prev, item: e.target.value }))}
+                                            placeholder="Rice, oil, vegetables..."
+                                            rows={4}
+                                            className={`w-full rounded-xl border px-4 py-3 text-sm shadow-sm resize-none transition-all duration-200 ${isLight ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400' : 'bg-gray-800 border-gray-700 text-white placeholder:text-gray-500'} focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30`}
+                                            required
+                                        />
+                                    </label>
 
-                                <label className="space-y-2">
-                                    <span className={`text-sm font-medium ${isLight ? 'text-gray-700' : 'text-gray-200'}`}>Quantity</span>
-                                    <textarea
-                                        value={bazarForm.quantity}
-                                        onChange={(e) => setBazarForm((prev) => ({ ...prev, quantity: e.target.value }))}
-                                        placeholder="2, 4, 1..."
-                                        rows={4}
-                                        className={`w-full rounded-xl border px-4 py-3 text-sm shadow-sm resize-none transition-all duration-200 ${isLight ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400' : 'bg-gray-800 border-gray-700 text-white placeholder:text-gray-500'} focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30`}
-                                        required
-                                    />
-                                </label>
+                                    <label className="space-y-2">
+                                        <span className={`text-sm font-medium ${isLight ? 'text-gray-700' : 'text-gray-200'}`}>Quantity</span>
+                                        <textarea
+                                            value={bazarForm.quantity}
+                                            onChange={(e) => setBazarForm((prev) => ({ ...prev, quantity: e.target.value }))}
+                                            placeholder="2, 4, 1..."
+                                            rows={4}
+                                            className={`w-full rounded-xl border px-4 py-3 text-sm shadow-sm resize-none transition-all duration-200 ${isLight ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400' : 'bg-gray-800 border-gray-700 text-white placeholder:text-gray-500'} focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30`}
+                                            required
+                                        />
+                                    </label>
 
-                                <label className="space-y-2">
-                                    <span className={`text-sm font-medium ${isLight ? 'text-gray-700' : 'text-gray-200'}`}>Price</span>
-                                    <textarea
-                                        value={bazarForm.price}
-                                        onChange={(e) => setBazarForm((prev) => ({ ...prev, price: e.target.value }))}
-                                        placeholder="120, 450, 80..."
-                                        rows={4}
-                                        className={`w-full rounded-xl border px-4 py-3 text-sm shadow-sm resize-none transition-all duration-200 ${isLight ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400' : 'bg-gray-800 border-gray-700 text-white placeholder:text-gray-500'} focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30`}
-                                        required
-                                    />
-                                </label>
+                                    <label className="space-y-2">
+                                        <span className={`text-sm font-medium ${isLight ? 'text-gray-700' : 'text-gray-200'}`}>Price</span>
+                                        <textarea
+                                            value={bazarForm.price}
+                                            onChange={(e) => setBazarForm((prev) => ({ ...prev, price: e.target.value }))}
+                                            placeholder="120, 450, 80..."
+                                            rows={4}
+                                            className={`w-full rounded-xl border px-4 py-3 text-sm shadow-sm resize-none transition-all duration-200 ${isLight ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400' : 'bg-gray-800 border-gray-700 text-white placeholder:text-gray-500'} focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30`}
+                                            required
+                                        />
+                                    </label>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-4 items-end">
+                                    <label className="space-y-2">
+                                        <span className={`text-sm font-medium ${isLight ? 'text-gray-700' : 'text-gray-200'}`}>Sheet document</span>
+                                        <input
+                                            type="file"
+                                            onChange={(e) => setBazarForm((prev) => ({ ...prev, file: e.target.files?.[0] || null }))}
+                                            className={`block w-full rounded-xl border px-4 py-3 text-sm shadow-sm ${isLight ? 'bg-white border-gray-300 text-gray-900 file:mr-4 file:rounded-lg file:border-0 file:bg-violet-600 file:px-4 file:py-2 file:text-white' : 'bg-gray-800 border-gray-700 text-white file:mr-4 file:rounded-lg file:border-0 file:bg-violet-600 file:px-4 file:py-2 file:text-white'} focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30`}
+                                            required
+                                        />
+                                    </label>
+                                </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-end">
-                                <label className="space-y-2">
-                                    <span className={`text-sm font-medium ${isLight ? 'text-gray-700' : 'text-gray-200'}`}>Sheet document</span>
-                                    <input
-                                        type="file"
-                                        onChange={(e) => setBazarForm((prev) => ({ ...prev, file: e.target.files?.[0] || null }))}
-                                        className={`block w-full rounded-xl border px-4 py-3 text-sm shadow-sm ${isLight ? 'bg-white border-gray-300 text-gray-900 file:mr-4 file:rounded-lg file:border-0 file:bg-violet-600 file:px-4 file:py-2 file:text-white' : 'bg-gray-800 border-gray-700 text-white file:mr-4 file:rounded-lg file:border-0 file:bg-violet-600 file:px-4 file:py-2 file:text-white'} focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30`}
-                                        required
-                                    />
-                                </label>
-
-                                <button
-                                    type="submit"
-                                    disabled={isSaving}
-                                    className="inline-flex h-12 items-center justify-center rounded-xl bg-linear-to-r from-violet-600 via-fuchsia-600 to-indigo-600 px-6 text-sm font-semibold text-white shadow-lg shadow-violet-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-600/30 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
-                                >
-                                    {isSaving ? 'Saving...' : 'Save Bazar Detail'}
-                                </button>
+                            <div className={`sticky bottom-0 border-t px-4 sm:px-6 pt-3 sm:pt-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] ${isLight ? 'border-gray-200 bg-white' : 'border-gray-700 bg-gray-900'}`}>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsSheetOpen(false)}
+                                        className={`inline-flex h-12 items-center justify-center rounded-xl border px-6 text-sm font-semibold transition-colors ${isLight ? 'border-gray-300 text-gray-800 hover:bg-gray-100' : 'border-gray-600 text-gray-200 hover:bg-gray-800'}`}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isSaving}
+                                        className="inline-flex h-12 items-center justify-center rounded-xl bg-linear-to-r from-violet-600 via-fuchsia-600 to-indigo-600 px-6 text-sm font-semibold text-white shadow-lg shadow-violet-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-600/30 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                                    >
+                                        {isSaving ? 'Saving...' : 'Save Bazar Detail'}
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
