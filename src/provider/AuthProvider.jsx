@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AuthContext } from './AuthContext';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, onIdTokenChanged, signInWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/firebase.init';
@@ -17,7 +17,7 @@ const AuthProvider = ({ children }) => {
 
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [userRole, setUserRole] = useState(() => {
+    const [userRole, setUserRoleState] = useState(() => {
         // Check if role exists in localStorage
         return localStorage.getItem('userRole') || null;
     });
@@ -31,6 +31,7 @@ const AuthProvider = ({ children }) => {
         return null;
     });
     const provider = new GoogleAuthProvider();
+    const hasCompletedInitialRoleSyncRef = useRef(false);
 
     // for theme toggle
     const [isLight, setIsLight] = useState(() => {
@@ -60,6 +61,30 @@ const AuthProvider = ({ children }) => {
         }
     }, [userRole]);
 
+    const setUserRole = (nextRoleOrUpdater, options = {}) => {
+        const shouldReload = options?.reloadOnChange !== false;
+
+        setUserRoleState((prevRole) => {
+            const resolvedNextRole = typeof nextRoleOrUpdater === 'function'
+                ? nextRoleOrUpdater(prevRole)
+                : nextRoleOrUpdater;
+
+            if (
+                shouldReload &&
+                hasCompletedInitialRoleSyncRef.current &&
+                typeof window !== 'undefined' &&
+                prevRole !== resolvedNextRole
+            ) {
+                // Queue reload after React applies state updates.
+                window.setTimeout(() => {
+                    window.location.reload();
+                }, 0);
+            }
+
+            return resolvedNextRole;
+        });
+    };
+
     useEffect(() => {
         if (currentGroup) {
             localStorage.setItem('currentGroup', JSON.stringify(currentGroup));
@@ -73,8 +98,9 @@ const AuthProvider = ({ children }) => {
             setUser(currentUser);
 
             if (!currentUser) {
-                setUserRole(null);
+                setUserRoleState(null);
                 setIsRoleSelectionCompleted(false);
+                hasCompletedInitialRoleSyncRef.current = true;
                 setLoading(false);
                 return;
             }
@@ -91,12 +117,13 @@ const AuthProvider = ({ children }) => {
                 setCurrentGroup(session?.currentGroup || null);
             } catch (error) {
                 // Avoid stale local role to prevent unauthorized role-only API calls.
-                setUserRole(null);
+                setUserRoleState(null);
                 setIsRoleSelectionCompleted(false);
                 setCurrentGroup(null);
                 console.error('Auth sync failed:', error);
                 toast.error(getSyncErrorMessage(error));
             } finally {
+                hasCompletedInitialRoleSyncRef.current = true;
                 setLoading(false);
             }
         })

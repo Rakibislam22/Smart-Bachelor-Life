@@ -1,4 +1,5 @@
 import React, { use, useEffect, useMemo, useState } from 'react';
+import { FiCheck, FiLoader, FiX } from 'react-icons/fi';
 import { AuthContext } from '../../provider/AuthContext';
 import Loading from '../../component/Loading';
 import { toast } from 'react-toastify';
@@ -310,20 +311,17 @@ const BazarPage = () => {
                             </div>
 
                             <div className={`sticky bottom-0 border-t px-4 sm:px-6 pt-3 sm:pt-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] ${isLight ? 'border-gray-200 bg-white' : 'border-gray-700 bg-gray-900'}`}>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsSheetOpen(false)}
-                                        className={`inline-flex h-12 items-center justify-center rounded-xl border px-6 text-sm font-semibold transition-colors ${isLight ? 'border-gray-300 text-gray-800 hover:bg-gray-100' : 'border-gray-600 text-gray-200 hover:bg-gray-800'}`}
-                                    >
-                                        Cancel
-                                    </button>
+                                <div className="">
+                                    
                                     <button
                                         type="submit"
                                         disabled={isSaving}
-                                        className="inline-flex h-12 items-center justify-center rounded-xl bg-linear-to-r from-violet-600 via-fuchsia-600 to-indigo-600 px-6 text-sm font-semibold text-white shadow-lg shadow-violet-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-600/30 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                                        className="w-full inline-flex h-12 items-center justify-center rounded-xl bg-linear-to-r from-violet-600 via-fuchsia-600 to-indigo-600 px-6 text-sm font-semibold text-white shadow-lg shadow-violet-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-600/30 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                                        aria-label={isSaving ? 'Saving bazar detail' : 'Save bazar detail'}
+                                        title="Save"
                                     >
-                                        {isSaving ? 'Saving...' : 'Save Bazar Detail'}
+                                        {isSaving ? <FiLoader className="h-5 w-5 animate-spin" /> : <FiCheck className="h-5 w-5" />}
+                                        <span className="sr-only">{isSaving ? 'Saving...' : 'Save Bazar Detail'}</span>
                                     </button>
                                 </div>
                             </div>

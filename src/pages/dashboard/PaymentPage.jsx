@@ -1,4 +1,5 @@
 import React, { use, useCallback, useEffect, useRef, useState } from 'react';
+import { FiX } from 'react-icons/fi';
 import { AuthContext } from '../../provider/AuthContext';
 import Loading from '../../component/Loading';
 import { toast } from 'react-toastify';
@@ -508,8 +509,10 @@ const PaymentPage = () => {
                                 type="button"
                                 onClick={closeStripeFeedbackModal}
                                 className={`rounded-md px-2 py-1 text-sm ${isLight ? 'bg-gray-100 text-gray-700' : 'bg-gray-800 text-gray-200'}`}
+                                aria-label="Close feedback"
+                                title="Close"
                             >
-                                Close
+                                <FiX className="h-4 w-4" />
                             </button>
                         </div>
                         <p className={`mt-3 text-sm ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>
