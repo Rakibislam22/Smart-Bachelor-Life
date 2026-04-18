@@ -1,0 +1,25 @@
+name: Keepalive Ping
+
+on:
+  schedule:
+    - cron: '*/1 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        run: |
+          if [ -z "${{ secrets.KEEP_ALIVE_URL }}" ]; then
+            echo "KEEP_ALIVE_URL secret is not set"
+            exit 1
+          fi
+
+          status=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.KEEP_ALIVE_URL }}")
+          echo "Health endpoint status: $status"
+
+          if [ "$status" -lt 200 ] || [ "$status" -ge 400 ]; then
+            echo "Health ping failed with status $status"
+            exit 1
+          fi
