@@ -2,21 +2,37 @@ name: Keepalive Ping
 
 on:
   schedule:
-    - cron: '*/1 * * * *'
+    # GitHub Actions schedule minimum is every 5 minutes.
+    - cron: '*/5 * * * *'
   workflow_dispatch:
+
+concurrency:
+  group: keepalive-ping
+  cancel-in-progress: true
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping health endpoint
+      - name: Ping health endpoint with retries
         run: |
           if [ -z "${{ secrets.KEEP_ALIVE_URL }}" ]; then
             echo "KEEP_ALIVE_URL secret is not set"
             exit 1
           fi
 
-          status=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.KEEP_ALIVE_URL }}")
+          url="${{ secrets.KEEP_ALIVE_URL }}"
+          # Avoid edge caches returning stale results.
+          ping_url="$url?t=$(date +%s)"
+
+          echo "Pinging: $ping_url"
+
+          # Retry a few times because cold starts can take time.
+          status=$(curl -L --retry 4 --retry-all-errors --retry-delay 8 --connect-timeout 10 --max-time 60 \
+            -H "User-Agent: sbl-keepalive-bot" \
+            -H "Cache-Control: no-cache" \
+            -s -o /dev/null -w "%{http_code}" "$ping_url")
+
           echo "Health endpoint status: $status"
 
           if [ "$status" -lt 200 ] || [ "$status" -ge 400 ]; then

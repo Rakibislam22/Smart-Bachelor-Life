@@ -26,11 +26,18 @@ const HeroSection = () => {
 				</div>
 
 				<div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-					{user ? (
-										<Link to="/dashboard"><ButtonPrimary >Go to Dashboard</ButtonPrimary></Link>
-									) : (
-										<Link to="/auth/login"><ButtonPrimary >Get Started</ButtonPrimary></Link>
-									)}
+					<div className="w-full sm:w-auto">
+						{user ? (
+							<Link to="/dashboard" className="w-full">
+								<ButtonPrimary className="w-full sm:w-auto px-8 py-3">Go to Dashboard</ButtonPrimary>
+							</Link>
+						) : (
+							<Link to="/auth/login" className="w-full">
+								<ButtonPrimary className="w-full sm:w-auto px-8 py-3">Get Started</ButtonPrimary>
+							</Link>
+						)}
+					</div>
+
 
 					<ButtonSecondary className="w-full sm:w-auto px-8 py-3">
 						Watch Demo
