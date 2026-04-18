@@ -1,6 +1,7 @@
 import React, { use, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { BsChatDotsFill } from 'react-icons/bs';
+import { FiLoader, FiSend, FiX } from 'react-icons/fi';
 import { AuthContext } from '../provider/AuthContext';
 import { getChatMessages, getChatTypingStatus, markChatMessagesRead, sendChatMessage, setChatTypingStatus } from '../utils/chatApi';
 
@@ -306,8 +307,10 @@ const GroupChatIcon = () => {
                                 type="button"
                                 onClick={() => setIsOpen(false)}
                                 className={`rounded-lg px-2 py-1 text-sm ${isLight ? 'bg-white/70 text-gray-700 hover:bg-white' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
+                                aria-label="Close chat"
+                                title="Close"
                             >
-                                Close
+                                <FiX className="h-4 w-4" />
                             </button>
                         </div>
                     </div>
@@ -389,8 +392,11 @@ const GroupChatIcon = () => {
                                 onClick={handleSend}
                                 disabled={isSending}
                                 className="rounded-xl bg-violet-600 hover:bg-violet-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+                                aria-label={isSending ? 'Sending message' : 'Send message'}
+                                title="Send"
                             >
-                                {isSending ? 'Sending...' : 'Send'}
+                                {isSending ? <FiLoader className="h-4 w-4 animate-spin" /> : <FiSend className="h-4 w-4" />}
+                                <span className="sr-only">{isSending ? 'Sending...' : 'Send'}</span>
                             </button>
                         </div>
                     </div>

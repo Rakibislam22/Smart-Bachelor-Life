@@ -4,6 +4,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { TbCoinTakaFilled } from 'react-icons/tb';
 import { MdOutlineRestaurantMenu } from 'react-icons/md';
 import { FaAmazonPay, FaCartPlus } from 'react-icons/fa';
+import { FiCheck } from 'react-icons/fi';
 import Avatar from '../component/Avatar';
 import GroupChatIcon from '../component/GroupChatIcon';
 import ThemeToggle from '../component/common/ThemeToggle';
@@ -484,7 +485,8 @@ const DashboardLayout = () => {
                                                         placeholder="Enter group name"
                                                     />
                                                     <ButtonPrimary onClick={handleSaveGroupTitle} loading={isSavingGroupTitle} loadingText="Saving...">
-                                                        Save
+                                                        <FiCheck className="h-4 w-4" />
+                                                        <span className="sr-only">Save</span>
                                                     </ButtonPrimary>
                                                 </div>
                                                 <p className={`mt-2 text-xs ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>

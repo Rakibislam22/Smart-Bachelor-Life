@@ -1,4 +1,5 @@
 import React, { useState, use, useEffect } from 'react';
+import { FiCheck, FiLoader, FiX } from 'react-icons/fi';
 import { AuthContext } from '../provider/AuthContext';
 import { toast } from 'react-toastify';
 import { createMeal, getMeals, updateMeal } from '../utils/mealApi';
@@ -504,22 +505,16 @@ const MealCalendar = () => {
 
                             {/* Actions */}
                             <div className="flex gap-3 mt-6">
-                                <button
-                                    onClick={() => {
-                                        setShowMealModal(false);
-                                        setSelectedDate(null);
-                                        setMeals([0, 0, 0]);
-                                    }}
-                                    className={`flex-1 px-4 py-3 rounded-lg font-semibold ${isLight ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' : 'bg-gray-700 hover:bg-gray-600 text-white'} transition-colors`}
-                                >
-                                    Cancel
-                                </button>
+                                
                                 <button
                                     onClick={saveMeal}
                                     disabled={isSaving}
-                                    className={`flex-1 px-4 py-3 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors`}
+                                    className={`flex-1 inline-flex items-center justify-center px-4 py-3 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors`}
+                                    aria-label={isSaving ? 'Saving meals' : 'Save meals'}
+                                    title="Save meals"
                                 >
-                                    {isSaving ? 'Saving...' : 'Save Meals'}
+                                    {isSaving ? <FiLoader className="h-5 w-5 animate-spin" /> : <FiCheck className="h-5 w-5" />}
+                                    <span className="sr-only">{isSaving ? 'Saving...' : 'Save Meals'}</span>
                                 </button>
                             </div>
                         </div>

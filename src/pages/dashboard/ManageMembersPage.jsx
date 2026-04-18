@@ -2,6 +2,7 @@ import React, { use, useCallback, useEffect, useState } from 'react';
 import { AuthContext } from '../../provider/AuthContext';
 import Loading from '../../component/Loading';
 import { toast } from 'react-toastify';
+import { syncUserSession } from '../../utils/authApi';
 import {
     changeGroupUserRole,
     getManagerGroupDetails,
@@ -11,7 +12,7 @@ import {
 } from '../../utils/groupApi';
 
 const ManageMembersPage = () => {
-    const { isLight, userRole, user } = use(AuthContext);
+    const { isLight, userRole, user, setUserRole, setCurrentGroup } = use(AuthContext);
     const normalizedRole = userRole ? userRole.toLowerCase() : null;
 
     const [members, setMembers] = useState([]);
@@ -116,6 +117,11 @@ const ManageMembersPage = () => {
         try {
             const token = await user.getIdToken();
             await changeGroupUserRole(memberId, token);
+            const session = await syncUserSession(token, user);
+
+            setUserRole(session?.user?.role ? session.user.role.toLowerCase() : null);
+            setCurrentGroup(session?.currentGroup || null);
+
             setMembers((prev) => prev.map((member) => ({
                 ...member,
                 role: member.id === memberId ? 'Manager' : member.role,
