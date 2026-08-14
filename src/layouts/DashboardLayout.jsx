@@ -324,6 +324,19 @@ const DashboardLayout = () => {
                         </Link>
                     </li>
                     <li>
+                        <Link to="/dashboard/iot" className="">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="my-1.5 inline-block size-6">
+                                <path d="M4 14h16" />
+                                <path d="M6 18h12" />
+                                <path d="M8 10h8" />
+                                <path d="M12 3v7" />
+                                <path d="M10 21h4" />
+                                <path d="M7 5h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+                            </svg>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">IoT Dashboard</span>
+                        </Link>
+                    </li>
+                    <li>
                         <button onClick={handleOpenGroupModal} className={` min-w-18 h-full px-2 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-6"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Settings</span>
@@ -369,6 +382,19 @@ const DashboardLayout = () => {
                         <Link to="/dashboard/payment" className="">
                             <FaAmazonPay className="my-1.5 inline-block size-6" />
                             <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">Make Payment</span>
+                        </Link>
+                    </li>
+                    <li>
+                        <Link to="/dashboard/iot" className="">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="my-1.5 inline-block size-6">
+                                <path d="M4 14h16" />
+                                <path d="M6 18h12" />
+                                <path d="M8 10h8" />
+                                <path d="M12 3v7" />
+                                <path d="M10 21h4" />
+                                <path d="M7 5h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+                            </svg>
+                            <span className="inline-block whitespace-nowrap transition-opacity duration-150 ease-linear is-drawer-open:opacity-100 is-drawer-close:opacity-0">IoT Dashboard</span>
                         </Link>
                     </li>
                     <li>
