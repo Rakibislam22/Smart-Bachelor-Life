@@ -18,6 +18,7 @@ import TotalExpensePage from "../pages/dashboard/TotalExpensePage";
 import DailyMenuPage from "../pages/dashboard/DailyMenuPage";
 import BazarPage from "../pages/dashboard/BazarPage";
 import PaymentPage from "../pages/dashboard/PaymentPage";
+import IoTDashboard from "../pages/IotDashboard";
 import NotFound from "../pages/NotFound";
 import ManagerRoute from "./ManagerRoute";
 
@@ -97,6 +98,10 @@ const router = createBrowserRouter([
             {
                 path: "payment",
                 element: <PaymentPage />,
+            },
+            {
+                path: "iot",
+                element: <IoTDashboard />,
             }
         ]
     },
