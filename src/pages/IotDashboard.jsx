@@ -25,6 +25,26 @@ const getSensorValue = (value, fallback = 0) => {
     return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+const getValidSensorTimestamp = (value) => {
+    if (value === null || value === undefined || value === '') {
+        return null;
+    }
+
+    const parsed = Number(value);
+    const dateMs = Number.isFinite(parsed) ? parsed : new Date(value).getTime();
+
+    if (!Number.isFinite(dateMs) || dateMs <= 0) {
+        return null;
+    }
+
+    const now = Date.now();
+    if (dateMs > now + 60000) {
+        return null;
+    }
+
+    return dateMs;
+};
+
 const normalizeKey = (key) => String(key || '').trim().replace(/:$/, '').toLowerCase();
 
 const pickValue = (target, keys, fallback = null) => {
@@ -155,15 +175,24 @@ const IoTDashboard = () => {
                 0,
             );
 
+            const sensorTimestamp = getValidSensorTimestamp(
+                pickValue(sensorData, ['updatedAt', 'lastUpdated', 'timestamp', 'time', 'updated_at'], null),
+            );
+
             setSensors({
                 temperature: nextTemperature,
                 humidity: nextHumidity,
                 gas: nextGas,
-                updatedAt: pickValue(sensorData, ['updatedAt', 'lastUpdated', 'timestamp', 'time', 'updated_at'], null),
+                updatedAt: sensorTimestamp ?? pickValue(sensorData, ['updatedAt', 'lastUpdated', 'timestamp', 'time', 'updated_at'], null),
             });
 
-            // Every write to /sensors is a heartbeat from the ESP32 itself.
-            setLastSeenAt(Date.now());
+            if (sensorTimestamp === null) {
+                setLastSeenAt(null);
+                return;
+            }
+
+            const isExpired = Date.now() - sensorTimestamp > ONLINE_TIMEOUT_MS;
+            setLastSeenAt(isExpired ? null : sensorTimestamp);
         });
 
         const unsubscribeWarning = onValue(warningRef, (snapshot) => {
@@ -262,12 +291,12 @@ const IoTDashboard = () => {
                     </h2>
                     <div
                         className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${isOnline
-                                ? isLight
-                                    ? 'border-emerald-500/40 bg-emerald-50 text-emerald-700'
-                                    : 'border-emerald-500/30 bg-emerald-500/15 text-emerald-300'
-                                : isLight
-                                    ? 'border-gray-300 bg-gray-100 text-gray-600'
-                                    : 'border-gray-500/30 bg-gray-500/15 text-gray-300'
+                            ? isLight
+                                ? 'border-emerald-500/40 bg-emerald-50 text-emerald-700'
+                                : 'border-emerald-500/30 bg-emerald-500/15 text-emerald-300'
+                            : isLight
+                                ? 'border-gray-300 bg-gray-100 text-gray-600'
+                                : 'border-gray-500/30 bg-gray-500/15 text-gray-300'
                             }`}
                     >
                         {isOnline ? <Wifi className="h-3.5 w-3.5" /> : <WifiOff className="h-3.5 w-3.5" />}
@@ -279,8 +308,8 @@ const IoTDashboard = () => {
                 {hasWarning && (
                     <div
                         className={`rounded-2xl border p-4 shadow-lg ${isLight
-                                ? 'border-red-300 bg-red-50 shadow-red-200/60'
-                                : 'border-red-500/40 bg-gradient-to-r from-red-500/20 via-red-500/15 to-amber-500/10 shadow-red-500/20'
+                            ? 'border-red-300 bg-red-50 shadow-red-200/60'
+                            : 'border-red-500/40 bg-gradient-to-r from-red-500/20 via-red-500/15 to-amber-500/10 shadow-red-500/20'
                             }`}
                     >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -295,8 +324,8 @@ const IoTDashboard = () => {
                             </div>
                             <div
                                 className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${isLight
-                                        ? 'border-red-300 bg-red-100 text-red-700'
-                                        : 'border-red-400/30 bg-red-500/15 text-red-100'
+                                    ? 'border-red-300 bg-red-100 text-red-700'
+                                    : 'border-red-400/30 bg-red-500/15 text-red-100'
                                     }`}
                             >
                                 <AlertTriangle className="h-4 w-4" />
@@ -352,8 +381,8 @@ const IoTDashboard = () => {
                             {gasIsOverLimit && (
                                 <span
                                     className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${isLight
-                                            ? 'border-red-300 bg-red-50 text-red-700'
-                                            : 'border-red-400/30 bg-red-500/15 text-red-200'
+                                        ? 'border-red-300 bg-red-50 text-red-700'
+                                        : 'border-red-400/30 bg-red-500/15 text-red-200'
                                         }`}
                                 >
                                     <AlertTriangle className="h-3.5 w-3.5" />
@@ -365,8 +394,8 @@ const IoTDashboard = () => {
                         <div className="relative mt-4 h-3 overflow-hidden rounded-full bg-slate-700/60">
                             <div
                                 className={`h-full rounded-full transition-all duration-500 ${gasIsOverLimit
-                                        ? 'bg-red-500'
-                                        : 'bg-gradient-to-r from-cyan-400 via-violet-500 to-fuchsia-500'
+                                    ? 'bg-red-500'
+                                    : 'bg-gradient-to-r from-cyan-400 via-violet-500 to-fuchsia-500'
                                     }`}
                                 style={{ width: `${gasMeter}%` }}
                             />
@@ -387,12 +416,12 @@ const IoTDashboard = () => {
                         <div className="flex items-center gap-3">
                             <div
                                 className={`rounded-xl p-2 ${kitchen.status === 'done'
-                                        ? isLight
-                                            ? 'bg-emerald-50 text-emerald-700'
-                                            : 'bg-emerald-500/15 text-emerald-300'
-                                        : isLight
-                                            ? 'bg-amber-50 text-amber-700'
-                                            : 'bg-amber-500/15 text-amber-300'
+                                    ? isLight
+                                        ? 'bg-emerald-50 text-emerald-700'
+                                        : 'bg-emerald-500/15 text-emerald-300'
+                                    : isLight
+                                        ? 'bg-amber-50 text-amber-700'
+                                        : 'bg-amber-500/15 text-amber-300'
                                     }`}
                             >
                                 <Microwave className="h-5 w-5" />
@@ -405,12 +434,12 @@ const IoTDashboard = () => {
 
                         <div
                             className={`mt-5 rounded-2xl border p-4 ${kitchen.status === 'done'
-                                    ? isLight
-                                        ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                                        : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-100'
-                                    : isLight
-                                        ? 'border-amber-300 bg-amber-50 text-amber-800'
-                                        : 'border-amber-500/30 bg-amber-500/10 text-amber-100'
+                                ? isLight
+                                    ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                                    : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-100'
+                                : isLight
+                                    ? 'border-amber-300 bg-amber-50 text-amber-800'
+                                    : 'border-amber-500/30 bg-amber-500/10 text-amber-100'
                                 }`}
                         >
                             <p className="text-sm font-medium">{kitchen.message || 'Kitchen is waiting for updates'}</p>
