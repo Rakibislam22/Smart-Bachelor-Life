@@ -706,6 +706,17 @@ const DashboardLayout = () => {
                                             <FaAmazonPay className="size-5" />
                                             <span className="text-[10px] mt-0.5 truncate w-full text-center">Payment</span>
                                         </Link>
+                                        <Link to="/dashboard/iot" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/iot' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-5">
+                                                <path d="M4 14h16" />
+                                                <path d="M6 18h12" />
+                                                <path d="M8 10h8" />
+                                                <path d="M12 3v7" />
+                                                <path d="M10 21h4" />
+                                                <path d="M7 5h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+                                            </svg>
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">IoT</span>
+                                        </Link>
                                         <button onClick={handleOpenGroupModal} className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-5"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                             <span className="text-[10px] mt-0.5 truncate w-full text-center">Settings</span>
@@ -736,6 +747,17 @@ const DashboardLayout = () => {
                                         <Link to="/dashboard/payment" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/payment' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
                                             <FaAmazonPay className="size-5" />
                                             <span className="text-[10px] mt-0.5 truncate w-full text-center">Payment</span>
+                                        </Link>
+                                        <Link to="/dashboard/iot" className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${location.pathname === '/dashboard/iot' ? (isLight ? 'text-violet-600' : 'text-violet-400') : (isLight ? 'text-gray-600' : 'text-gray-400')}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-5">
+                                                <path d="M4 14h16" />
+                                                <path d="M6 18h12" />
+                                                <path d="M8 10h8" />
+                                                <path d="M12 3v7" />
+                                                <path d="M10 21h4" />
+                                                <path d="M7 5h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+                                            </svg>
+                                            <span className="text-[10px] mt-0.5 truncate w-full text-center">IoT</span>
                                         </Link>
                                         <button onClick={handleOpenGroupModal} className={`flex flex-col items-center justify-center min-w-17.5 h-full px-2 ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-5"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
