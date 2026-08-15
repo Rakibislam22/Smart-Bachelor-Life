@@ -338,15 +338,19 @@ const IoTDashboard = () => {
                 {/* Everything below fades out while a warning is active */}
                 <div className={`space-y-4 transition-opacity duration-500 ${hasWarning ? 'opacity-30' : 'opacity-100'}`}>
                     {/* Row 1: Temperature + Humidity */}
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 grid-cols-2">
                         <div
                             className={`rounded-2xl border p-4 shadow-lg ${isLight ? 'border-gray-200 bg-white text-gray-900 shadow-slate-200/60' : 'border-gray-700 bg-slate-900/80 text-white shadow-slate-900/40'}`}
                         >
-                            <div className={`rounded-xl p-2 inline-flex ${getStatusTone(sensors.temperature, { warning: 32, high: 40 }, isLight)}`}>
-                                <ThermometerSun className="h-5 w-5" />
+                            <div className="flex items-center gap-3">
+                                <div className={`rounded-xl p-2 inline-flex ${getStatusTone(sensors.temperature, { warning: 32, high: 40 }, isLight)}`}>
+                                    <ThermometerSun className="h-5 w-5" />
+                                </div>
+                                <p className={`text-lg ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Temperature</p>
                             </div>
-                            <div className="mt-5">
-                                <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Temperature</p>
+
+                            <div className="mt-5 pl-11">
+
                                 <p className="mt-2 text-3xl font-bold">{sensors.temperature.toFixed(1)}°C</p>
                             </div>
                         </div>
@@ -354,11 +358,15 @@ const IoTDashboard = () => {
                         <div
                             className={`rounded-2xl border p-4 shadow-lg ${isLight ? 'border-gray-200 bg-white text-gray-900 shadow-slate-200/60' : 'border-gray-700 bg-slate-900/80 text-white shadow-slate-900/40'}`}
                         >
-                            <div className={`rounded-xl p-2 inline-flex ${getStatusTone(sensors.humidity, { warning: 70, high: 85 }, isLight)}`}>
-                                <Droplets className="h-5 w-5" />
+                            <div className="flex items-center gap-3">
+                                <div className={`rounded-xl p-2 inline-flex ${getStatusTone(sensors.humidity, { warning: 70, high: 85 }, isLight)}`}>
+                                    <Droplets className="h-5 w-5" />
+                                </div>
+                                <p className={`text-lg ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Humidity</p>
                             </div>
-                            <div className="mt-5">
-                                <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Humidity</p>
+
+                            <div className="mt-5 pl-11 ">
+
                                 <p className="mt-2 text-3xl font-bold">{sensors.humidity.toFixed(0)}%</p>
                             </div>
                         </div>
@@ -374,7 +382,7 @@ const IoTDashboard = () => {
                                     <Flame className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Gas Level</p>
+                                    <p className={`text-lg ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Gas Level</p>
                                     <p className="mt-1 text-3xl font-bold">{sensors.gas.toFixed(0)} ppm</p>
                                 </div>
                             </div>
