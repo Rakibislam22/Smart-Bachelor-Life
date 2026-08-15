@@ -17,8 +17,8 @@ import { AuthContext } from '../provider/AuthContext';
 // ESP32 posts /sensors every ~60s. If nothing arrives within this window,
 // we treat the device as offline.
 const ONLINE_TIMEOUT_MS = 90000;
-const GAS_MAX = 600;
-const GAS_LIMIT = 400;
+const GAS_MAX = 1000;
+const GAS_LIMIT = 700;
 
 const getSensorValue = (value, fallback = 0) => {
     const parsed = Number(value);
@@ -31,7 +31,10 @@ const getValidSensorTimestamp = (value) => {
     }
 
     const parsed = Number(value);
-    const dateMs = Number.isFinite(parsed) ? parsed : new Date(value).getTime();
+    const normalizedNumeric = Number.isFinite(parsed)
+        ? (parsed > 0 && parsed < 1e12 ? parsed * 1000 : parsed)
+        : null;
+    const dateMs = normalizedNumeric ?? new Date(value).getTime();
 
     if (!Number.isFinite(dateMs) || dateMs <= 0) {
         return null;
@@ -152,6 +155,8 @@ const IoTDashboard = () => {
     const [lastSeenAt, setLastSeenAt] = useState(null);
     const [isOnline, setIsOnline] = useState(false);
     const warningToastShownRef = useRef(false);
+    const hasInitialSensorSnapshotRef = useRef(false);
+    const previousSensorSignatureRef = useRef(null);
 
     useEffect(() => {
         const sensorsRef = ref(db, '/sensors');
@@ -175,24 +180,54 @@ const IoTDashboard = () => {
                 0,
             );
 
-            const sensorTimestamp = getValidSensorTimestamp(
-                pickValue(sensorData, ['updatedAt', 'lastUpdated', 'timestamp', 'time', 'updated_at'], null),
+            const rawSensorTimestamp = pickValue(
+                sensorData,
+                ['updatedAt', 'lastUpdated', 'timestamp', 'time', 'updated_at'],
+                null,
             );
+
+            const sensorTimestamp = getValidSensorTimestamp(
+                rawSensorTimestamp,
+            );
+
+            const sensorSignature = JSON.stringify({
+                temperature: nextTemperature,
+                humidity: nextHumidity,
+                gas: nextGas,
+                rawTimestamp: rawSensorTimestamp,
+                heartbeat: pickValue(sensorData, ['heartbeat', 'sequence', 'seq', 'packetId', 'counter'], null),
+            });
+
+            const payloadChanged = previousSensorSignatureRef.current !== sensorSignature;
+            previousSensorSignatureRef.current = sensorSignature;
+
+            let resolvedTimestamp = sensorTimestamp;
+
+            // Avoid false "Live" on initial page load when RTDB contains old data but no timestamp.
+            // If later payloads change and still have no timestamp, treat that change time as heartbeat.
+            if (!resolvedTimestamp && hasInitialSensorSnapshotRef.current && payloadChanged) {
+                resolvedTimestamp = Date.now();
+            }
+
+            hasInitialSensorSnapshotRef.current = true;
 
             setSensors({
                 temperature: nextTemperature,
                 humidity: nextHumidity,
                 gas: nextGas,
-                updatedAt: sensorTimestamp ?? pickValue(sensorData, ['updatedAt', 'lastUpdated', 'timestamp', 'time', 'updated_at'], null),
+                updatedAt:
+                    sensorTimestamp
+                    ?? rawSensorTimestamp
+                    ?? resolvedTimestamp,
             });
 
-            if (sensorTimestamp === null) {
+            if (!resolvedTimestamp) {
                 setLastSeenAt(null);
                 return;
             }
 
-            const isExpired = Date.now() - sensorTimestamp > ONLINE_TIMEOUT_MS;
-            setLastSeenAt(isExpired ? null : sensorTimestamp);
+            const isExpired = Date.now() - resolvedTimestamp > ONLINE_TIMEOUT_MS;
+            setLastSeenAt(isExpired ? null : resolvedTimestamp);
         });
 
         const unsubscribeWarning = onValue(warningRef, (snapshot) => {
@@ -378,7 +413,7 @@ const IoTDashboard = () => {
                     >
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className={`rounded-xl p-2 ${getStatusTone(sensors.gas, { warning: 200, high: GAS_LIMIT }, isLight)} ${gasIsOverLimit ? 'gas-pulse' : ''}`}>
+                                <div className={`rounded-xl p-2 ${getStatusTone(sensors.gas, { warning: 4000, high: GAS_LIMIT }, isLight)} ${gasIsOverLimit ? 'gas-pulse' : ''}`}>
                                     <Flame className="h-5 w-5" />
                                 </div>
                                 <div>
