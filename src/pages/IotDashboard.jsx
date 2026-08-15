@@ -1,9 +1,24 @@
 import { use, useEffect, useRef, useState } from 'react';
 import { onValue, ref } from 'firebase/database';
-import { AlertTriangle, Droplets, Flame, Gauge, Microwave, ShieldAlert, ThermometerSun } from 'lucide-react';
+import {
+    AlertTriangle,
+    Droplets,
+    Flame,
+    Microwave,
+    ShieldAlert,
+    ThermometerSun,
+    Wifi,
+    WifiOff,
+} from 'lucide-react';
 import { toast } from 'react-toastify';
 import { db } from '../firebase/firebase.init';
 import { AuthContext } from '../provider/AuthContext';
+
+// ESP32 posts /sensors every ~60s. If nothing arrives within this window,
+// we treat the device as offline.
+const ONLINE_TIMEOUT_MS = 90000;
+const GAS_MAX = 600;
+const GAS_LIMIT = 400;
 
 const getSensorValue = (value, fallback = 0) => {
     const parsed = Number(value);
@@ -75,18 +90,24 @@ const formatUpdatedAt = (value) => {
     }).format(date);
 };
 
-const getStatusTone = (value, thresholds = {}) => {
+const getStatusTone = (value, thresholds = {}, isLight = false) => {
     const safeValue = Number(value || 0);
 
     if (safeValue >= (thresholds.high ?? Infinity)) {
-        return 'bg-red-500/15 text-red-300 border-red-500/30';
+        return isLight
+            ? 'bg-red-50 text-red-700 border-red-300'
+            : 'bg-red-500/15 text-red-300 border-red-500/30';
     }
 
     if (safeValue >= (thresholds.warning ?? -Infinity)) {
-        return 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30';
+        return isLight
+            ? 'bg-yellow-50 text-yellow-700 border-yellow-300'
+            : 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30';
     }
 
-    return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
+    return isLight
+        ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+        : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
 };
 
 const IoTDashboard = () => {
@@ -108,6 +129,8 @@ const IoTDashboard = () => {
         message: 'Kitchen is waiting for updates',
         updatedAt: null,
     });
+    const [lastSeenAt, setLastSeenAt] = useState(null);
+    const [isOnline, setIsOnline] = useState(false);
     const warningToastShownRef = useRef(false);
 
     useEffect(() => {
@@ -138,6 +161,9 @@ const IoTDashboard = () => {
                 gas: nextGas,
                 updatedAt: pickValue(sensorData, ['updatedAt', 'lastUpdated', 'timestamp', 'time', 'updated_at'], null),
             });
+
+            // Every write to /sensors is a heartbeat from the ESP32 itself.
+            setLastSeenAt(Date.now());
         });
 
         const unsubscribeWarning = onValue(warningRef, (snapshot) => {
@@ -188,157 +214,208 @@ const IoTDashboard = () => {
         };
     }, []);
 
-    const sensorCards = [
-        {
-            label: 'Temperature',
-            value: `${sensors.temperature.toFixed(1)}°C`,
-            icon: <ThermometerSun className="h-5 w-5" />,
-            tone: getStatusTone(sensors.temperature, { warning: 32, high: 40 }),
-            meter: Math.min((sensors.temperature / 60) * 100, 100),
-        },
-        {
-            label: 'Humidity',
-            value: `${sensors.humidity.toFixed(0)}%`,
-            icon: <Droplets className="h-5 w-5" />,
-            tone: getStatusTone(sensors.humidity, { warning: 70, high: 85 }),
-            meter: Math.min((sensors.humidity / 100) * 100, 100),
-        },
-        {
-            label: 'Gas',
-            value: `${sensors.gas.toFixed(0)} ppm`,
-            icon: <Flame className="h-5 w-5" />,
-            tone: getStatusTone(sensors.gas, { warning: 200, high: 400 }),
-            meter: Math.min((sensors.gas / 600) * 100, 100),
-        },
-    ];
+    // Recompute online/offline every second based on the last heartbeat.
+    useEffect(() => {
+        const check = () => {
+            setIsOnline(Boolean(lastSeenAt) && Date.now() - lastSeenAt < ONLINE_TIMEOUT_MS);
+        };
+
+        check();
+        const interval = setInterval(check, 1000);
+        return () => clearInterval(interval);
+    }, [lastSeenAt]);
 
     const hasWarning = warning.active;
+    const gasIsOverLimit = sensors.gas >= GAS_LIMIT;
+    const gasMeter = Math.min((sensors.gas / GAS_MAX) * 100, 100);
+    const gasLimitPosition = Math.min((GAS_LIMIT / GAS_MAX) * 100, 100);
 
     return (
-        <div className="space-y-6">
+        <div className="relative space-y-6">
+            <style>{`
+                @keyframes warningBlink {
+                    0%, 100% { background-color: rgba(220, 38, 38, 0.10); }
+                    50% { background-color: rgba(220, 38, 38, 0.38); }
+                }
+                .warning-blink {
+                    animation: warningBlink 1s ease-in-out infinite;
+                }
+                @keyframes gasPulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.55; }
+                }
+                .gas-pulse {
+                    animation: gasPulse 1s ease-in-out infinite;
+                }
+            `}</style>
+
+            {/* Full-page blink overlay while an emergency is active */}
             {hasWarning && (
-                <div className="rounded-2xl border border-red-500/40 bg-gradient-to-r from-red-500/15 via-red-500/10 to-amber-500/10 p-4 shadow-lg shadow-red-500/10">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex items-start gap-3">
-                            <div className="rounded-xl bg-red-500/20 p-2 text-red-200">
-                                <ShieldAlert className="h-5 w-5" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-200">Emergency Alert</p>
-                                <h3 className="mt-1 text-xl font-bold text-white">{warning.message || 'Warning detected'}</h3>
-                            </div>
-                        </div>
-                        <div className="inline-flex items-center gap-2 rounded-full border border-red-400/30 bg-red-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-red-100">
-                            <AlertTriangle className="h-4 w-4" />
-                            Active
-                        </div>
-                    </div>
-                </div>
+                <div className="warning-blink pointer-events-none fixed inset-0 z-0" />
             )}
 
-            <div className="grid gap-4 md:grid-cols-3">
-                {sensorCards.map((sensor) => (
+            <div className="relative z-10 space-y-6">
+                {/* Header: title + connectivity pill */}
+                <div className="flex items-center justify-between">
+                    <h2 className={`text-lg font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                        Apartment IoT Dashboard
+                    </h2>
                     <div
-                        key={sensor.label}
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${isOnline
+                                ? isLight
+                                    ? 'border-emerald-500/40 bg-emerald-50 text-emerald-700'
+                                    : 'border-emerald-500/30 bg-emerald-500/15 text-emerald-300'
+                                : isLight
+                                    ? 'border-gray-300 bg-gray-100 text-gray-600'
+                                    : 'border-gray-500/30 bg-gray-500/15 text-gray-300'
+                            }`}
+                    >
+                        {isOnline ? <Wifi className="h-3.5 w-3.5" /> : <WifiOff className="h-3.5 w-3.5" />}
+                        {isOnline ? 'Live' : 'Offline'}
+                    </div>
+                </div>
+
+                {/* Warning banner - stays fully visible, everything else fades */}
+                {hasWarning && (
+                    <div
+                        className={`rounded-2xl border p-4 shadow-lg ${isLight
+                                ? 'border-red-300 bg-red-50 shadow-red-200/60'
+                                : 'border-red-500/40 bg-gradient-to-r from-red-500/20 via-red-500/15 to-amber-500/10 shadow-red-500/20'
+                            }`}
+                    >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex items-start gap-3">
+                                <div className={`rounded-xl p-2 ${isLight ? 'bg-red-100 text-red-600' : 'bg-red-500/20 text-red-200'}`}>
+                                    <ShieldAlert className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-red-600' : 'text-red-200'}`}>Emergency Alert</p>
+                                    <h3 className={`mt-1 text-xl font-bold ${isLight ? 'text-red-900' : 'text-white'}`}>{warning.message || 'Warning detected'}</h3>
+                                </div>
+                            </div>
+                            <div
+                                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${isLight
+                                        ? 'border-red-300 bg-red-100 text-red-700'
+                                        : 'border-red-400/30 bg-red-500/15 text-red-100'
+                                    }`}
+                            >
+                                <AlertTriangle className="h-4 w-4" />
+                                Active
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Everything below fades out while a warning is active */}
+                <div className={`space-y-4 transition-opacity duration-500 ${hasWarning ? 'opacity-30' : 'opacity-100'}`}>
+                    {/* Row 1: Temperature + Humidity */}
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <div
+                            className={`rounded-2xl border p-4 shadow-lg ${isLight ? 'border-gray-200 bg-white text-gray-900 shadow-slate-200/60' : 'border-gray-700 bg-slate-900/80 text-white shadow-slate-900/40'}`}
+                        >
+                            <div className={`rounded-xl p-2 inline-flex ${getStatusTone(sensors.temperature, { warning: 32, high: 40 }, isLight)}`}>
+                                <ThermometerSun className="h-5 w-5" />
+                            </div>
+                            <div className="mt-5">
+                                <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Temperature</p>
+                                <p className="mt-2 text-3xl font-bold">{sensors.temperature.toFixed(1)}°C</p>
+                            </div>
+                        </div>
+
+                        <div
+                            className={`rounded-2xl border p-4 shadow-lg ${isLight ? 'border-gray-200 bg-white text-gray-900 shadow-slate-200/60' : 'border-gray-700 bg-slate-900/80 text-white shadow-slate-900/40'}`}
+                        >
+                            <div className={`rounded-xl p-2 inline-flex ${getStatusTone(sensors.humidity, { warning: 70, high: 85 }, isLight)}`}>
+                                <Droplets className="h-5 w-5" />
+                            </div>
+                            <div className="mt-5">
+                                <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Humidity</p>
+                                <p className="mt-2 text-3xl font-bold">{sensors.humidity.toFixed(0)}%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Row 2: Gas - full width, aligned under the two cards above */}
+                    <div
                         className={`rounded-2xl border p-4 shadow-lg ${isLight ? 'border-gray-200 bg-white text-gray-900 shadow-slate-200/60' : 'border-gray-700 bg-slate-900/80 text-white shadow-slate-900/40'}`}
                     >
                         <div className="flex items-center justify-between">
-                            <div className={`rounded-xl p-2 ${sensor.tone}`}>
-                                {sensor.icon}
+                            <div className="flex items-center gap-3">
+                                <div className={`rounded-xl p-2 ${getStatusTone(sensors.gas, { warning: 200, high: GAS_LIMIT }, isLight)} ${gasIsOverLimit ? 'gas-pulse' : ''}`}>
+                                    <Flame className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Gas Level</p>
+                                    <p className="mt-1 text-3xl font-bold">{sensors.gas.toFixed(0)} ppm</p>
+                                </div>
                             </div>
-                            <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${sensor.tone}`}>
-                                Live
-                            </span>
+                            {gasIsOverLimit && (
+                                <span
+                                    className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${isLight
+                                            ? 'border-red-300 bg-red-50 text-red-700'
+                                            : 'border-red-400/30 bg-red-500/15 text-red-200'
+                                        }`}
+                                >
+                                    <AlertTriangle className="h-3.5 w-3.5" />
+                                    Limit exceeded
+                                </span>
+                            )}
                         </div>
 
-                        <div className="mt-5">
-                            <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>{sensor.label}</p>
-                            <p className="mt-2 text-3xl font-bold">{sensor.value}</p>
-                        </div>
-
-                        <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-700/60">
+                        <div className="relative mt-4 h-3 overflow-hidden rounded-full bg-slate-700/60">
                             <div
-                                className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-violet-500 to-fuchsia-500"
-                                style={{ width: `${sensor.meter}%` }}
+                                className={`h-full rounded-full transition-all duration-500 ${gasIsOverLimit
+                                        ? 'bg-red-500'
+                                        : 'bg-gradient-to-r from-cyan-400 via-violet-500 to-fuchsia-500'
+                                    }`}
+                                style={{ width: `${gasMeter}%` }}
+                            />
+                            {/* Limit marker on the bar */}
+                            <div
+                                className="absolute top-0 h-full w-[2px] bg-white/70"
+                                style={{ left: `${gasLimitPosition}%` }}
+                                title={`Limit: ${GAS_LIMIT} ppm`}
                             />
                         </div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-                <div className={`rounded-2xl border p-5 ${isLight ? 'border-gray-200 bg-white' : 'border-gray-700 bg-slate-900/80'}`}>
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                            <div className="rounded-xl bg-cyan-500/15 p-2 text-cyan-300">
-                                <Gauge className="h-5 w-5" />
-                            </div>
-                            <div>
-                                <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>System Snapshot</p>
-                                <h3 className={`text-xl font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>Environment Monitor</h3>
-                            </div>
-                        </div>
-                        <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${isLight ? 'border-gray-200 bg-gray-100 text-gray-700' : 'border-gray-700 bg-slate-800 text-slate-200'}`}>
-                            {formatUpdatedAt(sensors.updatedAt)}
-                        </span>
-                    </div>
-
-                    <div className="mt-6 space-y-4">
-                        <div>
-                            <div className="mb-2 flex items-center justify-between text-sm">
-                                <span className={isLight ? 'text-gray-600' : 'text-slate-300'}>Temperature</span>
-                                <span className={isLight ? 'text-gray-900' : 'text-white'}>{sensors.temperature.toFixed(1)}°C</span>
-                            </div>
-                            <div className="h-2.5 overflow-hidden rounded-full bg-slate-700/60">
-                                <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500" style={{ width: `${Math.min((sensors.temperature / 60) * 100, 100)}%` }} />
-                            </div>
-                        </div>
-
-                        <div>
-                            <div className="mb-2 flex items-center justify-between text-sm">
-                                <span className={isLight ? 'text-gray-600' : 'text-slate-300'}>Humidity</span>
-                                <span className={isLight ? 'text-gray-900' : 'text-white'}>{sensors.humidity.toFixed(0)}%</span>
-                            </div>
-                            <div className="h-2.5 overflow-hidden rounded-full bg-slate-700/60">
-                                <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500" style={{ width: `${Math.min((sensors.humidity / 100) * 100, 100)}%` }} />
-                            </div>
-                        </div>
-
-                        <div>
-                            <div className="mb-2 flex items-center justify-between text-sm">
-                                <span className={isLight ? 'text-gray-600' : 'text-slate-300'}>Gas</span>
-                                <span className={isLight ? 'text-gray-900' : 'text-white'}>{sensors.gas.toFixed(0)} ppm</span>
-                            </div>
-                            <div className="h-2.5 overflow-hidden rounded-full bg-slate-700/60">
-                                <div className="h-full rounded-full bg-gradient-to-r from-rose-500 to-red-500" style={{ width: `${Math.min((sensors.gas / 600) * 100, 100)}%` }} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className={`rounded-2xl border p-5 ${isLight ? 'border-gray-200 bg-white' : 'border-gray-700 bg-slate-900/80'}`}>
-                    <div className="flex items-center gap-3">
-                        <div className={`rounded-xl p-2 ${kitchen.status === 'done' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'}`}>
-                            <Microwave className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Kitchen Status</p>
-                            <h3 className={`text-xl font-bold capitalize ${isLight ? 'text-gray-900' : 'text-white'}`}>{kitchen.status || 'idle'}</h3>
-                        </div>
-                    </div>
-
-                    <div className={`mt-5 rounded-2xl border p-4 ${kitchen.status === 'done' ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-100' : 'border-amber-500/30 bg-amber-500/10 text-amber-100'}`}>
-                        <p className="text-sm font-medium">{kitchen.message || 'Kitchen is waiting for updates'}</p>
-                        <p className={`mt-2 text-xs uppercase tracking-[0.18em] ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>
-                            Updated: {formatUpdatedAt(kitchen.updatedAt)}
+                        <p className={`mt-2 text-xs ${isLight ? 'text-gray-500' : 'text-slate-400'}`}>
+                            Limit: {GAS_LIMIT} ppm
                         </p>
                     </div>
 
-                    <div className="mt-5 rounded-2xl border border-red-500/30 bg-red-500/10 p-4">
+                    {/* Row 3: Kitchen status */}
+                    <div className={`rounded-2xl border p-5 ${isLight ? 'border-gray-200 bg-white' : 'border-gray-700 bg-slate-900/80'}`}>
                         <div className="flex items-center gap-3">
-                            <AlertTriangle className="h-5 w-5 text-red-300" />
-                            <p className={`text-sm font-medium ${isLight ? 'text-gray-700' : 'text-white'}`}>
-                                {warning.active ? warning.message : 'No active safety issue.'}
+                            <div
+                                className={`rounded-xl p-2 ${kitchen.status === 'done'
+                                        ? isLight
+                                            ? 'bg-emerald-50 text-emerald-700'
+                                            : 'bg-emerald-500/15 text-emerald-300'
+                                        : isLight
+                                            ? 'bg-amber-50 text-amber-700'
+                                            : 'bg-amber-500/15 text-amber-300'
+                                    }`}
+                            >
+                                <Microwave className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Kitchen Status</p>
+                                <h3 className={`text-xl font-bold capitalize ${isLight ? 'text-gray-900' : 'text-white'}`}>{kitchen.status || 'idle'}</h3>
+                            </div>
+                        </div>
+
+                        <div
+                            className={`mt-5 rounded-2xl border p-4 ${kitchen.status === 'done'
+                                    ? isLight
+                                        ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                                        : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-100'
+                                    : isLight
+                                        ? 'border-amber-300 bg-amber-50 text-amber-800'
+                                        : 'border-amber-500/30 bg-amber-500/10 text-amber-100'
+                                }`}
+                        >
+                            <p className="text-sm font-medium">{kitchen.message || 'Kitchen is waiting for updates'}</p>
+                            <p className={`mt-2 text-xs uppercase tracking-[0.18em] ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>
+                                Updated: {formatUpdatedAt(kitchen.updatedAt)}
                             </p>
                         </div>
                     </div>
