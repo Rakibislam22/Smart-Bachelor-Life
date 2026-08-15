@@ -17,8 +17,8 @@ import { AuthContext } from '../provider/AuthContext';
 // ESP32 posts /sensors every ~60s. If nothing arrives within this window,
 // we treat the device as offline.
 const ONLINE_TIMEOUT_MS = 90000;
-const GAS_MAX = 600;
-const GAS_LIMIT = 400;
+const GAS_MAX = 1000;
+const GAS_LIMIT = 700;
 
 const getSensorValue = (value, fallback = 0) => {
     const parsed = Number(value);
@@ -31,7 +31,10 @@ const getValidSensorTimestamp = (value) => {
     }
 
     const parsed = Number(value);
-    const dateMs = Number.isFinite(parsed) ? parsed : new Date(value).getTime();
+    const normalizedNumeric = Number.isFinite(parsed)
+        ? (parsed > 0 && parsed < 1e12 ? parsed * 1000 : parsed)
+        : null;
+    const dateMs = normalizedNumeric ?? new Date(value).getTime();
 
     if (!Number.isFinite(dateMs) || dateMs <= 0) {
         return null;
@@ -152,6 +155,8 @@ const IoTDashboard = () => {
     const [lastSeenAt, setLastSeenAt] = useState(null);
     const [isOnline, setIsOnline] = useState(false);
     const warningToastShownRef = useRef(false);
+    const hasInitialSensorSnapshotRef = useRef(false);
+    const previousSensorSignatureRef = useRef(null);
 
     useEffect(() => {
         const sensorsRef = ref(db, '/sensors');
@@ -175,24 +180,54 @@ const IoTDashboard = () => {
                 0,
             );
 
-            const sensorTimestamp = getValidSensorTimestamp(
-                pickValue(sensorData, ['updatedAt', 'lastUpdated', 'timestamp', 'time', 'updated_at'], null),
+            const rawSensorTimestamp = pickValue(
+                sensorData,
+                ['updatedAt', 'lastUpdated', 'timestamp', 'time', 'updated_at'],
+                null,
             );
+
+            const sensorTimestamp = getValidSensorTimestamp(
+                rawSensorTimestamp,
+            );
+
+            const sensorSignature = JSON.stringify({
+                temperature: nextTemperature,
+                humidity: nextHumidity,
+                gas: nextGas,
+                rawTimestamp: rawSensorTimestamp,
+                heartbeat: pickValue(sensorData, ['heartbeat', 'sequence', 'seq', 'packetId', 'counter'], null),
+            });
+
+            const payloadChanged = previousSensorSignatureRef.current !== sensorSignature;
+            previousSensorSignatureRef.current = sensorSignature;
+
+            let resolvedTimestamp = sensorTimestamp;
+
+            // Avoid false "Live" on initial page load when RTDB contains old data but no timestamp.
+            // If later payloads change and still have no timestamp, treat that change time as heartbeat.
+            if (!resolvedTimestamp && hasInitialSensorSnapshotRef.current && payloadChanged) {
+                resolvedTimestamp = Date.now();
+            }
+
+            hasInitialSensorSnapshotRef.current = true;
 
             setSensors({
                 temperature: nextTemperature,
                 humidity: nextHumidity,
                 gas: nextGas,
-                updatedAt: sensorTimestamp ?? pickValue(sensorData, ['updatedAt', 'lastUpdated', 'timestamp', 'time', 'updated_at'], null),
+                updatedAt:
+                    sensorTimestamp
+                    ?? rawSensorTimestamp
+                    ?? resolvedTimestamp,
             });
 
-            if (sensorTimestamp === null) {
+            if (!resolvedTimestamp) {
                 setLastSeenAt(null);
                 return;
             }
 
-            const isExpired = Date.now() - sensorTimestamp > ONLINE_TIMEOUT_MS;
-            setLastSeenAt(isExpired ? null : sensorTimestamp);
+            const isExpired = Date.now() - resolvedTimestamp > ONLINE_TIMEOUT_MS;
+            setLastSeenAt(isExpired ? null : resolvedTimestamp);
         });
 
         const unsubscribeWarning = onValue(warningRef, (snapshot) => {
@@ -338,15 +373,19 @@ const IoTDashboard = () => {
                 {/* Everything below fades out while a warning is active */}
                 <div className={`space-y-4 transition-opacity duration-500 ${hasWarning ? 'opacity-30' : 'opacity-100'}`}>
                     {/* Row 1: Temperature + Humidity */}
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 grid-cols-2">
                         <div
                             className={`rounded-2xl border p-4 shadow-lg ${isLight ? 'border-gray-200 bg-white text-gray-900 shadow-slate-200/60' : 'border-gray-700 bg-slate-900/80 text-white shadow-slate-900/40'}`}
                         >
-                            <div className={`rounded-xl p-2 inline-flex ${getStatusTone(sensors.temperature, { warning: 32, high: 40 }, isLight)}`}>
-                                <ThermometerSun className="h-5 w-5" />
+                            <div className="flex items-center gap-3">
+                                <div className={`rounded-xl p-2 inline-flex ${getStatusTone(sensors.temperature, { warning: 32, high: 40 }, isLight)}`}>
+                                    <ThermometerSun className="h-5 w-5" />
+                                </div>
+                                <p className={`text-lg ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Temperature</p>
                             </div>
-                            <div className="mt-5">
-                                <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Temperature</p>
+
+                            <div className="mt-5 pl-11">
+
                                 <p className="mt-2 text-3xl font-bold">{sensors.temperature.toFixed(1)}°C</p>
                             </div>
                         </div>
@@ -354,11 +393,15 @@ const IoTDashboard = () => {
                         <div
                             className={`rounded-2xl border p-4 shadow-lg ${isLight ? 'border-gray-200 bg-white text-gray-900 shadow-slate-200/60' : 'border-gray-700 bg-slate-900/80 text-white shadow-slate-900/40'}`}
                         >
-                            <div className={`rounded-xl p-2 inline-flex ${getStatusTone(sensors.humidity, { warning: 70, high: 85 }, isLight)}`}>
-                                <Droplets className="h-5 w-5" />
+                            <div className="flex items-center gap-3">
+                                <div className={`rounded-xl p-2 inline-flex ${getStatusTone(sensors.humidity, { warning: 70, high: 85 }, isLight)}`}>
+                                    <Droplets className="h-5 w-5" />
+                                </div>
+                                <p className={`text-lg ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Humidity</p>
                             </div>
-                            <div className="mt-5">
-                                <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Humidity</p>
+
+                            <div className="mt-5 pl-11 ">
+
                                 <p className="mt-2 text-3xl font-bold">{sensors.humidity.toFixed(0)}%</p>
                             </div>
                         </div>
@@ -370,11 +413,11 @@ const IoTDashboard = () => {
                     >
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className={`rounded-xl p-2 ${getStatusTone(sensors.gas, { warning: 200, high: GAS_LIMIT }, isLight)} ${gasIsOverLimit ? 'gas-pulse' : ''}`}>
+                                <div className={`rounded-xl p-2 ${getStatusTone(sensors.gas, { warning: 4000, high: GAS_LIMIT }, isLight)} ${gasIsOverLimit ? 'gas-pulse' : ''}`}>
                                     <Flame className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <p className={`text-sm ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Gas Level</p>
+                                    <p className={`text-lg ${isLight ? 'text-gray-600' : 'text-slate-300'}`}>Gas Level</p>
                                     <p className="mt-1 text-3xl font-bold">{sensors.gas.toFixed(0)} ppm</p>
                                 </div>
                             </div>

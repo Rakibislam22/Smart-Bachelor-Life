@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AuthContext } from './AuthContext';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, onIdTokenChanged, signInWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/firebase.init';
+import useFcmToken from '../hooks/useFcmToken';
 import { registerUserInBackend, syncUserSession } from '../utils/authApi';
 import { toast } from 'react-toastify';
 
@@ -92,6 +93,8 @@ const AuthProvider = ({ children }) => {
             localStorage.removeItem('currentGroup');
         }
     }, [currentGroup]);
+
+    useFcmToken(user);
 
     useEffect(() => {
         const unsubscribe = onIdTokenChanged(auth, async (currentUser) => {
