@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/generate-sw.js",
     "build": "vite build",
+    "predev": "node scripts/generate-sw.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },
