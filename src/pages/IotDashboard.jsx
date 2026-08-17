@@ -14,11 +14,12 @@ import { toast } from 'react-toastify';
 import { db } from '../firebase/firebase.init';
 import { AuthContext } from '../provider/AuthContext';
 
-// ESP32 posts /sensors every ~60s. If nothing arrives within this window,
-// we treat the device as offline.
-const ONLINE_TIMEOUT_MS = 90000;
-const GAS_MAX = 1000;
-const GAS_LIMIT = 700;
+// ESP32 posts /sensors every ~5s. Allow three missed updates before marking it
+// offline so a brief Wi-Fi delay does not cause a false Offline status.
+const SENSOR_UPDATE_INTERVAL_MS = 5000;
+const ONLINE_TIMEOUT_MS = SENSOR_UPDATE_INTERVAL_MS * 3;
+const GAS_MAX = 2000;
+const GAS_LIMIT = 1600;
 
 const getSensorValue = (value, fallback = 0) => {
     const parsed = Number(value);
@@ -290,6 +291,15 @@ const IoTDashboard = () => {
     }, [lastSeenAt]);
 
     const hasWarning = warning.active;
+    // A warning remains useful after the ESP32 stops sending data, but it is no
+    // longer a live emergency. This also keeps a persisted warning from
+    // re-locking/blinking the page after a browser refresh while the device is
+    // offline.
+    const isLiveEmergency = hasWarning && isOnline;
+    const isWarningDeviceOffline = hasWarning && !isOnline;
+    const warningMessage = isWarningDeviceOffline
+        ? `Device went offline while this warning was active: ${warning.message || 'Warning detected'}`
+        : warning.message || 'Warning detected';
     const gasIsOverLimit = sensors.gas >= GAS_LIMIT;
     const gasMeter = Math.min((sensors.gas / GAS_MAX) * 100, 100);
     const gasLimitPosition = Math.min((GAS_LIMIT / GAS_MAX) * 100, 100);
@@ -313,8 +323,8 @@ const IoTDashboard = () => {
                 }
             `}</style>
 
-            {/* Full-page blink overlay while an emergency is active */}
-            {hasWarning && (
+            {/* Blink only while the warning comes from a currently live device. */}
+            {isLiveEmergency && (
                 <div className="warning-blink pointer-events-none fixed inset-0 z-0" />
             )}
 
@@ -353,8 +363,10 @@ const IoTDashboard = () => {
                                     <ShieldAlert className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-red-600' : 'text-red-200'}`}>Emergency Alert</p>
-                                    <h3 className={`mt-1 text-xl font-bold ${isLight ? 'text-red-900' : 'text-white'}`}>{warning.message || 'Warning detected'}</h3>
+                                    <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? 'text-red-600' : 'text-red-200'}`}>
+                                        {isWarningDeviceOffline ? 'Warning history' : 'Emergency alert'}
+                                    </p>
+                                    <h3 className={`mt-1 text-xl font-bold ${isLight ? 'text-red-900' : 'text-white'}`}>{warningMessage}</h3>
                                 </div>
                             </div>
                             <div
@@ -364,14 +376,15 @@ const IoTDashboard = () => {
                                     }`}
                             >
                                 <AlertTriangle className="h-4 w-4" />
-                                Active
+                                {isWarningDeviceOffline ? 'Device offline' : 'Active'}
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* Everything below fades out while a warning is active */}
-                <div className={`space-y-4 transition-opacity duration-500 ${hasWarning ? 'opacity-30' : 'opacity-100'}`}>
+                {/* Only a live emergency dims the controls. An offline device keeps the
+                    warning visible without making the rest of the dashboard look locked. */}
+                <div className={`space-y-4 transition-opacity duration-500 ${isLiveEmergency ? 'opacity-30' : 'opacity-100'}`}>
                     {/* Row 1: Temperature + Humidity */}
                     <div className="grid gap-4 grid-cols-2">
                         <div
